@@ -1,0 +1,8 @@
+﻿[B]Version 1.0.2[/B]
+- Move repo from google to github.
+
+[B]Version 1.0.1[/B]
+- Change structure.
+
+[B]Version 1.0.0[/B]
+- Initial on code.google.com.

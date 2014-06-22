@@ -1,0 +1,66 @@
+﻿V2.4.1 (2013-11-12)
+- fixed: can't get serie list because site changed
+
+V2.4.0 (2013-10-26)
+- fixed: live video channel for BTV
+
+V2.3.9 (2013-07-25)
+- fixed: live video channel
+
+V2.3.8 (2013-07-20)
+- fixed: get video list for episodes
+
+V2.3.7 (2013-06-03)
+- added: sort method for episodes
+
+V2.3.6 (2013-05-13)
+- fixed: can't get live video channels
+
+V2.3.5 (2013-03-21)
+- changed play video with playlist to stacked urls to smooth play between clips
+
+V2.3.4 (2013-03-03)
+- fixed: can't get video list because site changed
+
+V2.3.3 (2012-12-27)
+- fixed: live video channel
+
+V2.3.0 (2012-07-12 - cmeng)
+- Add & Update CHANNEL_LIST latest Categories and ID
+- Improve PlayVideo Reliability
+- Added new PlayVideoUgc
+- Provide video search function
+- Include Cookie support (needed by certain categories) 
+- Include Proxy support (must be transparent for video link - header)
+
+V2.2.2 (2012-03-07)
+- fixed character decode error
+
+V2.2.1 (2012-03-05)
+- add live tv channels
+
+V2.2.0 (2012-03-04)
+- add server site select
+
+V2.1.9 (2012-03-04)
+- change to add real video path to playlist
+
+V2.1.8 (2012-02-01)
+- fix error for non-supported default selected video resolution
+- change settings.xml '标清' to '流畅'
+
+V2.1.7 (2012-02-01)
+- Add dialog message for non-existence user selected video
+- Add dialog message for non-supported video resolution selected
+
+V2.1.6 (2012-01-28)
+- Start video playback only after completion of the vidoe playlist queue
+
+V2.1.5 (2012-01-28)
+- force utf8 encode on httpdata for series video listing
+  httpdata contains no charset=gbk in GetHttpData. utf-8 Requires for proper display
+
+V2.1.4 (2011)
+- Modified by wow1122/wht9000@gmail.com
+- Modified by fxfboy@gmail.com
+
