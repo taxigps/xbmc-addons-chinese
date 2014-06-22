@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <setting label="GENERAL" type="lsep"/>
+	<setting id="sort" type="enum" label="默认视频排序" values="名称|评价|播放次数" default="2"/>
+   	<setting id="image_en" type="bool" label="Load Thumb Image" default="true"/>
+    <setting label="30320" type="lsep"/>
+    <setting label="30100" type="enum" id="trailer_quality" default="0" lvalues="30101|30102|30103|30104" />
+    <setting label="30240" type="bool" id="trailer_hd_only" default="false" enable="gt(-1,1)" />
+    <setting label="30323" type="lsep" />
+    <setting label="30120" type="enum" id="rating" default="5" lvalues="30400|30401|30402|30403|30404|30405" />
+    <setting label="30230" type="enum" id="not_rated_rating" default="2" lvalues="30400|30401|30402|30403|30404" enable="!eq(-1,5)" />
+    <setting label="30324" type="lsep" />
+    <setting label="30130" type="enum" id="play_mode" default="0" lvalues="30131|30132|30133" />
+    <setting label="30140" type="folder" id="download_path" default="" source="auto" option="writeable" enable="eq(-1,2)" />
+    <setting label="30180" type="bool" id="use_title" default="true" enable="eq(-2,2) + !eq(-1,)" />
+    <setting label="30210" type="bool" id="use_trailer" default="true" enable="eq(-3,2) + !eq(-2,)" />
+    <setting label="30220" type="bool" id="create_nfo" default="true" enable="eq(-4,2) + !eq(-3,)" />
+    <setting label="30250" type="bool" id="copy_thumb" default="true" enable="eq(-5,2) + !eq(-4,)" />
+    <setting label="30200" type="bool" id="play_existing" default="true" enable="eq(-6,2) + !eq(-5,)" />
+    <setting label="30321" type="lsep" />
+    <setting label="30150" type="text" id="local" default="90210" />
+    <setting label="30325" type="lsep" />
+    <setting label="30160" type="fileenum" id="scraper" default="Google" mask="/" values="/resources/scrapers/" enable="!eq(-2,)" />
+    <setting label="30170" type="enum" id="day" default="0" lvalues="30171|30172|30173|30174|30175|30176|30177|30178" enable="!eq(-3,)" />
+    <setting label="30322" type="lsep" />
+    <setting label="30190" type="pictures" id="fanart_image" default="" source="auto" />
+</settings>

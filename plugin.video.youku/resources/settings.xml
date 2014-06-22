@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf8" standalone="yes"?>
+<settings>
+	<setting id="resolution" type="enum" label="视频清晰度" values="每次询问|1080P|超清|高清|标清" default="1"/>
+	<setting id="lang_select" type="enum" label="语言选择方式" values="默认|每次选择|自动首选" default="0"/>
+	<setting id="lang_prefer" enable="eq(-1,2)" type="labelenum" label="首选语言" values="国语|粤语" default="0"/>
+</settings>

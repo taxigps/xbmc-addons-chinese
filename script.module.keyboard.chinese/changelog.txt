@@ -1,0 +1,7 @@
+﻿v2.0.0 2014-02-08
+ - Delete skin files and change to use DialogKeyboard.xml
+ - Calculate Chinese words list width to fit output label size
+ - Auto get more Chinese words when skip to last page
+
+v1.0.0 2011-03-31
+ - Original Release

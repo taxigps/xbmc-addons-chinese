@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.ku6"
+    name="酷6云中剧场(Ku6)"
+    version="1.0.5"
+    provider-name="wow1122">
+    <extension
+        point="xbmc.python.pluginsource"
+        library="default.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">Ku6 video plugin</summary>
+        <summary lang="zh">酷6云中剧场视频插件</summary>
+        <description lang="en">online video from www.juchang.com/n</description>
+        <description lang="zh">观看酷6云中剧场</description>
+        <platform>all</platform>
+    </extension>
+</addon>

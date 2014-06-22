@@ -1,0 +1,67 @@
+﻿########################################################################
+# PPS影音(PPS.tv)
+########################################################################
+# Version 1.1.10 2014-02-16 (cmeng)
+# - Skip prompt user for single selectable item
+# - Provide second retrial and remove DeprecationWarning in read_xml
+
+# Version 1.1.9 2014-02-16 (cmeng)
+# - Update Search UI
+
+# Version 1.1.8 2013-12-07 (cmeng)
+# - Omit menu items with dj='1' for selection
+
+# Version 1.1.7 2013-12-01 (cmeng)
+# - Update pps URL links
+
+# Version 1.1.6 2013-09-22 (cmeng)
+# - Update pps URL link
+
+# Version 1.1.5 2013-06-22 (cmeng)
+# - Update pps4xbmc.exe
+
+# Version 1.1.4 2013-04-13 (cmeng)
+# - Fixed script error
+# - Remove text buffering - faster to do direct online fetch
+# - Regain focus when PPS notification pop up
+
+# Version 1.1.3 2013-04-06 (cmeng)
+# - Add video display info for narrowing next time search 
+# - Set PPS Player window to top most and locked its position 
+# - Enable mouse pointer when player in pause mode
+# - Change Fast FWD/PREV to smaller step 0.02 of video length
+# - Correct resolution display error (vb6 twip to pixel)
+# - Add support to control player via remote control
+# - Player window auto-centering
+
+# Version 1.1.2 2013-03-30 (cmeng)
+# - Ported pps4xbmc to VB 2010
+# - Set PPS player focus to accept user input by default
+# - Change Fast FWD/PREV to smaller step 0.1 > 0.025
+# - Auto unmute when changing audio volume level
+
+# Version 1.1.1 2013-03-26 (cmeng)
+# - Update search function
+
+# Version 1.1.0 2013-03-24 (cmeng)
+# - Complete script rewrite to support filtering
+# - User defined sort order in addon settings
+# - Enhance menu display inforomation
+# - Add thumb images display
+# - Rename PPS网络电视(PPS客户端) to PPS影音(PPS.tv) per site provider
+
+# Version 1.0.2 2012-08-04 (cmeng)
+# - add sort to menu listing (keeping numbering) 
+# - replace ElementTree deprecated function getiterator()
+# - correct script error in (year)-cause items list filtering
+
+# Version 1.0.1 2012-07-28 (cmeng)
+# - change default.py text string to utf-8 for non-Chinese OS display
+# - clean up python syntax error
+# - clean up xbmc deprecated function call
+# - add in chinese keyboard support
+# - change search url querry string
+
+# Version 1.0.0 2012-07-23 (yxnr)
+# - initial release
+########################################################################

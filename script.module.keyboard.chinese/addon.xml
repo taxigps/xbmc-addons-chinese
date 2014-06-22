@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="script.module.keyboard.chinese"
+    name="Chinese keyboard"
+    version="2.0.0"
+    provider-name="Taxigps">
+    <extension point="xbmc.python.module" library="lib" />
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">Chinese keyboard</summary>
+        <summary lang="zh">中文键盘</summary>
+        <description lang="en">Visual keyboard to input Chinese</description>
+        <description lang="zh">支持中文输入的虚拟键盘</description>
+        <license>GPL</license>
+        <source>https://github.com/taxigps/script.module.keyboard.chinese/</source>
+        <platform>all</platform>
+    </extension>
+</addon>

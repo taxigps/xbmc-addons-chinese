@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.funshion"
+    name="风行视频(Funshion)"
+    version="1.0.11"
+    provider-name="taxigps">
+    <extension
+        point="xbmc.python.pluginsource"
+        library="default.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">Funshion Video plugin</summary>
+        <summary lang="zh">风行网视频插件</summary>
+        <description lang="en">Online videos from www.funshion.com</description>
+        <description lang="zh">来自风行网（www.funshion.com）的网络视频内容。</description>
+        <platform>all</platform>
+    </extension>
+</addon>

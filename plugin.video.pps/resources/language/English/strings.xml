@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    <!-- Plugin settings strings -->
+    <string id="30320">TRAILER</string>
+    <string id="30100">Trailer Quality</string>
+    <string id="30101">Trailer Quality 1</string>
+    <string id="30102">Trailer Quality 2</string>
+    <string id="30103">Trailer Quality 3</string>
+    <string id="30104">Trailer Quality 4</string>
+
+    <string id="30240">Trailer HD Only</string>
+    <string id="30323">RATING</string>
+    
+    <string id="30120">Rating</string>
+    <string id="30400">Rating 1</string>
+    <string id="30401">Rating 2</string>
+    <string id="30402">Rating 3</string>
+    <string id="30403">Rating 4</string>
+    <string id="30404">Rating 5</string>
+    <string id="30405">Rating 6</string>
+    
+    <string id="30230">Not Rated Rating</string>
+    <string id="30324">PLAYMODE</string>
+
+    <string id="30130">Play Mode</string>
+    <string id="30131">Play Mode 1</string>
+    <string id="30132">Play Mode 1</string>
+    <string id="30133">Play Mode 1</string>
+
+    <string id="30140">Download Path</string>
+    <string id="30180">Use Little</string>
+    <string id="30210">Use Trailer</string>
+
+    <string id="30220">Create NFO</string>
+    <string id="30250">Copy Thumb</string>
+    <string id="30200">Play Existing</string>
+
+    <string id="30321">AREA</string>
+    <string id="30150">Local</string>
+    <string id="90210">Local-1</string>
+    
+    <string id="30325">CATCH</string>
+    <string id="30160">Scraper</string>
+    <string id="30170">Day</string>
+    <string id="30171">Day-1</string>
+    <string id="30172">Day-2</string>
+    <string id="30173">Day-3</string>
+    <string id="30174">Day-4</string>
+    <string id="30175">Day-5</string>
+    <string id="30176">Day-6</string>
+    <string id="30177">Day-7</string>
+    <string id="30178">Day-8</string>
+
+    <string id="30322"></string>
+    <string id="30190">Fineart Image</string>
+   
+</strings>

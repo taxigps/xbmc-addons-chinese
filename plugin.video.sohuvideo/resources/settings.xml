@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf8" standalone="yes"?>
+<settings>
+	<setting id="resolution" type="enum" label="默认播放清晰度" values="流畅|高清|超清|每次询问" default="3"/>
+	<setting id="videosite" type="enum" label="视频服务器" values="默认服务器|备选服务器" default="0"/>
+	<setting id="http_proxy" type="text" label="Proxy (e.g. http://122.72.33.138:80)" values="" default=""/>
+</settings>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.pps"
+    name="PPS影音(PPS.tv)"
+    version="1.1.10"
+    provider-name="cmeng (originator: yxnr)">
+    <extension
+        point="xbmc.python.pluginsource"
+        library="default.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">PPStream Network TV</summary>
+        <summary lang="zh">PPS影音</summary>
+        <description lang="en">PPStream Network TV: (KeyMap Settings)[CR]Mute: F8  Vol-: F9  Vol+: F10  ZoomIn: [↓  ZoomOut: ]↑[CR]Rev: ,←  Next: .→  Pause: Space/Ent  Exit: x/Esc  About: F1[CR]
+To customize Keypmap:[CR]Run plugin.video.pps\resources\player\KeymapSet.exe
+For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and Language"|"Administrative"[CR]Change system locale to "Chinese (Simplified PRC)"</description>
+        <description lang="zh">快捷键设置 (Keymap Settings):[CR]静音: F8  声音缩小: F9  声音放大: F10  画面缩小: [↓  画面放大: ]↑[CR]上一章节: ,←  下一章节: .→  播放暂停: 空格键/回车  关闭程序: x/Esc  关于: F1
+设置自定快捷键:[CR]请运行 plugin.video.pps\resources\player\KeymapSet.exe
+使用PPS影音收看影视节目，清晰流畅更新快。PPS网络电视是全球第一家集P2P直播点播于一身的网络电视软件。PPS网络电视播放流畅、完全免费，PPS网络电视是网民喜爱的装机必备软件。</description>
+        <platform>windx wingl</platform>
+    </extension>
+</addon>

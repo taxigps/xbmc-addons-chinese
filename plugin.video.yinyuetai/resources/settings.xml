@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+	<setting id="video_resolution" type="enum" label="默认播放清晰度 (Video Playback Resolution)" values="标清|高清|超清" default="2"/>
+	<setting id="video_vplaycont" type="bool" label="视频连续播放  (Continuous Video Playback)" default="true"/>
+    <setting id="http_proxy" type="text" label="Proxy (ip:port) - leave blank if not required" values="" default=""/>
+</settings>

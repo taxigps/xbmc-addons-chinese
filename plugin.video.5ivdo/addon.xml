@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.5ivdo"
+    name="5ivdo(5ivdo)"
+    version="1.1.5"
+    provider-name="5ivdo">
+    <extension
+        point="xbmc.python.pluginsource"
+        library="default.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">5ivdo video plugin</summary>
+        <summary lang="zh">我爱VDO</summary>
+        <description lang="en">online video from 5ivdo.com</description>
+        <description lang="zh">在线视频聚合，主站[http://www.5ivdo.com]。基于XBMC运行，能够支持优土，爱奇艺，腾讯，搜狐，乐视，新浪，风行等主要视频内容的在线播放，更多站点支持敬请期待。本站作为资源导航，只为个人服务，商业用途勿扰。你所体验的所有视频内容，版权归属相应网站，应对他们的工作心存感激。有任何意见或建议请加入QQ群[197687378]，或者关注官方微博[http://weibo.com/5ivdo]。让我们为创造更好的XBMC体验而努力！</description>
+        <platform>all</platform>
+    </extension>
+</addon>
