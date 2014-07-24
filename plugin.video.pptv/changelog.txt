@@ -1,0 +1,82 @@
+﻿########################################################################
+# # PPTV视频 for XBMC by Uranus Zhou, 2012 - 2014
+########################################################################
+# Version 1.2.5 2014-07-24 (taxigps)
+# - Fix m3u8 live video play
+
+# Version 1.2.4 2014-01-05 (Uranus Zhou - nocwat at gmail dot com)
+# Fix can't read gzip webpage bug cause missing StringIO
+# Some sports live videos like premier league will work
+
+# Version 1.2.3 2013-12-29 (Uranus Zhou - nocwat at gmail dot com)
+# Fix can't get some video URL bug (incorrect gzip page encoding)
+# Some sports live videos like premier league should work
+
+# Version 1.2.2 2013-12-25 (cmeng)
+# Revert back to 1.2.0
+
+# Version 1.2.1 2013-12-25 (cmeng)
+# Temporary fix for listroot - link broken
+# Update filters extraction attribute 
+
+# Version 1.2.0 2013-11-03 (Uranus Zhou - nocwat at gmail dot com)
+# - Big update for PPTV website changes
+# - Fix can't get PPTV video category list bug
+# - Fix can't get PPTV video list bug
+# - Fix can't get PPTV episode list bug
+# - Fix can't get PPTV flash video url bug
+# - Enum areas for TV list
+# - Use new PPTV API to get sports/games/finance live video list
+
+# Version 1.1.9 2013-06-13 (Uranus Zhou - nocwat at gmail dot com)
+# - Fix incorrect m3u8 live video URL bug
+
+# Version 1.1.8 2013-05-09 (Uranus Zhou - nocwat at gmail dot com)
+# - Skip version 1.1.4 ~ 1.1.7 version, cmeng update these versions
+# - Remove PPSAP option in 1.1.4 ~ 1.1.7 cmeng for platform independent
+# - Fix search doesn't work with new PPTV website bug
+# - Fix search lose some results bug
+# - Fix can't get Flash video URL bug, use more flvcd tricks
+# - Fix can't get iPad video URL bug
+# - Add standalone iPad video option, iPad video can also choose quality
+# - iPad video option is enabled by default, turn it off if can't play
+# - Add website, forum URL, license, email information in addon.xml
+
+# Version 1.1.7 2013-02-24 (cmeng)
+# - Apply PPSAP option to live TV streaming only
+
+# Version 1.1.6 2013-01-03 (cmeng)
+# - PPSAP option added (default disabled - v1.1.3 streaming method)
+
+# Version 1.1.5 2013-01-03 (cmeng)
+# - fix TV broadcast stream video start time
+
+# Version 1.1.4 2013-01-01 (cmeng)
+# - Update TV broadcast link decode algorithm
+
+# Version 1.1.3 2012-10-31 (Uranus Zhou - nocwat at gmail dot com)
+# - Update ternary expression for Python 2.x
+# - Use simplejson instead of json in Python 2.4/2.5 (like Xbox)
+
+# Version 1.1.2 2012-10-30 (Uranus Zhou - nocwat at gmail dot com)
+# - Replace ternary 'if else' with normal 'if else'
+# - Let this work in XBMC system with Python lower than 2.5 (like Xbox)
+
+# Version 1.1.1 2012-10-25 (Uranus Zhou - nocwat at gmail dot com)
+# - Fix incorrect live video list bug
+# - If a live video doesn't have direct video link, search to get link
+# - PPTV m3u8 may still doesn't play well in some XBMC system
+
+# Version 1.1 2012-10-25 (Uranus Zhou - nocwat at gmail dot com)
+# - Support searching PPTV videos using XBMC Chinese Keyboard
+# - If searched video is not provided by PPTV, give user a tip message
+# - Give user a tip message if try to play PPTV VIP video
+# - Fix can't load some TV series video list bug
+
+# Version 1.0 2012-10-23 (Uranus Zhou - nocwat at gmail dot com)
+# - Initial cross-platform release (include live stream support)
+# - Support differnt video qualities : normal/hd/full hd/blue-ray/iPad
+# - Set default video quality to : hd, you can change this in settings
+# - Support iPad live stream (m3u8) and non-live stream (m3u)
+# - Your XBMC system need m3u and m3u8 support for iPad streams
+########################################################################

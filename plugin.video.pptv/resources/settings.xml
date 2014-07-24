@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+	<setting label="使用iPad m3u8流媒体视频" type="bool" id="ipad_video" default="true"/>
+	<setting id="movie_quality" type="enum" label="视频质量" values="流畅|高清|超清|蓝光" default="1"/>
+	<setting label="注：直播及iPad视频需XBMC系统可正常播放m3u m3u8类型网络媒体" type="lsep"/>
+</settings>
