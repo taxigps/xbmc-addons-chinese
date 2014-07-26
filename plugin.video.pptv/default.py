@@ -736,12 +736,12 @@ def playVideo(name, url, thumb):
 		if os.path.isdir(__temp__):
 			shutil.rmtree(__temp__)
 		xbmc.sleep(100)
-		os.mkdir(__temp__)
+		os.makedirs(__temp__)
 		for i in range(0, len(ppurls)):
 			data = GetHttpData(ppurls[i])
 			print ppurls[i]
 			data = data.replace('type=ppbox', 'type=m3u8.web.pad')
-			m3u = os.path.join( __temp__, "%s%d.m3u" % (name.decode("utf-8"),i))
+			m3u = os.path.join( __temp__, u"pptvvideo.%d.m3u" % (i))
 			with open(m3u, "w") as f:
 				f.write(data)
 			f.close()
