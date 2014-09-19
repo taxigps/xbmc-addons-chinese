@@ -180,7 +180,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.sohuvideo"
     name="搜狐视频(SoHu)"
-    version="2.4.1"
+    version="2.4.2"
     provider-name="Taxigps">
     <requires>
         <import addon="script.module.keyboard.chinese" version="1.0.0"/>

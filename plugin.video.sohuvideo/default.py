@@ -101,41 +101,41 @@ def searchDict(dlist,idx):
 # - etc
 ##################################################################################
 def getcatList(listpage):
-    match = re.compile('<dt>类型：</dt>\s*<dd>(.+?)</dd>', re.DOTALL).findall(listpage)
+    match = re.compile('<dt>类别：</dt>\s*<dd class="sort-tag">(.+?)</dd>', re.DOTALL).findall(listpage)
     catlist = re.compile('p2(.*?)_p3.+?>(.+?)</a>', re.DOTALL).findall(match[0])
     return catlist
 
 def getareaList(listpage):
-    match = re.compile('<dt>产地：</dt>\s*<dd>(.+?)</dd>', re.DOTALL).findall(listpage)
+    match = re.compile('<dt>地区：</dt>\s*<dd class="sort-tag">(.+?)</dd>', re.DOTALL).findall(listpage)
     arealist = re.compile('p3(.*?)_p4.+?>(.+?)</a>', re.DOTALL).findall(match[0])
     return arealist
 
 def getyearList(listpage):    
-    match = re.compile('<dt>年份：</dt>\s*<dd>(.+?)</dd>', re.DOTALL).findall(listpage)
+    match = re.compile('<dt>年份：</dt>\s*<dd class="sort-tag">(.+?)</dd>', re.DOTALL).findall(listpage)
     yearlist = re.compile('p4(.*?)_p5.+?>(.+?)</a>', re.DOTALL).findall(match[0])
     return yearlist
 
 def getlabelList(listpage): # label & area share the same _P3   
-    match = re.compile('<dt>标签：</dt>\s*<dd>(.+?)</dd>', re.DOTALL).findall(listpage)
+    match = re.compile('<dt>类别：</dt>\s*<dd class="sort-tag">(.+?)</dd>', re.DOTALL).findall(listpage)
     catlist = re.compile('p2(.*?)_p3.+?>(.+?)</a>', re.DOTALL).findall(match[0])
     return catlist
 
 def getList16(listpage):    
-    match = re.compile('<dt>篇幅：</dt>\s*<dd>(.+?)</dd>', re.DOTALL).findall(listpage)
+    match = re.compile('<dt>篇幅：</dt>\s*<dd class="sort-tag">(.+?)</dd>', re.DOTALL).findall(listpage)
     pflist = re.compile('p5(.*?)_p6.+?>(.+?)</a>', re.DOTALL).findall(match[0])
-    match = re.compile('<dt>年龄：</dt>\s*<dd>(.+?)</dd>', re.DOTALL).findall(listpage)
+    match = re.compile('<dt>年龄：</dt>\s*<dd class="sort-tag">(.+?)</dd>', re.DOTALL).findall(listpage)
     nllist = re.compile('p6(.*?)_p7.+?>(.+?)</a>', re.DOTALL).findall(match[0])
     return pflist,nllist
            
 def getList24(listpage):
-    match = re.compile('<dt>类型：</dt>\s*<dd>(.+?)</dd>', re.DOTALL).findall(listpage)
+    match = re.compile('<dt>类别：</dt>\s*<dd class="sort-tag">(.+?)</dd>', re.DOTALL).findall(listpage)
     lxlist = re.compile('p5(.*?)_p6.+?html">(.+?)</a>', re.DOTALL).findall(match[0])
-    match = re.compile('<dt>语言：</dt>\s*<dd>(.+?)</dd>', re.DOTALL).findall(listpage)
+    match = re.compile('<dt>语言：</dt>\s*<dd class="sort-tag">(.+?)</dd>', re.DOTALL).findall(listpage)
     yylist = re.compile('_p101_p11(.+?).html">(.+?)</a>', re.DOTALL).findall(match[0])
     if len(yylist)>0: yylist.insert(0,['','全部'])
-    match = re.compile('<dt>地区：</dt>\s*<dd>(.+?)</dd>', re.DOTALL).findall(listpage)
+    match = re.compile('<dt>地区：</dt>\s*<dd class="sort-tag">(.+?)</dd>', re.DOTALL).findall(listpage)
     arealist = re.compile('p3(.*?)_p4.+?>(.+?)</a>', re.DOTALL).findall(match[0])
-    match = re.compile('<dt>风格：</dt>\s*<dd>(.+?)</dd>', re.DOTALL).findall(listpage)
+    match = re.compile('<dt>风格：</dt>\s*<dd class="sort-tag">(.+?)</dd>', re.DOTALL).findall(listpage)
     fglist = re.compile('p2(.*?)_p3.+?>(.+?)</a>', re.DOTALL).findall(match[0])
     return lxlist,yylist,arealist,fglist
 
@@ -200,21 +200,22 @@ def progList(name,id,page,cat,area,year,p5,p6,p11,order):
 
     currpage = int(page)
     link = getHttpData(url)
-    match = re.compile('共有<span.*?>(.+?)</span> 个符合条件', re.DOTALL).findall(link)
-    if match[0]=='0':
+    match = re.compile('<div class="ssPages area">(.+?)</div>', re.DOTALL).findall(link)
+    if not match:
         dialog = xbmcgui.Dialog()
         ok = dialog.ok(__addonname__, '没有符合此条件的视频！')
     else:
-        totalpages = int(round((float(match[0]) / 20) + 0.5))
-        if totalpages>200:
-            totalpages = 200
-        match = re.compile('<div class="mod-con">(.+?)</div>', re.DOTALL).findall(link)
+        matchpages = re.compile('<a href="[^"]*">(\d+)</a>', re.DOTALL).findall(match[0])
+        totalpages = int(matchpages[-1])
+        if totalpages < currpage:
+            totalpages = currpage
+        match = re.compile('<div class="sort-type">(.+?)</div>', re.DOTALL).findall(link)
         if len(match):
             listpage = match[0]
         else:
             listpage = ''
 
-        match = re.compile('<li class="clear">(.+?)</li>', re.DOTALL).findall(link)
+        match = re.compile('<li>(.+?)</li>', re.DOTALL).findall(link)
         totalItems = len(match) + 1
         if currpage > 1: totalItems = totalItems + 1
         if currpage < totalpages: totalItems = totalItems + 1
@@ -296,16 +297,22 @@ def progList(name,id,page,cat,area,year,p5,p6,p11,order):
         xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True, totalItems)
 
         for i in range(0,len(match)):
-            match1 = re.compile('<a target="_blank" title="(.+?)" href="(.+?)"', re.DOTALL).search(match[i])
-            p_name = match1.group(1)
-            p_url = match1.group(2)
-            match1 = re.compile('<img src="(.+?)"', re.DOTALL).search(match[i])
+            match1 = re.compile('<a href="([^"]+)" title="([^"]+)" target="_blank"', re.DOTALL).search(match[i])
+            i_url = 1
+            i_name = 2
+            if not match1:
+                match1 = re.compile('<a title="([^"]+)" target="_blank" href="([^"]+)"', re.DOTALL).search(match[i])
+                i_url = 2
+                i_name = 1
+            p_name = match1.group(i_name)
+            p_url = match1.group(i_url)
+            match1 = re.compile('<img .*?src="([^"]+)"', re.DOTALL).search(match[i])
             p_thumb = match1.group(1)
             p_rating = 0
             p_votes = ''
             p_director = ''
             p_genre = ''
-            match1 = re.compile('<p class="desc">(.+?)</p>').search(match[i])
+            match1 = re.compile('<p class="lh-info">(.+?)</p>').search(match[i])
             if match1:
                 p_plot = match1.group(1)
             else:
@@ -319,38 +326,37 @@ def progList(name,id,page,cat,area,year,p5,p6,p11,order):
                 p_dir = False
                 mode = 3
 
-            match1 = re.compile('<span></span><i>(.+?)</i>').search(match[i])
+            match1 = re.compile('<span class="maskTx">(.+?)</span>').search(match[i])
             if match1:
                 p_name1 = p_name + ' [' + match1.group(1) + ']'
             else:
                 p_name1 = p_name
-            if match[i].find('<em class="super"')>0:
+            if match[i].find('<span class="rl-phua"></span>')>0:
+                p_name1 += ' [片花]'
+            elif match[i].find('<span class="rl-rep"></span>')>0:
+                p_name1 += ' [预告]'
+            elif match[i].find('<span class="rl-fuf"></span>')>0:
+                p_name1 += ' [付费]'
+            if match[i].find('<a title="超清" class="super">')>0:
                 p_name1 += ' [超清]'
                 p_res = 2
-            elif match[i].find('<em class="op"')>0:
-                p_name1 += ' [高清]'
+            elif match[i].find('<a title="原画" class="origin">')>0:
+                p_name1 += ' [原画]'
                 p_res = 1
             else:
                 p_res = 0
-                
-            match1 = re.compile('<em class="pay">').search(match[i])
-            if match1:
-                p_name1 += ' [会员]'
-            
+
             li = xbmcgui.ListItem(str(i + 1) + '. ' + p_name1, iconImage = '', thumbnailImage = p_thumb)
             u = sys.argv[0]+"?mode="+str(mode)+"&name="+urllib.quote_plus(p_name)+"&url="+urllib.quote_plus(p_url)+"&thumb="+urllib.quote_plus(p_thumb)+"&id="+urllib.quote_plus(str(i))
             li.setInfo(type = "Video", infoLabels = {"Title":p_name, "Director":p_director, "Genre":p_genre, "Plot":p_plot, "Year":p_year, "Rating":p_rating, "Votes":p_votes})
             xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, p_dir, totalItems)
     
         # Fetch and build user selectable page number
-        matchp = re.compile('<div class="page">(.+?)</div>', re.DOTALL).findall(link)
-        if len(matchp): 
-            matchp1 = re.compile('<a href=".+?>([0-9]+)</a>', re.DOTALL).findall(matchp[0])
-            if len(matchp1):
-                for num in matchp1:
-                    li = xbmcgui.ListItem("... 第" + num + "页")
-                    u=sys.argv[0]+"?mode=1&name="+urllib.quote_plus(name)+"&id="+id+"&page="+str(num)+"&cat="+cat+"&area="+area+"&year="+year+"&p5="+p5+"&p6="+p6+"&p11="+p11+"&order="+order 
-                    xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True, totalItems)        
+        if matchpages:
+            for num in matchpages:
+                li = xbmcgui.ListItem("... 第" + num + "页")
+                u=sys.argv[0]+"?mode=1&name="+urllib.quote_plus(name)+"&id="+id+"&page="+str(num)+"&cat="+cat+"&area="+area+"&year="+year+"&p5="+p5+"&p6="+p6+"&p11="+p11+"&order="+order 
+                xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True, totalItems)
         xbmcplugin.setContent(int(sys.argv[1]), 'movies')
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -377,12 +383,16 @@ def seriesList(name, id,url,thumb):
             u = sys.argv[0] + "?mode=3&name=" + urllib.quote_plus(p_name) + "&url=" + urllib.quote_plus(p_url)+ "&thumb=" + urllib.quote_plus(p_thumb)
             xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, False, totalItems)       
     else:
-        match0 = re.compile('var pid=(.+?);', re.DOTALL).findall(link)
+        match0 = re.compile('var pid\s*=\s*(.+?);', re.DOTALL).findall(link)
         if len(match0)>0:
             # print 'pid=' + match0[0]
             pid = match0[0].replace('"','')
-            match0 = re.compile('var vid=(.+?);', re.DOTALL).findall(link)
+            match0 = re.compile('var vid\s*=\s*(.+?);', re.DOTALL).findall(link)
             vid = match0[0].replace('"','')
+            if vid == '0':
+                dialog = xbmcgui.Dialog()
+                ok = dialog.ok(__addonname__,'您当前选择的节目暂不能播放，请选择其它节目')
+                return
             obtype = '2'
             link = getHttpData("http://search.vrs.sohu.com/avs_i"+vid+"_pr"+pid+"_o"+obtype+"_n_p1000_chltv.sohu.com.json")
             data = link.replace('var video_album_videos_result=','').decode('raw_unicode_escape')
@@ -599,75 +609,51 @@ def sohuSearchList(name, url, page):
     #########################################################################
     # Video listing for all found related episode title
     #########################################################################
-    match = re.compile('</span> 共找到(.+?)个').search(link)
-    if match: totalItems = int(match.group(1))
-    else: totalItems = 0;
-    if totalItems == 0:
-        li=xbmcgui.ListItem('抱歉，没有找到[COLOR FFFF0000] '+name+' [/COLOR]的相关视频')
-        xbmcplugin.addDirectoryItem(int(sys.argv[1]),u,li,False)
-    else:
-        matchp=re.compile('<div class=["clear list_pack"|"list_pack clear"]+>(.+?)播 放 </a>').findall(link)
-        k = 0
-        for i in range(0, len(matchp)):
-            vlink = matchp[i]    
-            if vlink.find('<em class="pay"></em>')>0: continue
+    matchp=re.compile('<div class="ssItem cfix">(.+?)<div class="alike">').findall(link)
+    totalItems = len(matchp)
+    k = 0
+    for i in range(0, len(matchp)):
+        vlink = matchp[i]
+        if vlink.find('<em class="pay"></em>')>0: continue
 
-            match1 = re.compile('href="(.+?)"').findall(vlink)
-            p_url = 'http://so.tv.sohu.com' + match1[0]
+        match1 = re.compile('href="(.+?)"').findall(vlink)
+        p_url = match1[0]
 
-            match1 = re.compile('alt="(.+?)"').search(vlink)
-            p_name = match1.group(1)
+        match1 = re.compile('title="(.+?)"').search(vlink)
+        p_name = match1.group(1)
             
-            match1 = re.compile('src="(.+?)"').search(vlink)
-            p_thumb = match1.group(1)
+        match1 = re.compile('src="(.+?)"').search(vlink)
+        p_thumb = match1.group(1)
 
-            match1 = re.compile("<b class='gq_ico'></b>(.+?)</span>").search(vlink)
-            if match1:
-                label = match1.group(1)
-                if '分' in label:
-                    label = re.sub('分',':',label)[:-3]
-                p_label = ' [' + label.strip(' ') + ']'
-            else:
-                p_label =''
+        match1 = re.compile('<span class="maskTx">(.*?)</span>').search(vlink)
+        if match1 and match1.group(1)<>'':
+            p_label = ' [' + match1.group(1) + ']'
+        else:
+            p_label =''
 
-            p_type = ''
-            isTeleplay = False
-            match1 = re.compile('<span class="type">(.+?)</span>').search(vlink)
-            if match1:
-                p_type = match1.group(1)
-            if p_type=='[电视剧]':
-                isTeleplay = True
-                mode = '2'
-                p_type='【[COLOR FF00FF00]电视剧[/COLOR]】'
-            elif p_type=='[电影]':
-                p_type='【[COLOR FF00FF00]电影[/COLOR]】'
-                mode ='3'
-            else:
-                p_type = ' ' + p_type
-                mode ='3'
- 
-            k+=1 
-            p_list = str(k) + ': ' + p_name + p_type + p_label
-            li = xbmcgui.ListItem(p_list, iconImage=p_thumb, thumbnailImage=p_thumb)
-            u = sys.argv[0] + "?mode=" + mode + "&name=" + urllib.quote_plus(p_name) + "&id=101" + "&url=" + urllib.quote_plus(p_url) + "&thumb=" + urllib.quote_plus(p_thumb)
+        p_type = ''
+        isTeleplay = False
+        match1 = re.compile('<span class="label-red"><em>(.+?)</em></span>').search(vlink)
+        if match1:
+            p_type = match1.group(1)
+        if p_type=='电视剧':
+            isTeleplay = True
+            mode = '2'
+            p_type='【[COLOR FF00FF00]电视剧[/COLOR]】'
+        elif p_type=='电影':
+            p_type='【[COLOR FF00FF00]电影[/COLOR]】'
+            mode ='3'
+        else:
+            p_type = ' ' + p_type
+            mode ='3'
+
+        k+=1
+        p_list = str(k) + ': ' + p_name + p_type + p_label
+        li = xbmcgui.ListItem(p_list, iconImage=p_thumb, thumbnailImage=p_thumb)
+        u = sys.argv[0] + "?mode=" + mode + "&name=" + urllib.quote_plus(p_name) + "&id=101" + "&url=" + urllib.quote_plus(p_url) + "&thumb=" + urllib.quote_plus(p_thumb)
   
-            if isTeleplay:
-                xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True, totalItems)       
-            else:
-                xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, False, totalItems)
+        xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, isTeleplay, totalItems)
  
-    # Fetch and build user selectable page number
-    matchp = re.compile('<div class="jumpB clear">(.+?)</div>', re.DOTALL).findall(link)
-    if len(matchp): 
-        matchp1 = re.compile('<a href=".+?">([1-9]+)</a>', re.DOTALL).findall(matchp[0])
-        if len(matchp1):
-            plist=[str(currpage)]
-            for num in matchp1:
-                if num not in plist:
-                    plist.append(num)
-                    li = xbmcgui.ListItem("... 第" + num + "页")
-                    u = sys.argv[0] + "?mode=22&name=" + urllib.quote_plus(name) + "&url=" + urllib.quote_plus(url) + "&page=" + str(num)
-                    xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True, totalItems)        
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
  
@@ -688,26 +674,34 @@ def PlayVideo(name,url,thumb):
             PlayVideo(name,match1.group(1),thumb)
         return
     p_vid = match1.group(1)
+    if p_vid == '0':
+        match1 = re.compile('data-vid="([^"]+)"').search(link)
+        if not match1:
+            dialog = xbmcgui.Dialog()
+            ok = dialog.ok(__addonname__,'您当前选择的节目暂不能播放，请选择其它节目')
+            return
+        p_vid = match1.group(1)
     if p_vid.find(',') > 0 : p_vid = p_vid.split(',')[0]
        
     p_url = 'http://hot.vrs.sohu.com/vrs_flash.action?vid='+ p_vid
     link = getHttpData(p_url)
-    match = re.compile('"norVid":(.+?),"highVid":(.+?),"superVid":(.+?),').search(link)
+    match = re.compile('"norVid":(.+?),"highVid":(.+?),"superVid":(.+?),"oriVid":(.+?),').search(link)
     if not match:
        dialog = xbmcgui.Dialog()
        ok = dialog.ok(__addonname__,'您当前选择的节目暂不能播放，请选择其它节目')   
        return    
     ratelist=[]
+    if match.group(4)!='0':ratelist.append(['原画','4'])
     if match.group(3)!='0':ratelist.append(['超清','3'])
     if match.group(2)!='0':ratelist.append(['高清','2'])
     if match.group(1)!='0':ratelist.append(['流畅','1'])
-    if level == 3 :
+    if level == 4:
         dialog = xbmcgui.Dialog()
         list = [x[0] for x in ratelist]
         if len(ratelist)==1:
             rate=ratelist[0][1]
         else:
-            sel = dialog.select('视频率 (请选择低视频-流畅如网络缓慢)', list)
+            sel = dialog.select('视频清晰度（低网速请选择低清晰度-流畅）', list)
             if sel == -1:
                 return
             else:
