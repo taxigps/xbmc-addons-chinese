@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+
+<strings>
+    <string id="1">Refresh</string>
+    <string id="2">Chinese</string>
+
+    <!-- Plugin settings strings -->
+    <string id="30200">Login Xunlei</string>
+    <string id="30201">Username</string>
+    <string id="30202">Password</string>
+</strings>

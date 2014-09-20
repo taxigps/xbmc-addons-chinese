@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.youku2" name="优酷视频2(YouKu2)" version="0.9.5" provider-name="tacy.lee">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+    <import addon="script.module.xbmcswift2" version="2.4.0"/>
+    <import addon="script.module.keyboard.chinese" version="1.0.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="addon.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <platform>all</platform>
+    <language></language>
+    <summary lang="en">YouKu Video by tacy.lee</summary>
+    <summary lang="zh">另一个优酷视频插件</summary>
+    <description lang="en">YouKu is china's largest video sharing site, YoukuVideo plugin support all channels play and video search. Please submit bug or issue to http://github.com/tacy/plugin.video.youkuvideo.</description>
+    <description lang="zh">优酷视频是中国最大的视频分享网站: [CR]1. 插件支持优酷全频道播放 [CR]2. 视频搜索(搜酷搜索引擎) [CR]3. 多播放源支持，包括优酷/搜狐/腾讯/爱奇艺/乐视/土豆/PPS [CR]如果有问题请提交到 http://github.com/tacy/plugin.video.youkuvideo</description>
+  </extension>
+</addon>

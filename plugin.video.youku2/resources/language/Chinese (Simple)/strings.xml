@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+
+<strings>
+    <string id="1">刷新</string>
+    <string id="2">中文</string>
+
+    <!-- Plugin settings strings -->
+    <string id="30200">登入迅雷（只支持白金用户播放）</string>
+    <string id="30201">用户名</string>
+    <string id="30202">密码</string>
+
+</strings>
