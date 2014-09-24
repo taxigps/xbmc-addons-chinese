@@ -49,7 +49,7 @@ To install the repository, you need to download the latest repository zip file [
 
 ## Program Add-ons
 
-* Skin Font(script.skinfont) - Add arial font type to any skin for display chinese characters. 
+* Skin Font - script.skinfont - Add arial font type to any skin for display chinese characters. 
 
 [1]: http://bbs.htpc1.com/forum-225-1.html
 [2]: http://xbmc.org/forum/showthread.php?t=64250
