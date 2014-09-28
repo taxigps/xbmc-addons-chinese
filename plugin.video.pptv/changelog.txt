@@ -1,6 +1,10 @@
 ﻿########################################################################
 # # PPTV视频 for XBMC by Uranus Zhou, 2012 - 2014
 ########################################################################
+# Version 1.2.6 2014-09-28 (Uranus Zhou - nocwat at gmail dot com)
+# Add PPTV new key to query video URL
+# Fix iPad m3u8 video / live video / sports live video doesn't work bug
+
 # Version 1.2.5 2014-07-24 (taxigps)
 # - Fix m3u8 live video play
 

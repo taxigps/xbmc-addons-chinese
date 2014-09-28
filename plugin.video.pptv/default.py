@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, re, gzip, datetime, StringIO
-import shutil
 try:
 	import json
 except:
@@ -8,9 +7,9 @@ except:
 import ChineseKeyboard
 
 # Plugin constants
-__addon__   = xbmcaddon.Addon()
-__profile__ = xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode("utf-8")
-__temp__    = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode("utf-8")
+__addonname__ = "PPTV视频"
+__addonid__ = "plugin.video.pptv"
+__addon__ = xbmcaddon.Addon(id=__addonid__)
 
 UserAgent_IPAD = 'Mozilla/5.0 (iPad; U; CPU OS 4_2_1 like Mac OS X; ja-jp) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8C148 Safari/6533.18.5'
 UserAgent_IE = 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)'
@@ -247,14 +246,14 @@ def GetPPTVCatalogs():
 	if len(chl) > 0:
 		links = parseDOM(chl, 'a', ret = 'href')
 		names = parseDOM(chl, 'a')
-	cat_list.extend([{ 'link' : i.encode('utf-8'), 'name' : j.encode('utf-8') } for i, j in zip(links, names)])
 
 	data = GetHttpData(PPTV_LIST)
 	chl = CheckValidList(parseDOM(unicode(data, 'utf-8', 'ignore'), 'div', attrs = { 'id' : 'channelBox' }))
 	if len(chl) > 0:
-		links = parseDOM(chl, 'a', ret = 'href')
-		names = parseDOM(chl, 'a')
-	cat_list.extend([{ 'link' : i.encode('utf-8'), 'name' : j.encode('utf-8')+'（待修复）' } for i, j in zip(links, names)])
+		links.extend(parseDOM(chl, 'a', ret = 'href'))
+		names.extend(parseDOM(chl, 'a'))
+
+	cat_list.extend([{ 'link' : i.encode('utf-8'), 'name' : j.encode('utf-8') } for i, j in zip(links, names)])
 	return cat_list
 
 def CheckJSLink(link):
@@ -451,7 +450,7 @@ def GetPPTVVideoURL_Flash(url, quality):
 	vid = CheckValidList(re.compile(',\s*["\']vid["\']\s*:\s*(\d+)\s*,').findall(data))
 	if len(vid) <= 0:
 		return []
-	
+
 	# get data
 	data = GetHttpData(PPTV_WEBPLAY_XML + 'webplay3-0-' + vid + '.xml&ft=' + str(quality) + '&version=4&type=web.fpp')
 
@@ -510,24 +509,31 @@ def GetPPTVVideoURL_Flash(url, quality):
 
 def GetPPTVVideoURL(url, quality):
 	# check whether is PPTV video
-	if not re.match('^http://.*\.pptv\.com/.*$', url):
+	domain = CheckValidList(re.compile('^http://(.*\.pptv\.com)/.*$').findall(url))
+	if len(domain) <= 0:
 		xbmcgui.Dialog().ok(__addonname__, PPTV_MSG_INVALID_URL)
 		return []
 
 	data = GetHttpData(url)
+
+	# new key for query XML
+	kk = CheckValidList(re.compile('%26kk%3D([^"\']*)["\'],').findall(data))
 
 	# try to directly get iPad live video URL
 	ipadurl = CheckValidList(re.compile(',\s*["\']ipadurl["\']\s*:\s*["\']([^"\']*)["\']').findall(data))
 	if len(ipadurl) > 0:
 		ipadurl = re.sub('\\\/', '/', ipadurl)
 		if ipadurl.find('?type=') < 0:
-			ipadurl += '?type=ppbox'
+			ipadurl += '?type=m3u8.web.pad'
+		if len(kk) > 0:
+			ipadurl += '&kk=' + kk
+		ipadurl += '&o=' + domain
 		return [ipadurl]
 
 	# get sports iPad live URL
 	ipadurl = CheckValidList(re.compile('["\']pbar_video_(\d+)["\']').findall(data))
 	if len(ipadurl) > 0:
-		return [ PPTV_WEBPLAY_XML + 'web-m3u8-' + ipadurl + '.m3u8?type=ppbox' ]
+		return [ PPTV_WEBPLAY_XML + 'web-m3u8-' + ipadurl + '.m3u8?type=m3u8.web.pad&o=' + domain ]
 
 	# try to get iPad non-live video URL
 	if 'true' == __addon__.getSetting('ipad_video'):
@@ -535,8 +541,14 @@ def GetPPTVVideoURL(url, quality):
 		if len(vid) <= 0:
 			return []
 
+		if len(kk) <= 0:
+			return []
+
 		# get data
-		data = GetHttpData(PPTV_WEBPLAY_XML + 'webplay3-0-' + vid + '.xml&version=4&type=m3u8.web.pad')
+		ipadurl = PPTV_WEBPLAY_XML + 'webplay3-0-' + vid + '.xml&version=4&type=m3u8.web.pad'
+		if len(kk) > 0:
+			ipadurl += '&kk=' + kk
+		data = GetHttpData(ipadurl)
 
 		# get quality
 		tmp = CheckValidList(parseDOM(unicode(data, 'utf-8', 'ignore'), 'file'))
@@ -733,22 +745,11 @@ def playVideo(name, url, thumb):
 	if len(ppurls) > 0:
 		playlist = xbmc.PlayList(1)
 		playlist.clear()
-		if os.path.isdir(__temp__):
-			shutil.rmtree(__temp__)
-		xbmc.sleep(100)
-		os.makedirs(__temp__)
 		for i in range(0, len(ppurls)):
-			data = GetHttpData(ppurls[i])
-			print ppurls[i]
-			data = data.replace('type=ppbox', 'type=m3u8.web.pad')
-			m3u = os.path.join( __temp__, u"pptvvideo.%d.m3u" % (i))
-			with open(m3u, "w") as f:
-				f.write(data)
-			f.close()
 			title = name + ' ' + PPTV_TTH + ' ' + str(i + 1) + '/' + str(len(ppurls)) + ' ' + PPTV_FIELD
 			liz = xbmcgui.ListItem(title, thumbnailImage = thumb)
 			liz.setInfo(type = "Video", infoLabels = { "Title" : title })
-			playlist.add(m3u, liz)
+			playlist.add(ppurls[i], liz)
 		xbmc.Player().play(playlist)
 	else:
 		xbmcgui.Dialog().ok(__addonname__, PPTV_MSG_GET_URL_FAILED)
