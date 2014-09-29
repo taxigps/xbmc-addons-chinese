@@ -180,7 +180,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.sohuvideo"
     name="搜狐视频(SoHu)"
-    version="2.4.2"
+    version="2.4.3"
     provider-name="Taxigps">
     <requires>
         <import addon="script.module.keyboard.chinese" version="1.0.0"/>
@@ -273,7 +273,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="script.module.keyboard.chinese"
     name="Chinese keyboard"
-    version="2.0.0"
+    version="2.0.1"
     provider-name="Taxigps">
     <extension point="xbmc.python.module" library="lib" />
     <extension point="xbmc.addon.metadata">
