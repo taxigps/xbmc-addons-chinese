@@ -219,7 +219,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.youku"
     name="优酷视频(YouKu)"
-    version="2.2.0"
+    version="2.2.1"
     provider-name="Taxigps">
     <extension
         point="xbmc.python.pluginsource"
