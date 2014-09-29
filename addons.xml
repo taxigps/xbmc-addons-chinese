@@ -55,7 +55,7 @@
 
 <addon id="plugin.video.funshion"
     name="风行视频(Funshion)"
-    version="1.0.11"
+    version="1.0.12"
     provider-name="taxigps">
     <extension
         point="xbmc.python.pluginsource"

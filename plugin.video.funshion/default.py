@@ -3,9 +3,9 @@ import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, re, string, sys, o
 import math, os.path, httplib, time
 from random import randrange
 import cookielib
-if sys.version_info < (2, 7):
+try:
     import simplejson
-else:
+except ImportError:
     import json as simplejson
     
 ########################################################################
