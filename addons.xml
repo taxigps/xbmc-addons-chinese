@@ -19,7 +19,7 @@
 
 <addon id="plugin.audio.baidufm"
 	name="百度随心听"
-	version="0.0.3"
+	version="0.0.4"
 	provider-name="zhangyuanwei">
 	<extension
 		point="xbmc.python.pluginsource"

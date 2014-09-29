@@ -2,9 +2,9 @@
 import xbmc, xbmcgui, xbmcaddon,  xbmcplugin
 import sys, urllib, urlparse, string
 
-if sys.version_info < (2, 7):
+try:
 	import simplejson
-else:
+except ImportError:
 	import json as simplejson
 
 __addon__ = xbmcaddon.Addon()
