@@ -1,9 +1,9 @@
 ﻿# -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, re, string, sys, os, gzip, StringIO, math
 import base64, time
-if sys.version_info < (2, 7):
+try:
     import simplejson
-else:
+except ImportError:
     import json as simplejson
 
 # Plugin constants 

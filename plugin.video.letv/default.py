@@ -4,9 +4,9 @@ import math, os.path, httplib, time
 import cookielib
 import ChineseKeyboard
         
-if sys.version_info < (2, 7):
+try:
     import simplejson
-else:
+except ImportError:
     import json as simplejson
 
 ########################################################################

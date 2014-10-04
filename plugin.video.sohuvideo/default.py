@@ -2,9 +2,9 @@
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, urlparse, httplib, re, string, sys, os, gzip, StringIO
 import cookielib, datetime, time
 import ChineseKeyboard
-if sys.version_info < (2, 7):
+try:
     import simplejson
-else:
+except ImportError:
     import json as simplejson
        
 # Plugin constants 
