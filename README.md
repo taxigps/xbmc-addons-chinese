@@ -24,14 +24,12 @@ For proper Chinese text display on xbmc, do the following steps:
 * Navigate to System | Settings | Appearance | skin
 * Change skin-font to "Arial based"
 
-
 ## Install Add-ons
 
 * Click Get Add-ons
 * Select Chinese Add-ons Repository
 * Select the appropriate Add-ons from the display categories
 * Click to install the Add-on
-
 
 # Features
 
@@ -49,12 +47,12 @@ For proper Chinese text display on xbmc, do the following steps:
 * 优酷视频(YouKu) - plugin.video.youku - Online tv and movies from www.youku.com (Chinese)
 * 优酷视频2(YouKu2) - plugin.video.youku2 - Online tv and movies from www.youku.com (Chinese)
 
-### Note:
-PPS网络电视(PPStream) requires pps4xbmc to access the PPStream player. pps4xbmc is not 
-compatible with ppstream version 3 and above. Please reinstall an earlier version 2.7.x.
-You may download ppstream v2.7.0.x from the links below:
+Note: PPS影音(PPS.tv) and PPS网络电视(PPStream)
+Both use pps4xbmc to access PPStream player and is not compatible with ppstream version 3 and above.
+Please install an earlier version 2.7.x; and may download from the links below:
 * http://www.ernesthan.com/?p=121
 * https://files.secureserver.net/0sQRNPYrXCznzZ 
+PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStream Player" in Add-on settings
 
 
 ## Music Add-ons
