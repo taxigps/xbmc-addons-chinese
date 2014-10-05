@@ -19,6 +19,11 @@ To install the repository, you need to download the latest repository zip file [
 * Browse to the directory where the new downloaded zip file is being stored.
 * Select OK
 
+For proper Chinese text display on xbmc, do the following steps:
+* Launch XBMC
+* Navigate to System | Settings | Appearance | skin
+* Change skin-font to "Arial based"
+
 ## Install Add-ons
 
 * Click Get Add-ons
@@ -41,6 +46,14 @@ To install the repository, you need to download the latest repository zip file [
 * 音悦台MV(YinYueTai) - plugin.video.yinyuetai - MV from www.yinyuetai.com (Chinese)
 * 优酷视频(YouKu) - plugin.video.youku - Online tv and movies from www.youku.com (Chinese)
 * 优酷视频2(YouKu2) - plugin.video.youku2 - Online tv and movies from www.youku.com (Chinese)
+
+Note: PPS影音(PPS.tv) and PPS网络电视(PPStream)
+Both use pps4xbmc to access PPStream player and is not compatible with ppstream version 3 and above.
+Please install an earlier version 2.7.x; and may download from the links below:
+* http://www.ernesthan.com/?p=121
+* https://files.secureserver.net/0sQRNPYrXCznzZ 
+PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStream Player" in Add-on settings
+
 
 ## Music Add-ons
 
