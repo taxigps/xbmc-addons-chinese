@@ -1,6 +1,3 @@
-xbmc-addons-chinese
-===================
-
 # Introduction
 
 This project is an repository for open source Addon scripts, plugins, and skins for XBMC Media Center. Specially for Chinese Language speaking people.
