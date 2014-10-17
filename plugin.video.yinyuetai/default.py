@@ -4,7 +4,6 @@ import xbmcaddon
 import datetime
 import gzip, StringIO
 import cookielib
-import ChineseKeyboard
 import base64
 
 try:

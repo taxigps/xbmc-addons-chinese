@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="plugin.video.yinyuetai"
     name="音悦台MV(YinYueTai)"
-    version="1.7.6"
+    version="1.7.7"
     provider-name="cmeng (originator: Skyemperor)">
     <extension
         point="xbmc.python.pluginsource"
