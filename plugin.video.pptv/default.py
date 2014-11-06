@@ -523,6 +523,7 @@ def GetPPTVVideoURL(url, quality):
 	ipadurl = CheckValidList(re.compile(',\s*["\']ipadurl["\']\s*:\s*["\']([^"\']*)["\']').findall(data))
 	if len(ipadurl) > 0:
 		ipadurl = re.sub('\\\/', '/', ipadurl)
+		ipadurl = ipadurl.replace('}', '')
 		if ipadurl.find('?type=') < 0:
 			ipadurl += '?type=m3u8.web.pad'
 		if len(kk) > 0:
