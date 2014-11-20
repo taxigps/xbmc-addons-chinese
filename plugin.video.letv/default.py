@@ -2,8 +2,12 @@
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, re, string, sys, os, gzip, StringIO
 import math, os.path, httplib, time
 import cookielib
-import ChineseKeyboard
-        
+
+try:
+    from ChineseKeyboard import Keyboard as Apps
+except:
+    from xbmc import Keyboard as Apps
+
 try:
     import simplejson
 except ImportError:
@@ -12,9 +16,9 @@ except ImportError:
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
-# Version 1.3.5 2014-03-18 (cmeng)
-# - fixed setting selection and include super resolution selection
-# - fixed page selector repeated numbering '2'
+# Version 1.3.7 2014-11-20 (cmeng)
+# - Include <requires/> in addon.xml to import ChineseKeyboard
+# - add exception when loading ChineseKeyboard
 
 # See changelog.txt for previous history
 ########################################################################
@@ -694,7 +698,9 @@ def progListUgc(name, url, cat, filtrs, page, listpage):
 ##################################################################################
 def searchLetv():
     result=''
-    keyboard = ChineseKeyboard.Keyboard('','请输入搜索内容')
+    
+    keyboard = Apps('','请输入搜索内容')
+    # keyboard.setHiddenInput(hidden)
     xbmc.sleep( 1500 )
     keyboard.doModal()
     if (keyboard.isConfirmed()):

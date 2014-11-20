@@ -1,8 +1,11 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="plugin.video.letv"
     name="乐视网 (LeTV)"
-    version="1.3.6"
+    version="1.3.7"
     provider-name="cmeng">
+  	<requires>
+		<import addon="script.module.keyboard.chinese" version="1.0.0"/>
+  	</requires>    
     <extension
         point="xbmc.python.pluginsource"
         library="default.py">
