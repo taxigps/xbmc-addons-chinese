@@ -3,7 +3,11 @@ import xbmc, xbmcgui, xbmcplugin, xbmcaddon
 import urllib2, urllib, httplib, time
 import os, sys, re, string, gzip, StringIO
 import cookielib
-import ChineseKeyboard
+
+try:
+    from ChineseKeyboard import Keyboard as Apps
+except:
+    from xbmc import Keyboard as Apps
 
 if sys.version_info < (2, 7):
     import simplejson
@@ -12,9 +16,9 @@ else:
 
 ########################################################################
 # PPStream 网络电视 by cmeng
-# Version 2.2.12 2014-03-02 (cmeng)
-# - Update playVideoUgcX to include new video link search algorithm
-# - Update playVideoUgc to use correct embedded thumb image
+# Version 2.2.13 2014-11-20 (cmeng)
+# - Include <requires/> in addon.xml to import ChineseKeyboard
+# - add exception when loading ChineseKeyboard
  
 # See changelog.txt for previous history
 ########################################################################
@@ -579,9 +583,9 @@ def PlayVideo(name, url, thumb):
     
     link = getHttpData(url)
     # match= "pps://hwshzjoqednezs5t2aqh2lrzslica.pps/f98cfd0eee8fae402f874577a4b3dad27fb48bf2.pfv?maingen=内地剧场"
-    match = re.compile('"play_url":"(.*?)"').findall(link)
+    match = re.compile('p2p_src.+?"(.*?)"').findall(link)
     if not match: # try search for alt link source
-        match = re.compile('p2p_src.+?"(.*?)"').findall(link)
+        match = re.compile('"play_url":"(.*?)"').findall(link)
         
     if not match: # null - try second method to fetch pps video link
         matchp = re.compile('play_(.+?).html').findall(url)
@@ -775,7 +779,7 @@ def playVideoUgcX(name, url, thumb):
 ##################################################################################
 def searchPPS():
     result=''
-    keyboard = ChineseKeyboard.Keyboard('','请输入搜索内容')
+    keyboard = Apps('','请输入搜索内容')
     xbmc.sleep( 1500 )
     keyboard.doModal()
     if (keyboard.isConfirmed()):

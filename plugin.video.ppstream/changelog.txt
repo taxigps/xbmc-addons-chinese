@@ -5,6 +5,10 @@
 # - Update playVideoUgcX to include new video link search algorithm
 # - Update playVideoUgc to use correct embedded thumb image
 ########################################################################
+# Version 2.2.13 2014-11-20 (cmeng)
+# - Include <requires/> in addon.xml to import ChineseKeyboard
+# - add exception when loading ChineseKeyboard
+
 # PPStream 网络电视 by cmeng
 # Version 2.2.12 2014-03-02 (cmeng)
 # - Update playVideoUgcX to include new video link search algorithm
