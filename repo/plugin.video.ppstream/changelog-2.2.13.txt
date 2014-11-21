@@ -1,0 +1,142 @@
+﻿########################################################################
+# PPStream 网络电视
+# PPStream 网络电视 by cmeng
+# Version 2.2.12 2014-03-02 (cmeng)
+# - Update playVideoUgcX to include new video link search algorithm
+# - Update playVideoUgc to use correct embedded thumb image
+########################################################################
+# Version 2.2.13 2014-11-20 (cmeng)
+# - Include <requires/> in addon.xml to import ChineseKeyboard
+# - add exception when loading ChineseKeyboard
+
+# PPStream 网络电视 by cmeng
+# Version 2.2.12 2014-03-02 (cmeng)
+# - Update playVideoUgcX to include new video link search algorithm
+# - Update playVideoUgc to use correct embedded thumb image
+
+# PPStream 网络电视 by cmeng
+# Version 2.2.11 2014-03-01 (cmeng)
+# - Resolved ugc video link fetching (qiyi)
+
+# Version 2.2.10 2014-02-23 (cmeng)
+# - Update search funtion
+# - ugc video link fetch (qiyi) remains unresolved
+
+# Version 2.2.9 2013-12-20 (cmeng)
+# - Update all filters per latest site content changed
+
+# Version 2.2.8 2013-06-22 (cmeng)
+# - Update pps4xbmc.exe
+
+# Version 2.2.7 2013-04-27 (cmeng)
+# Enabled Linux installation
+# Update search filter per ipd site changes
+
+# Version 2.2.6 2013-04-21 (cmeng)
+# Enhanced menu display information
+
+# Version 2.2.5 2013-04-20 (cmeng)
+# Remove test code
+
+# Version 2.2.4 2013-04-20 (cmeng)
+# Update scripts per site latest change
+# Clean up search routine
+# Use new pps4xbmc (VB2010) with enhanced features
+
+# Version 2.2.3 2013-03-16 (cmeng)
+# - update pps video link search algorithm 
+# - Use ugc playback for ppstream video on Linux system
+
+# Version 2.2.2 2013-02-27 (cmeng)
+# - Use single item playback for search ugc video
+
+# PPStream 网络电视 by cmeng
+# Version 2.2.1 2013-02-22 (cmeng)
+# - Fixed missing page # selection
+# - Fixed video search function
+
+# Version 2.2.0 2013-02-20 (cmeng)
+# - Update per lastest site design changes
+# - Update site link creation algorithm
+# - Update movie url link fetch
+# - Update video series list fetching method (json)
+# - Update video series category selection list creation
+# - add cookie support
+
+# Version 2.1.7 2012-12-30 (cmeng)
+# - Fix continuous playback error
+
+# Version 2.1.6 2012-12-30 (cmeng)
+# - Add support for continuous playback on ugc video list
+
+# Version 2.1.5 2012-12-22 (cmeng)
+# - Movie: bypass getMovie(2) sub-meu and goes straight to PlayVideo(10)
+# - Series: Update progListSeries match string pattern
+
+# Version 2.1.4 2012-09-09 (cmeng)
+# - Enhance video link search algorithm in playVideo()
+# - take care other web page design variants
+
+# Version 2.1.3 2012-09-08 (cmeng)
+# - Update all video links/fetches per latest web design changes
+# - Optimize access method to speed up response
+
+# Version 2.1.2 2012-07-29 (cmeng)
+# - hard coded list items to speed up main menu display
+# - correct error in getList() routine
+# - correct url query string error in progListMovie()
+# - allows 3 trials when accessing url data
+# - take care of inconsistency in ppstream listpage fetch:'综艺'=>'娱乐'
+
+# Version 2.1.1 2012-07-09 (cmeng)
+# - Correct error in progListMovie routine
+
+# Version 2.1.0 2012-07-06 (cmeng)
+# - Add support for Proxy Setting
+# - Update LeTV Player
+# - Reuse COLOR_LIST items
+  
+# Version 2.0.8 2012-03-31 (cmeng)
+# - To take care main web page <tag> structure change 
+
+# Version 2.0.7 2012-03-01 (cmeng)
+# - Enhance Letv player video link algorithm - under development
+# - Change IsFolder=False for video playback item lists
+
+# Version 2.0.6 2012-02-25 (cmeng)
+# - Include Episode Chapter & Section information in the video playlist
+# - Add Letv video player - under development
+
+# Version 2.0.5 2012-02-16 (taxigps)
+# - Work around for XBMC Eden Beta 3 [COLOR\] tag problem
+
+# Version 2.0.4 2012-02-11 (cmeng)
+# - Update PlayVideoSohu to take care of missing video/resolution 
+# - Take care for XBMC Eden Beta 3 [COLOR\] script problem
+
+# Version 2.0.1 2012-01-29 (taxigps)
+# - fixed error for COLOR_LIST index out of range
+
+# Version 2.0.0 2012-01-27 (cmeng)
+# a. Add PPStream 网络电视 video search function
+# b. Include related video players for the site providers: 
+# c. PPS,优酷,土豆,奇艺,搜狐,新浪
+
+# Version 1.2.1 2012-01-14 (cmeng)
+# a. update to pps 2012 latest web layout structure
+
+# Version 1.2.0 2012-1-8 (Taxigps)
+# a. changed for eden - not use os.getcwd()
+ 
+# Version 1.1.1 2011-12-25 (cmeng)
+# a. update to pps new video link
+# b. correct error in categories selection
+# c. correct error in page selection
+
+# Version 1.1.0 2011-11-26 (cmeng)
+# a. Change new UI Similar to taxigps format
+# b. Repair broken links
+# c. Highlight selected page title
+
+# Version 1.0.2 2010 (Originator: robinttt))
+########################################################################
