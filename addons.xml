@@ -134,10 +134,11 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.ppstream"
     name="PPS网络电视(PPStream)"
-    version="2.2.13"
+    version="2.2.14"
     provider-name="cmeng (originator: robinttt)">
     <requires>
-		<import addon="script.module.keyboard.chinese" version="1.0.0"/>
+        <import addon="script.module.simplejson" version="2.0.10" />
+ 		<import addon="script.module.keyboard.chinese" version="1.0.0"/>
   	</requires>
     <extension
         point="xbmc.python.pluginsource"
