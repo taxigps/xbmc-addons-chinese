@@ -28,10 +28,26 @@ CTL_BUTTON_LEFT       = 305
 CTL_BUTTON_RIGHT      = 306
 CTL_BUTTON_IP_ADDRESS = 307
 
-CTL_LABEL_EDIT        = 310
 CTL_LABEL_HEADING     = 311
 
 CTL_BUTTON_BACKSPACE  = 8
+
+# For Kodi 14
+BUTTON_ID_OFFSET = 100
+BUTTONS_PER_ROW  = 20
+CTL_BUTTON_LAYOUT = 309
+key_map = ["0123456789",
+           "qwertyuiop",
+           "asdfghjkl",
+           "zxcvbnm"]
+key_map_cap = ["0123456789",
+               "QWERTYUIOP",
+               "ASDFGHJKL",
+               "ZXCVBNM"]
+key_map_sym = [")!@#$%^&*(",
+               "[]{}-_=+;:",
+               "'\",.<>/?\\|",
+               "`~"]
 
 UserAgent  = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
 BAIDU_API_BASE = 'olime.baidu.com'
@@ -57,6 +73,10 @@ class HttpClient(object):
 
 class InputWindow(xbmcgui.WindowXMLDialog):
     def __init__( self, *args, **kwargs ):
+        self.Kodi14 = False
+        self.CTL_NUM_START = 48
+        self.CTL_NUM_END   = 57
+        self.CTL_LABEL_EDIT = 310
         self.strEdit = kwargs.get("default").decode('utf-8') or u""
         self.strHeading = kwargs.get("heading") or ""
         self.bIsConfirmed = False
@@ -70,14 +90,27 @@ class InputWindow(xbmcgui.WindowXMLDialog):
         xbmcgui.WindowXMLDialog.__init__(self)
 
     def onInit(self):
+        try:
+            pCtl = self.getControl(self.CTL_LABEL_EDIT)
+            self.getControl(self.CTL_LABEL_EDIT).setLabel(self.strEdit)
+        except:
+            self.CTL_LABEL_EDIT = 312
+            self.getControl(self.CTL_LABEL_EDIT).setText(self.strEdit)
+            #self.getControl(self.CTL_LABEL_EDIT).setEnabled(False)
+        try:
+            pCtl = self.getControl(self.CTL_NUM_START)
+        except:
+            self.Kodi14 = True
+            self.CTL_NUM_START = 100
+            self.CTL_NUM_END   = 109
+            self.getControl(CTL_BUTTON_LAYOUT).setLabel("")
         self.initControl()
         self.getControl(CTL_LABEL_HEADING).setLabel(self.strHeading)
-        self.getControl(CTL_LABEL_EDIT).setLabel(self.strEdit)
         self.getControl(CTL_BUTTON_CHINESE).setLabel('中文')
         self.UpdateButtons()
 
     def initControl(self):
-        pEdit = self.getControl(CTL_LABEL_EDIT)
+        pEdit = self.getControl(self.CTL_LABEL_EDIT)
         px = pEdit.getX()
         py = pEdit.getY()
         pw = pEdit.getWidth()
@@ -185,24 +218,43 @@ class InputWindow(xbmcgui.WindowXMLDialog):
             self.getControl(CTL_BUTTON_SYMBOLS).setSelected(True)
         else:
             self.getControl(CTL_BUTTON_SYMBOLS).setSelected(False)
-        # set numerals
-        for iButton in range(48, 57+1):
+        if self.Kodi14:
             if self.keyType == SYMBOLS:
-                aLabel = symbol_map[iButton - 48]
+                map = key_map_sym
+            elif self.keyType == CAPS:
+                map = key_map_cap
             else:
-                aLabel = chr(iButton - 48 + ord('0'))
-            self.getControl(iButton).setLabel(aLabel)
-        # set correct alphabet characters...
-        for iButton in range(65, 90+1):
-            # set the correct case...
-            if self.keyType == LOWER:
-                # make lower case
-                aLabel = chr(iButton - 65 + ord('a'))
-            elif self.keyType == SYMBOLS:
-                aLabel = symbol_map[iButton - 65 + 10]
-            else:
-                aLabel = chr(iButton - 65 + ord('A'))
-            self.getControl(iButton).setLabel(aLabel)
+                map = key_map
+            for i in range(0, 4):
+                for j in range(0, len(map[i])):
+                    iButton = (i * BUTTONS_PER_ROW) + j + BUTTON_ID_OFFSET
+                    aLabel = map[i][j]
+                    self.getControl(iButton).setLabel(aLabel)
+                    self.getControl(iButton).setVisible(True)
+                j += 1
+                while j <= 11:
+                    iButton = (i * BUTTONS_PER_ROW) + j + BUTTON_ID_OFFSET
+                    self.getControl(iButton).setVisible(False)
+                    j += 1
+        else:
+            # set numerals
+            for iButton in range(self.CTL_NUM_START, self.CTL_NUM_END+1):
+                if self.keyType == SYMBOLS:
+                    aLabel = symbol_map[iButton - self.CTL_NUM_START]
+                else:
+                    aLabel = chr(iButton - self.CTL_NUM_START + ord('0'))
+                self.getControl(iButton).setLabel(aLabel)
+            # set correct alphabet characters...
+            for iButton in range(65, 90+1):
+                # set the correct case...
+                if self.keyType == LOWER:
+                    # make lower case
+                    aLabel = chr(iButton - 65 + ord('a'))
+                elif self.keyType == SYMBOLS:
+                    aLabel = symbol_map[iButton - 65 + 10]
+                else:
+                    aLabel = chr(iButton - 65 + ord('A'))
+                self.getControl(iButton).setLabel(aLabel)
 
     def OnOK(self):
         self.bIsConfirmed = True
@@ -226,7 +278,10 @@ class InputWindow(xbmcgui.WindowXMLDialog):
         self.UpdateLabel()
 
     def UpdateLabel(self):
-        self.getControl(CTL_LABEL_EDIT).setLabel(self.strEdit)
+        if self.CTL_LABEL_EDIT == 310:
+            self.getControl(self.CTL_LABEL_EDIT).setLabel(self.strEdit)
+        else:
+            self.getControl(self.CTL_LABEL_EDIT).setText(self.strEdit)
 
     def Backspace(self):
         if self.bChinese and len(self.hzcode)>0:
@@ -244,37 +299,34 @@ class InputWindow(xbmcgui.WindowXMLDialog):
             self.GetCharacter(controlId)
 
     def GetCharacter(self, iButton):
-        if iButton >= 48 and iButton <= 57:
+        if iButton >= self.CTL_NUM_START and iButton <= self.CTL_NUM_END:
             # First the number buttons
             if self.keyType == SYMBOLS:
+                self.Character(self.getControl(iButton).getLabel()[0])
                 self.OnSymbols()
-                self.Character(symbol_map[iButton -48])
             elif self.bChinese:
-                i = self.pos + iButton -48
+                i = self.pos + iButton - self.CTL_NUM_START
                 if i < (self.pos + self.num):
                     self.hzcode = ""
                     self.CTL_HZCODE.setLabel(self.hzcode)
                     self.Character(self.words[i])
             else:
-                self.Character(chr(iButton))
+                self.Character(chr(iButton - self.CTL_NUM_START + 48))
         elif iButton == 32:
             # space button
             self.Character(chr(iButton))
-        elif iButton >= 65 and iButton < 91:
+        elif (self.Kodi14 and iButton >= 100 and iButton < 180) or (not self.Kodi14 and iButton >= 65 and iButton < 91):
             # alphabet character buttons
+            ch = self.getControl(iButton).getLabel()[0]
             if self.keyType == SYMBOLS:
                 self.OnSymbols()
-                self.Character(symbol_map[iButton - 65 + 10]);
-                return
-            if self.keyType == LOWER:
-                # make lower case
-                iButton += 32;
+            elif self.keyType == LOWER:
                 if self.bChinese:
-                  self.hzcode += chr(iButton)
+                  self.hzcode += ch
                   self.CTL_HZCODE.setLabel(self.hzcode)
                   self.GetChineseWord()
                   return
-            self.Character(chr(iButton))
+            self.Character(ch)
 
     def Character(self, str):
         self.strEdit += str

@@ -280,7 +280,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="script.module.keyboard.chinese"
     name="Chinese keyboard"
-    version="2.0.1"
+    version="2.0.2"
     provider-name="Taxigps">
     <extension point="xbmc.python.module" library="lib" />
     <extension point="xbmc.addon.metadata">
