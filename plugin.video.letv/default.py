@@ -16,9 +16,9 @@ except ImportError:
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
-# Version 1.3.7 2014-11-20 (cmeng)
-# - Include <requires/> in addon.xml to import ChineseKeyboard
-# - add exception when loading ChineseKeyboard
+# Version 1.3.8 2014-12-06 (cmeng)
+# - Change settings for dual languages support
+# - Retry if "Exception" in json data fetch
 
 # See changelog.txt for previous history
 ########################################################################
@@ -86,8 +86,10 @@ def getHttpData(url):
         else:
             httpdata = response.read()
             response.close()
-            cj.save(cookieFile, ignore_discard=True, ignore_expires=True)
-            break
+            # Retry if exception: {"exception":{....
+            if not (httpdata[2:11] == "exception") :
+                cj.save(cookieFile, ignore_discard=True, ignore_expires=True)
+                break
 
     httpdata = re.sub('\r|\n|\t', '', httpdata)
     match = re.compile('<meta.+?charset=["]*(.+?)"').findall(httpdata)
@@ -244,7 +246,7 @@ def mainMenu():
 
 ##################################################################################
 # Routine to fetch and build the video selection menu
-# - selected page & filtrss (user selectable)
+# - selected page & filters (user selectable)
 # - video items list
 # - user selectable pages
 ##################################################################################
@@ -372,7 +374,7 @@ def progListMovie(name, url, cat, filtrs, page, listpage):
 ##################################################################################
 # Routine to fetch and build the video series selection menu
 # - for 电视剧  & 动漫
-# - selected page & filtrss (user selectable)
+# - selected page & filters (user selectable)
 # - Video series list
 # - user selectable pages
 ##################################################################################
@@ -405,12 +407,12 @@ def progListSeries(name, url, thumb):
             p_thumb = match1[0]
             match1 = re.compile('<p class="p1">.+?href="(.+?)"[\s]*title="(.+?)">(.+?)</a>').findall(matchp[i])
             p_url = match1[0][0]
-            p_name = p_name = match1[0][1]
+            p_name = match1[0][1]
             sn = match1[0][2]
             p_list = sn + ': ' + p_name
             match1 = re.compile('class="time">(.+?)</span>').findall(matchp[i])
             if match1:
-                p_list += ' [COLOR FFFFFF00]['+match1[0]+'][/COLOR]'
+                p_list += ' [COLOR FFFFFF00][ ' + match1[0].strip() + ' ][/COLOR]'
 
             li = xbmcgui.ListItem(p_list, iconImage='', thumbnailImage=p_thumb)
             u = sys.argv[0] + "?mode=10&name=" + urllib.quote_plus(p_name) + "&url=" + urllib.quote_plus(p_url)

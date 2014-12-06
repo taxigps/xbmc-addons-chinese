@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+
+<strings>
+    <string id="1">Refresh</string>
+    <string id="2">Chinese</string>
+
+    <!-- Plugin settings labels -->
+    <string id="30200">Default Playback Resolution</string>
+    <string id="30201">Continuous Video Playback</string>
+    <string id="30202">Proxy (ip:port) - leave blank if not required</string>
+
+    <!-- Plugin settings values -->
+    <string id="30300">LD: Low Defination</string>
+    <string id="30301">SD: Standard Defination</string>
+    <string id="30302">HD: High Definition</string>
+</strings>

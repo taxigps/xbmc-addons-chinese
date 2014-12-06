@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+
+<strings>
+    <string id="1">刷新</string>
+    <string id="2">中文</string>
+
+    <!-- Plugin settings labels -->
+    <string id="30200">默认播放清晰度</string>
+    <string id="30201">连续视频播放</string>
+    <string id="30202">代理服务器（IP端口）- 空白，如果不是必需的</string>
+
+    <!-- Plugin settings values -->
+    <string id="30300">标清</string>
+    <string id="30301">高清</string>
+    <string id="30302">超清</string>
+    
+</strings>
