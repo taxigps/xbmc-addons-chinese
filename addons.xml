@@ -280,7 +280,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="script.module.keyboard.chinese"
     name="Chinese keyboard"
-    version="2.0.1"
+    version="2.0.2"
     provider-name="Taxigps">
     <extension point="xbmc.python.module" library="lib" />
     <extension point="xbmc.addon.metadata">
@@ -309,6 +309,24 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
     <description lang="zh">有些皮肤使用的字体文件中没有汉字造成中文无法显示，本插件可为此类皮肤增加支持中文显示的Arial字体选项。</description>
     <platform>all</platform>
     <language></language>
+  </extension>
+</addon>
+
+<addon id="service.subtitles.subom"
+       name="subom"
+       version="1.0.0"
+       provider-name="taxigps">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+    <import addon="script.module.beautifulsoup4" version="4.3.2"/>
+  </requires>
+  <extension point="xbmc.subtitle.module"
+             library="service.py" />
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">subom subtitle</summary>
+    <summary lang="zh">subom 字幕</summary>
+    <description lang="en">Search and download subtitles from subom.net/</description>
+    <description lang="zh">从 subom.net 下载字幕</description>
   </extension>
 </addon>
 </addons>
