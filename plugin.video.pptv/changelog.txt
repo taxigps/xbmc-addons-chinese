@@ -1,6 +1,11 @@
 ﻿########################################################################
 # # PPTV视频 for XBMC by Uranus Zhou, 2012 - 2014
 ########################################################################
+# Version 1.2.8 2014-12-13 (Uranus Zhou - nocwat at gmail dot com)
+# Fix can't get video catagory bug cause PPTV website update
+# Fix can't list video bug, fix video list page bug
+# Fix can't get video URL bug
+
 # Version 1.2.7 2014-11-06 (taxigps)
 # Fix live channels
 

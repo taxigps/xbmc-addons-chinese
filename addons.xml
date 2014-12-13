@@ -160,7 +160,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.pptv"
     name="PPTV视频"
-    version="1.2.7"
+    version="1.2.8"
     provider-name="Uranus Zhou">
     <requires>
         <import addon="script.module.keyboard.chinese" version="1.0.0"/>
