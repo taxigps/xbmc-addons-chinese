@@ -56,7 +56,7 @@ class Generator:
         # final addons text
         addons_xml = u("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<addons>\n")
         # loop thru and add each addons addon.xml file
-        for addon in addons:
+        for addon in sorted(addons):
             try:
                 # skip any file or .svn folder or .git folder
                 if ( not os.path.isdir( addon ) or excludedFolders.has_key(addon)): continue
