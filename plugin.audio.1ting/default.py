@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import xbmc, xbmcgui, urllib, xbmcplugin, sys, urllib2, re
 # This Python file uses the following encoding: utf-8
 
