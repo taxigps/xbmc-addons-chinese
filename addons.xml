@@ -2,7 +2,7 @@
 <addons>
 <addon id="plugin.audio.1ting"
     name="一听音乐"
-    version="1.0.0"
+    version="1.0.1"
     provider-name="arthurqi">
     <extension
         point="xbmc.python.pluginsource"

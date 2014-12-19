@@ -82,7 +82,12 @@ def addThirdDerec(name, pUrl, page):           #add the third direcdory, get the
         xbmcplugin.endOfDirectory(int(sys.argv[1])) 
     if name == '专辑':
         log("zhuanji")   
-        
+
+def getSongAddr(url):
+  req = urllib2.Request(url)
+  req.add_header("Cookie", "PIN=cnGQFFSRmPRxcDj2aUSnAg==")
+  return urllib2.urlopen(req).geturl()
+
 def playAudio(audioUrl, songName):           # play the song according the part url information
     UrlPlaySong = webHtml + audioUrl   # get the url of playing song address
     req = urllib2.Request(UrlPlaySong)     # create one connection
@@ -96,6 +101,7 @@ def playAudio(audioUrl, songName):           # play the song according the part 
         songAddress = songAddress.replace('"', '')
         songAddress = songAddress.replace('\\', '')     # delete the special charater
         songAddress = songBasehtml + songAddress        # get the whole song download address
+        songAddress = getSongAddr(songAddress)
         listitem = xbmcgui.ListItem(songName)
         log("songname is " + str(songName))
         listitem.setInfo(type="Music",infoLabels={"Title":songName})
