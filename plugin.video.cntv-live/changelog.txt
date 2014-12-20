@@ -1,0 +1,2 @@
+2.0.0
+- Initial release. Rewritten by RunasSudo from the ground up as a spiritual successor to the original plugin.video.cntv-live by Robinttt, Spy007 and taxigps.
