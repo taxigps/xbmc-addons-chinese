@@ -9,6 +9,7 @@ import xbmcplugin
 import urllib2
 
 addon = xbmcaddon.Addon(id="plugin.video.cntv-live")
+addon_name = addon.getAddonInfo('name')
 addon_path = xbmc.translatePath(addon.getAddonInfo("path"))
 addon_handle = int(sys.argv[1])
 xbmcplugin.setContent(addon_handle, "movies")
@@ -20,13 +21,17 @@ if param.startswith("?stream="):
 	resp = urllib2.urlopen("http://vdn.live.cntv.cn/api2/liveHtml5.do?channel=pa://cctv_p2p_hd" + param[8:] + "&client=html5")
 	data = resp.read().decode("utf-8")
 
-	url = data[data.index('"hls3":"') + 8:]
-	url = url[:url.index('"')]
+	try:
+		url = data[data.index('"hls3":"') + 8:]
+		url = url[:url.index('"')]
+	except:
+		xbmc.executebuiltin('Notification(%s,%s)' % (addon_name , '暂不支持此频道播放'))
+		url = ''
 	url = url.replace("b=100-300", "b=500-2000") #Set the desired minimum bandwidth
-	
+
 	#Apply nasty hacks
 	url = url.replace("tv.fw.live.cntv.cn", "tvhd.fw.live.cntv.cn") #Fix 403 Forbidden
-	
+
 	if "ak.live.cntv.cn" in url:
 		#Download and parse the M3U8 file
 		resp = urllib2.urlopen(url)
@@ -34,7 +39,7 @@ if param.startswith("?stream="):
 			if not line.startswith("#"):
 				url = line.rstrip()
 				break
-	
+
 	xbmc.Player().play(url)
 
 elif param.startswith("?city="):
