@@ -33,6 +33,7 @@ For proper Chinese text display on xbmc, do the following steps:
 ## Video Add-ons
 
 * 5ivdo(5ivdo) - plugin.video.5ivdo - Online video from www.5ivdo.com (Chinese)
+* CNTV Live 中国网络电视台直播 - plugin.video.cntv-live - TV live channels from cntv.cn (Chinese)
 * 风行视频(Funshion) - plugin.video.funshion - Online videos from www.funshion.com (Chinese)
 * 酷6云中剧场(Ku6) - plugin.video.ku6 - Online video from www.juchang.com (Chinese)
 * 乐视网(LeTV) - plugin.video.letv - Online video from www.letv.com.cn (Chinese)
@@ -61,6 +62,11 @@ PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStre
 ## Program Add-ons
 
 * Skin Font - script.skinfont - Add arial font type to any skin for display chinese characters. 
+
+## Subtitle Add-ons
+
+* Sub HD - service.subtitles.subhd - Search and download subtitles from www.subhd.com
+* subom - service.subtitles.subom - Search and download subtitles from subom.net
 
 [1]: http://bbs.htpc1.com/forum-225-1.html
 [2]: http://xbmc.org/forum/showthread.php?t=64250
