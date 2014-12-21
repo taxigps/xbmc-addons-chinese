@@ -7,6 +7,11 @@ import xbmcgui
 import xbmcplugin
 
 import urllib2
+import re
+try:
+	import simplejson
+except ImportError:
+	import json as simplejson
 
 addon = xbmcaddon.Addon(id="plugin.video.cntv-live")
 addon_name = addon.getAddonInfo('name')
@@ -21,12 +26,15 @@ if param.startswith("?stream="):
 	resp = urllib2.urlopen("http://vdn.live.cntv.cn/api2/liveHtml5.do?channel=pa://cctv_p2p_hd" + param[8:] + "&client=html5")
 	data = resp.read().decode("utf-8")
 
-	try:
-		url = data[data.index('"hls3":"') + 8:]
-		url = url[:url.index('"')]
-	except:
-		xbmc.executebuiltin('Notification(%s,%s)' % (addon_name , '暂不支持此频道播放'))
-		url = ''
+	url = ''
+	match = re.compile("'({.+?})';", re.DOTALL).search(data)
+	if match:
+		json = simplejson.loads(match.group(1))
+		if json.has_key("hls_url"):
+			url = json['hls_url']['hls3']
+		else:
+			xbmc.executebuiltin('Notification(%s,%s)' % (addon_name , '暂不支持此频道播放'))
+
 	url = url.replace("b=100-300", "b=500-2000") #Set the desired minimum bandwidth
 
 	#Apply nasty hacks
@@ -40,7 +48,8 @@ if param.startswith("?stream="):
 				url = line.rstrip()
 				break
 
-	xbmc.Player().play(url)
+	if url:
+		xbmc.Player().play(url)
 
 elif param.startswith("?city="):
 	city = param[6:]
