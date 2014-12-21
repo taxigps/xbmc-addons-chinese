@@ -1,0 +1,7 @@
+2.0.1 (RunasSudo)
+- Created higher resolution thumbnails.
+- Added more stations.
+- Fix 403 Forbidden when accessing HLS streams in China.
+
+2.0.0 (RunasSudo)
+- Initial release. Rewritten by RunasSudo from the ground up as a spiritual successor to the original plugin.video.cntv-live by Robinttt, Spy007 and taxigps.

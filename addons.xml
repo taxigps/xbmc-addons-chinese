@@ -53,6 +53,29 @@
     </extension>
 </addon>
 
+<addon id="plugin.video.cntv-live" name="CNTV Live 中国网络电视台直播" version="2.0.1" provider-name="RunasSudo">
+	<requires>
+		<import addon="xbmc.python" version="2.14.0"/>
+	</requires>
+	<extension point="xbmc.python.pluginsource" library="addon.py">
+		<provides>video</provides>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<summary lang="en">CNTV Live video plugin</summary>
+		<summary lang="zh">中国网络电视台直播</summary>
+		<description lang="en">Stream live Chinese television from CCTV via the CNTV website.</description>
+		<description lang="zh">中国网络电视台直播</description>
+		<disclaimer lang="en"></disclaimer>
+		<language></language>
+		<platform>all</platform>
+		<license>GNU GENERAL PUBLIC LICENSE, Version 3, 29 June 2007</license>
+		<forum></forum>
+		<website></website>
+		<email>RunasSudo at gmail dot com</email>
+		<source>https://github.com/RunasSudo/plugin.video.cntv-live</source>
+	</extension>
+</addon>
+
 <addon id="plugin.video.funshion"
     name="风行视频(Funshion)"
     version="1.0.12"
