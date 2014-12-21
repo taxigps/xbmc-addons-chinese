@@ -1,3 +1,9 @@
+2.0.2 (RunasSudo)
+- Improve code quality.
+- Fix bug with incorrect bitrates.
+- Add more descriptive error messages.
+- Add i18n.
+
 2.0.1 (RunasSudo)
 - Created higher resolution thumbnails.
 - Added more stations.
