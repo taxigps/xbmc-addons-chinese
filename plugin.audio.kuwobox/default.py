@@ -3,29 +3,23 @@
 #v1.0.0 2009/11/08 by robinttt, initial release
 #v1.1.0 2011/12/04 by d744000, full web scraping, added search.
 
-import urllib,urllib2,os,re,sys
-import gzip,StringIO #playvideo
-import hashlib,time
+import urllib, urllib2, os, re, sys
+import gzip, StringIO #playvideo
+import hashlib, time
+from bs4 import BeautifulSoup
 
+try:
 #if 'XBMC' in os.path.realpath('.'):
-if not sys.modules.has_key('idlelib'):
-    import xbmc
-else:
+    import xbmc, xbmcplugin, xbmcgui, xbmcaddon
+except:
     xbmc = None
-
-if xbmc:
-    import xbmcplugin,xbmcgui,xbmcaddon
-    from BeautifulSoup import BeautifulSoup
-else:
-    from myBeautifulSoup import BeautifulSoup
     urlparams = []
-
-xbmc_release = True
-support_MV = False
-
 
 UserAgent = 'Mozilla/5.0 (Windows NT 5.1; rv:8.0) Gecko/20100101 Firefox/8.0'
 URL_BASE = 'http://yinyue.kuwo.cn'
+MAX_TEST = 300
+INDENT_STR = '    '
+BANNER_FMT = '[COLOR FFDEB887]【%s】[/COLOR]'
 
 #
 # Web process engine
@@ -35,10 +29,9 @@ def getUrlTree(url, data=None):
         headers = { 
             'User-Agent': UserAgent,
         }
-        if data:
-            if type(data) != str:
-                # 2-item tuple or param dict, assume utf-8
-                data = urllib.urlencode(data)
+        if data and not isinstance(data, str):
+            # 2-item tuple or param dict, assume utf-8
+            data = urllib.urlencode(data)
         req = urllib2.Request(url, data, headers)
         response = urllib2.urlopen(req)
         httpdata = response.read()
@@ -49,84 +42,71 @@ def getUrlTree(url, data=None):
         return httpdata
 
     data = getUrl(url, data)
-    tree = BeautifulSoup(data, convertEntities=BeautifulSoup.HTML_ENTITIES)
+    tree = BeautifulSoup(data, "html.parser")
     return tree
-
 
 def processWebPage(tagHandler):
     global tree
     url = params['url']
-    if params.has_key('urlpost'):
-        post = params['urlpost']
-    else:
-        post = None
+    post = params.get('urlpost', None)
     tree = getUrlTree(url, post)
     driller(tree, tagHandler)
     endDir()
 
-
 def processStoredPage(tagHandler):
     global tree
     data = params['url']
-    tree = BeautifulSoup(data, convertEntities=BeautifulSoup.HTML_ENTITIES)
+    tree = BeautifulSoup(data, "html.parser")
     driller(tree, tagHandler)
     endDir()
 
-
 context_params = {}
+
 def driller(tree, lCont):
     #global item
     global context_params
-    if type(lCont) != list:
+    if not isinstance(lCont, list):
         lCont = [lCont]
     for cont in lCont:
         result = None
-        if cont.has_key('context'):
-            context_params = cont['context']
-        else:
-            context_params = {}
-        items = tree.findAll(*cont['tag'])
+        context_params = cont.get('context', {})
+        items = tree.find_all(*cont['tag'])
+        #print("to find:", cont)
         for item in items:
-            if not xbmc_release:
-                if cont['vect']:
+            #print('found')
+            if cont.get('vect', None):
+                try:
                     result = cont['vect'](item)
-            else:
-                if cont['vect']:
-                    try:
-                        result = cont['vect'](item)
-                    except:
-                        pass
-            if result != 'DRILLER_NO_DEEPER' and cont['child']:
-                driller(item, cont['child'])
-
+                except:
+                    pass
+            if result != 'DRILLER_NO_DEEPER':
+                if cont.get('child', None):
+                    driller(item, cont['child'])
 
 #
 # Keyboard for search
 #
-def searchDefaultKeyboard(key=None, mode='all'):
-    if not key:
-        if xbmc:
-            keyb = xbmc.Keyboard('', '搜索(可用拼音)')
-            keyb.doModal()
-            if keyb.isConfirmed():
-                key = keyb.getText()
-    if not key:
-        return
-    url = 'http://sou.kuwo.cn/ws/NSearch?key='+urllib.quote_plus(key)+'&type='+mode
+def processSearch(url):
+    key = get_params(url).get('key', None)
     params['url'] = url
     params['indent'] = str(True)
     params['search_key'] = key
-    processWebPage(hSearchResult)
+    processWebPage(searchList)
 
-
-def searchChineseKeyboard(key=None, mode='all'):
+def searchDefaultKeyboard(key=None, mode='all'):
+    if xbmc and not key:
+        keyb = xbmc.Keyboard('', '搜索(可用拼音)')
+        keyb.doModal()
+        if keyb.isConfirmed():
+            key = keyb.getText()
     if key:
-        #print('search input: %s, type %s' % (key, type(key)))
-        url = 'http://sou.kuwo.cn/ws/NSearch?key='+urllib.quote_plus(key)+'&type='+mode
-        params['url'] = url
-        params['indent'] = str(True)
-        params['search_key'] = key
-        processWebPage(hSearchResult)
+        url = make_param({"key":key, 'type':mode}, 'http://sou.kuwo.cn/ws/NSearch')
+        processSearch(url)
+
+def searchChineseKeyboard(key=None, mode='all', pn=0):
+    if key:
+        url = make_param({"key":key, 'type':mode}, 'http://sou.kuwo.cn/ws/NSearch')
+        processSearch(url)
     else:
         # Somehow, current chinese keyboard implementation works differently than the default keyboard.
         # The doModal doesn't prevent xbmcplugin from popping up the directory-scanning window, which
@@ -137,12 +117,11 @@ def searchChineseKeyboard(key=None, mode='all'):
         #中文输入法
         keyboard = ChineseKeyboard.Keyboard('', '搜索')
         keyboard.doModal()
-        if (keyboard.isConfirmed()):
+        if keyboard.isConfirmed():
             keyword = keyboard.getText()
-            if not keyword:
-                return
-            u=sys.argv[0]+"?url="+urllib.quote_plus('')+"&mode="+urllib.quote_plus('search("'+keyword+'")')
-            xbmc.executebuiltin('Container.Update(%s,replace)' % u)
+            if keyword:
+                u = make_param({"url":'',"mode":'search("%s")' % keyword})
+                xbmc.executebuiltin('Container.Update(%s,replace)' % u)
 
 # Choose ChineseKeyboard if script.module.keyboard.chinese is installed.
 try:
@@ -176,6 +155,7 @@ def PlayMusic():
         # kuwo has names like "song name(抢听版)", causing lyrics look up failure
         true_title = title.split('(')[0].rstrip()
         artist = get_content_by_tag(tree, 'artist')
+        iconimage = get_content_by_tag(tree, 'artist_pic240')
 
         # prefer AAC or WMA, somehow it starts or loads faster than the mp3 link,
         # change AAC to the first download.  edit by runner6502@gamil.com
@@ -193,88 +173,34 @@ def PlayMusic():
             hashstr = hashlib.md5("kuwo_web@1906/resource/%s%s" % (path, timestamp)).hexdigest()
             url = 'http://%s/%s/%s/resource/%s' % (dl, hashstr, timestamp, path)
             if xbmc:
-                listitem=xbmcgui.ListItem(title)
+                listitem=xbmcgui.ListItem(title, iconImage=iconimage, thumbnailImage=iconimage)
                 listitem.setInfo( type="Music", infoLabels={ "Title": true_title, "Artist": artist} )
                 playlist.add(url, listitem)
-            if not xbmc:
+            else:
                 print('PlayMusic: %s - %s, %s' % (title, artist, url))
     if xbmc:
         xbmc.Player().play(playlist)
 
-
-def PlayVideo():
-    # play MV need more decipher, currently it ask for kuwobox app, seems the app send a http GET first, 
-    return  # function not supported yet.
-    mids = params['url']
-    if xbmc:
-        playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
-        playlist.clear()
-    mids = mids.split('/')
-    for mid in mids:
-        if mid == '':
-            continue
-        tree = getUrlTree('http://plugin.kuwo.cn/mbox/st/FlashData?rid='+mid)
-        title = get_content_by_tag(tree, 'name')
-        true_title = title.split('(')[0].rstrip()
-        artist = get_content_by_tag(tree, 'artist')
-
-        path = get_content_by_tag(tree, 'path')
-        # Kuwo requires Windows client sw to play video, mbox://.
-        # Don't know how to make it work yet.
-        url = 'http://dl.cdn.kuwo.cn' + path #+'MV_38.mp4'
-        if xbmc:
-            listitem=xbmcgui.ListItem(title)
-            listitem.setInfo( type="Video", infoLabels={ "Title": true_title, "Artist": artist} )
-            listitem.setProperty('IsPlayable', 'true')
-            playlist.add(url, listitem)
-        if not xbmc:
-            print('PlayVideo: %s - %s, %s' % (title, artist, url))
-    if xbmc:
-        xbmc.Player().play(playlist)
-
-
 #
 # Utilities
 #
-def tag_na_feature(sName):
-    ''' Add ARGB tag to gray out features not supported yet. '''
-    # 80% tranparent, light gray.
-    return '[COLOR 33D3D3D3]' + sName + '[/COLOR]'
-
-
 def addBanner(name):
     ''' Add a banner, a button without action, but to separate groups of other buttons. '''
     # Burlywood color
     if name:
-        name = '[COLOR FFDEB887]' + '【' + name + '】' + '[/COLOR]' 
+        name = BANNER_FMT % name 
         addDir(name, '', 'pass', '', folder=False)
+
+def addNav(item, mode):
+    item_url = extractHref(item)
+    if item_url == '#@': return
+    name = extractName(item)
+    iconimage = ''
+    addDir(name, item_url, mode, iconimage)
 
 #
 # Kuwo tag handlers
 #
-def addCategoryFast():
-    addDir('搜索', '', 'search()', folder=True)
-    addDir('排行榜', 'http://yinyue.kuwo.cn/billboard_index.htm', 'processWebPage(hFrame)')
-    addDir('歌手', 'http://yinyue.kuwo.cn/artist.htm', 'processWebPage(hFrame)')
-    addDir('分类', 'http://yinyue.kuwo.cn/category.htm', 'processWebPage(hFrame)')
-    addDir('专辑', 'http://yinyue.kuwo.cn/album.htm', 'processWebPage(hFrame)')
-    addDir('淘歌单', 'http://fang.kuwo.cn',
-           "addDir('淘歌单分类', 'http://fang.kuwo.cn/p/st/PlCat', 'processWebPage(hFrame)');"
-           "processWebPage(hPlaylistFrame)")
-    endDir()
-
-
-def addCategory(item):
-    SUPPORTED_CATEGORIES = ['排行榜', '歌手', '分类', '专辑', '淘歌']
-    name = str(item.span.contents[0])
-    if name in SUPPORTED_CATEGORIES:
-        url =  item['href']
-        if name == '淘歌':
-            addDir('淘歌单分类', 'http://fang.kuwo.cn/p/st/PlCat', 'processWebPage(hFrame)')
-            addDir(name, url, 'processWebPage(hPlaylistFrame)')
-        else:            
-            addDir(name, url, 'processWebPage(hFrame)')
-
 
 def extractName(item):
     if not item:
@@ -282,39 +208,31 @@ def extractName(item):
     name = ''
     span_name = item.find('span')
     if span_name:
-        name = span_name.contents[0].encode('utf-8')
-    elif item.has_key('title'):
-        name = item['title'].encode('utf-8')
+        name = span_name.contents[0]
+    elif item.has_attr('title'):
+        name = item['title']
     elif item.contents:
         content = item.contents[0]
         if 'String' in str(type(content)):
             #BeautifulSoup NavigableString
-            name = content.encode('utf-8')
+            name = content
         else:
             try:
-                name = content['title'].encode('utf-8')
+                name = content['title']
             except:
                 pass
-    if not name:
-        if not xbmc_release:
-            print('listFrames, name not found in %s' % str(item))
-    return name
+    return name.encode('utf-8')
 
 def extractHref(item):
-    if not item:
-        return ''
-    if item.has_key('href'):
-        item_url = item['href'].encode('utf-8')
-    else:
-        item_url = ''
-    return item_url
+    if item and item.has_attr('href'):
+        return item['href'].encode('utf-8')
+    return ''
     
 def extractImg(item):
-    if not item:
-        return ''
-    for k in ['src', 'sr', 'lazy_src', 'init_src']:
-        if item.has_key(k):
-            return item[k].encode('utf-8')
+    if item:
+        for k in ['lazy_src', 'sr', 'src', 'init_src']:
+            if item.has_attr(k):
+                return item[k].encode('utf-8')
     return ''
 
 def extractImgSearch(item, name=''):
@@ -328,77 +246,9 @@ def extractImgSearch(item, name=''):
             iconimage = extractImg(item.findParent().findPreviousSibling('img', attrs))
     return iconimage
 
-def addFrame(item):
-    name = extractName(item)
-    if not name:
-        return
-    item_url = extractHref(item)
-    if item_url:
-        iconimage = extractImgSearch(item, name)
-        if context_params.has_key('onclick'):
-            mode = context_params['onclick']
-        else:
-            mode = 'processWebPage(hPage)'
-        addDir(name, item_url, mode, iconimage)
-
-
-def addPlayList(item):
-    ''' playlist item '''
-    url = extractHref(item.a)
-    name = extractName(item.a)
-    img_item = item.findPreviousSibling()
-    if img_item:
-        iconimg = extractImg(img_item.find('img'))
-    else:
-        iconimg = ''
-    context = {'indent':str(True), 'playall_title':('播放【' + name + '】所含曲目')}
-    addDir('    ' + name, url, 'processWebPage(hPlayListPage)', iconimg, context=context)
-
-def addPlayListFocus(item):
-    ''' playlist item in the flash hightlighter '''
-    name = extractName(item)
-    if not name:
-        return
-    url = extractHref(item)
-    iconimg = extractImg(item.find('img'))
-    context = {'indent':str(True), 'playall_title':('播放【' + name + '】所含曲目')}
-    addDir('    ' + name, url, 'processWebPage(hPlayListPage)', iconimg, context=context)
-
-
-def addPlayListBanner(item):
-    names = {'focusDiv':'闪亮歌单', 'FrmRecPl':'推荐歌单', 'FrmHotPl':'人气歌单', 'focusDiv':'闪亮歌单'}
-            # These requires login, 'FrmMyPl': '我制作的歌单', 'FrmMyColPl':'我收藏的歌单'}
-    if item.has_key('id') and (not names.has_key(item['id'])):
-        return
-    name = ''
-    if item.has_key('id') and names.has_key(item['id']):
-        name = names[item['id']]
-    if not name:
-        h3 = item.findParent().find('span', attrs={'class':'repairTit'})
-        if h3 and h3.contents and ('String' in str(type(h3.contents[0]))):
-            name = re.sub('\s', '', h3.contents[0]).encode('utf-8')
-    if not name:
-        h3 = item.findParent().find('h3')
-        if h3 and h3.contents and ('String' in str(type(h3.contents[0]))):
-            name = re.sub('\s', '', h3.contents[0]).encode('utf-8')
-            
-    if name:
-        addBanner(name)
-
-
-def addCategoryBanner(item):
-    if item['class'] in (tagBanners + tagSubBanners):
-        name = [x for x in item.contents if 'String' in str(type(x))]
-        if name:
-            addBanner(name[0].encode('utf-8'))
- 
-
 def addBillboardPhase(item):
     nxt_idx = None
-    if params.has_key('billboard_idx'):
-        cur_idx = params['billboard_idx']
-    else:
-        cur_idx = item.find('li')['idx'].encode('utf-8')
+    cur_idx = params.get('billboard_idx', item.find('li')['idx'].encode('utf-8'))
     cur_item = item.find('li', {'idx':cur_idx})
     if cur_item:
         tabDef = cur_item.find('p')
@@ -411,7 +261,7 @@ def addBillboardPhase(item):
     # previous billboard phase
     if nxt_idx:
         rgtArrow = item.find(attrs={'id':"goRight", 'class':"jtRig"})
-        if rgtArrow and rgtArrow.has_key('onclick'):
+        if rgtArrow and rgtArrow.has_attr('onclick'):
             catId = re.search("getData\((\d+),1\)", rgtArrow['onclick'])
             if catId:
                 catId = catId.groups()[0].encode('utf-8')
@@ -420,74 +270,6 @@ def addBillboardPhase(item):
                 context = {'urlpost':post, 'billboard_idx':nxt_idx, 'billboard_phases':str(item)}
                 addDir('查看前一期', url, 'processWebPage([songList])', '', context=context)
 
-
-def addPlayAll(item):
-    if params.has_key('billboard_phases'):
-        print(params['billboard_phases'])
-        phase_item = BeautifulSoup(params['billboard_phases'], convertEntities=BeautifulSoup.HTML_ENTITIES)
-        addBillboardPhase(phase_item)
-    mids = item.findAll(attrs={'type':'checkbox'})
-    mids = [x['mid'].encode('utf-8') for x in mids if x.has_key('mid')]
-    mids = '/'.join(mids)
-    if params.has_key('playall_title'):
-        disp_title = params['playall_title']
-    else:
-        h5 = item.findPreviousSibling('h5')
-        if h5 and h5.contents and ('String' in str(type(h5.contents[0]))): #<class 'BeautifulSoup.NavigableString'>
-            disp_title = '播放' + re.sub('\s', '', h5.contents[0]).encode('utf-8')
-        elif h5 and h5.findChild('a') and h5.findChild('a').has_key('title'):
-            disp_title = '播放' + h5.a['title'].encode('utf-8')
-        elif params.has_key('playall_adjust'):
-            disp_title = '播放' + params['playall_adjust'] + '歌曲'
-        else:
-            disp_title = '播放全部歌曲'
-    addDir(disp_title,mids,'PlayMusic()','',folder=False)
-
-
-def addSong(item):
-    mid = item.find(attrs={'type':'checkbox'})
-    if not (mid and mid.has_key('mid')):
-        return
-    mid = mid['mid']
-    title = item.find(attrs={'class':'songName'}).a['title'].encode('utf-8')
-    # artist page has album name in 'class songer', not artist name
-    artist = ''
-    if params.has_key('artist'):
-        artist = params['artist']
-    if not artist:
-        chld = item.find(attrs={'class':'songer'})
-        if chld and chld.findChild('a'):
-            chld = chld.findChild('a')
-            if chld.has_key('title'):
-                artist = chld['title'].encode('utf-8')
-    iconimage = ''
-    addLink(title,artist,mid,'PlayMusic()',iconimage)
-
-
-def addArtist(item):
-    # artist item
-    url = extractHref(item.a)
-    name = extractName(item.a)
-    iconimg = extractImg(item.find('img'))
-    context = {'indent':str(True)}
-    if params.has_key('indent'):
-        name = '    ' + name
-    addDir(name, url, 'processWebPage(hArtistPage)', iconimg, context=context)
-
-
-def listArtistFromStr():
-    # artist item
-    data = params['url']
-    tree = BeautifulSoup(data, convertEntities=BeautifulSoup.HTML_ENTITIES)
-    artists = tree.findAll(attrs={'otype':'art'})
-    for item in artists:
-        url = extractHref(item)
-        name = extractName(item)
-        context = {'indent':str(True), 'playall_adjust':(name + '热门')}
-        addDir(name, url, 'processWebPage(hArtistPage)', '', context=context)
-    endDir()
-
-    
 def addAlphaBeta(item):
     # artist alphabeta item
     try:
@@ -496,47 +278,120 @@ def addAlphaBeta(item):
     except:
         pass
 
-
-def addMV(item):
-    if not support_MV:
+# 排行榜
+def addBoardMusic(item):
+    mid = item.find(attrs={'type':'checkbox'})
+    if not (mid and mid.has_attr('mid')):
         return
+    mid = mid['mid']
+    title = item.find(attrs={'class':'songName'}).a['title'].encode('utf-8')
+    # artist page has album name in 'class songer', not artist name
+    artist = params.get('artist', '')
+    if not artist:
+        chld = item.find(attrs={'class':'songer'})
+        if chld and chld.findChild('a'):
+            chld = chld.findChild('a')
+            if chld.has_attr('title'):
+                artist = chld['title'].encode('utf-8')
+    iconimage = ''
+    addLink(title,artist,mid,'PlayMusic()',iconimage)
+
+def addBoardMusicList(item):
+    if 'billboard_phases' in params:
+        print(params['billboard_phases'])
+        phase_item = BeautifulSoup(params['billboard_phases'], "html.parser")
+        addBillboardPhase(phase_item)
+    mids = item.find_all(attrs={'type':'checkbox'})
+    mids = [x['mid'] for x in mids if x.has_attr('mid')]
+    if mids:
+        mids = '/'.join(mids)
+        disp_title = params.get('playall_title', '播放全部歌曲')
+        iconimg = params.get('playall_icon', '')
+        addDir(disp_title, mids, 'PlayMusic()', iconimg, folder=False)
+
+def addBoard(item):
+    name = extractName(item)
+    item_url = extractHref(item)
+    iconimage = extractImgSearch(item, name)
+    mode = 'processWebPage(boardMusicList)'
+    playall_title = '播放【%s】所含曲目' % name
+    context = {'indent':str(True), 'playall_title': playall_title, 'playall_icon': iconimage}
+    addDir(name, item_url, mode, iconimage, context=context)
+
+# 歌手
+def addArtistMusicNav(item):
+    mode = 'processWebPage(artistMusicPage)'
+    addNav(item, mode)
+
+def addArtistNav(item):
+    mode = 'processWebPage(artistListPage)'
+    addNav(item, mode)
+
+def addArtistList(item):
+    item_url = extractHref(item.a) + "music.htm"
+    name = INDENT_STR + extractName(item.a)
+    mode = 'processWebPage(artistMusicPage)'
+    iconimage = extractImg(item.a.img)
+    addDir(name, item_url, mode, iconimage)
+
+def addArtistCategory(item):
+    item = item.h1
+    item_url = "http://www.kuwo.cn%s" % extractHref(item.a)
+    name = item.contents[0].encode('utf-8')
+    mode = 'processWebPage(artistListPage)'
+    iconimage = ''
+    addDir(name, item_url, mode, iconimage)
+
+# 分类
+def addHotMusic(item):
+    global tree
+    l = re.findall('"musiclist":(\[.+\]),"rids"', tree.text)
+    if l:
+        l = eval(l[0])
+        mids = "/".join([d['musicrid'] for d in l])
+        disp_title = params.get('playall_title', '播放全部歌曲')
+        iconimg = params.get('playall_icon', '')
+        addDir(disp_title,mids, 'PlayMusic()', iconimg, folder = False)
+        for d in l:
+            title = d['name']
+            artist = d['artist']
+            mid = d['musicrid']
+            iconimage = ''
+            addLink(title,artist,mid,'PlayMusic()',iconimage)
+
+def addHotMusicList(item):
+    ''' playlist item '''
     url = extractHref(item.a)
-    mid = re.findall('(MV_\d+)', url)
-    if not mid:
-        return
-    else:
-        mid = mid[0]
-    title = item.a['title']
-    if params.has_key('artist'):
-        artist = params['artist']
-    else:
-        artist = ''
-    iconimg = extractImg(item.find('img'))
-    title = tag_na_feature(title)   # Kuwo requires kuwo_music_box Windows client, don't know how to workaround that.
-    addLink(title,artist,mid,'PlayVideo()',iconimg,video=True)
+    name = extractName(item.a)
+    iconimg = extractImg(item.a.img)
+    playall_title = '播放【%s】所含曲目' % name
+    context = {'indent':str(True), 'playall_title':playall_title, 'playall_icon': iconimg}
+    addDir(INDENT_STR + name, url, 'processWebPage(hotMusic)', iconimg, context=context)
 
-def addPlayAllMV(item):
-    if not support_MV:
-        return
-    mids = item.findAll('li')
-    pat = re.compile('(MV_\d+)')
-    mids = [pat.findall(x.a['href'])[0] for x in mids if x.find('a') and x.a.has_key('href') and pat.findall(x.a['href'])]
-    mids = '/'.join(mids)
-    if params.has_key('playall_title'):
-        disp_title = params['playall_title']
-    else:
-        h5 = item.findPreviousSibling('h5')
-        if h5 and h5.contents and ('String' in str(type(h5.contents[0]))):
-            disp_title = '播放' + re.sub('\s', '', h5.contents[0]).encode('utf-8')
-        elif h5 and h5.findChild('a') and h5.findChild('a').has_key('title'):
-            disp_title = '播放' + h5.a['title'].encode('utf-8')
-        elif params.has_key('playall_adjust'):
-            disp_title = '播放' + params['playall_adjust'] + 'MV'
-        else:
-            disp_title = '播放全部MV'
-    disp_title = tag_na_feature(disp_title)
-    addDir(disp_title,mids,'PlayVideo()','',folder=False)
+def addHotList(item):
+    ''' playlist item '''
+    url = extractHref(item.a)
+    name = extractName(item.a)
+    iconimg = extractImg(item.a.img)
+    playall_title = '播放【%s】所含曲目' % name
+    context = {'indent':str(True), 'playall_title':playall_title, 'playall_icon': iconimg}
+    addDir(INDENT_STR + name, url, 'processWebPage(hotMusicListPage)', iconimg, context=context)
 
+# 专辑
+def addMusic(item):
+    '''for mingxing and album'''
+    artist = item.find(attrs={'class':'s_name'}).a['title'].encode('utf-8')
+    title = item.find(attrs={'class':'m_name'}).a['title'].encode('utf-8')
+    mid = item.find(attrs={'class':'number'}).input['mid'].encode('utf-8')
+    iconimage = ''
+    addLink(title,artist,mid,'PlayMusic()',iconimage)
+
+def addAlbumMusicList(item):
+    disp_title = params.get('playall_title', '播放全部歌曲')
+    iconimg = params.get('playall_icon', '')
+    mids = [i.input['mid'] for i in item.find_all(attrs={'class':'number'})]
+    mids = "/".join(mids)
+    addDir(disp_title, mids,'PlayMusic()', iconimg, folder = False)    
 
 def addAlbum(item):
     # album item
@@ -544,225 +399,131 @@ def addAlbum(item):
     title = extractName(item.a)
     iconimg = extractImg(item.find('img'))
     albumCont = item.findNextSibling(attrs={'class':'albumCont'})
-    try:
-        artist = albumCont.li.findChildren('a')[-1]['title'].encode('utf-8')
-    except:
-        artist = ''
-    if artist:
-        playall_title = '播放【' + artist + ' - ' + title + '】所含曲目'
-        dispname = artist + ' - ' + title
+    playall_title = '播放【' + title + '】所含曲目'
+    dispname = title
+    context = {'indent':str(True), 'playall_title':playall_title, 'playall_icon': iconimg}
+    if 'indent' in params:
+        dispname = INDENT_STR + dispname
+    addDir(dispname, url, 'processWebPage(albumMusicList)', iconimg, context=context)
+
+def addAlbumNav(item):
+    mode = 'processWebPage(albums)'
+    addNav(item, mode)
+
+def addAlbumList(item):
+    item_url = extractHref(item.a)
+    name = item.a.string.encode('utf-8')
+    mode = 'processWebPage(albums)'
+    iconimage = ''
+    addDir(name, item_url, mode, iconimage)
+
+def addH1Banner(item):
+    addBanner(item.h1.text.encode('utf-8'))
+
+# 淘歌单
+def addPlaylistMusic(item):
+    s = item.string
+    if not s: return
+    l = re.findall('wbarr =(.*?);', s)
+    if not l: return
+    l = eval(l[0])
+    mids = "/".join([d['rid'].split('_')[1] for d in l])
+    disp_title = params.get('playall_title', '播放全部歌曲')
+    iconimg = params.get('playall_icon', '')
+    addDir(disp_title,mids,'PlayMusic()', iconimg)
+    for d in l:
+        title = d['name']
+        artist = d['art']
+        mid = d['rid'].split('_')[1]
+        iconimage = ''
+        addLink(title,artist,mid,'PlayMusic()',iconimage)
+
+def addPlaylistAlbum(item):
+    iconimg = extractImg(item.find('img'))
+    item = item.find('a', attrs={'class':'gdPlay'})
+    url = extractHref(item)
+    title = extractName(item.find_previous_sibling('a'))
+    playall_title = '播放【%s】' % title
+    playall_icon = iconimg
+    score = item.find_next_sibling().text.encode('utf-8')
+    dispname = '%s【%s】' % (title, score)
+    context = {'indent':str(True), 'playall_title':playall_title, 'playall_icon': iconimg}
+    if 'indent' in params:
+        dispname = INDENT_STR + dispname
+    addDir(dispname, url, 'processWebPage(playlistMusic)', iconimg, context=context)
+
+def addPlaylist(item):
+    addBanner(item.text.encode('utf-8'))
+    items = item.find_next_sibling().find_all('li')
+    for item in items:
+        item = item.a
+        name = extractName(item)
+        item_url = extractHref(item)
+        iconimage = extractImgSearch(item, name)
+        mode = 'processWebPage(playlistAlbum)'
+        addDir(name, item_url, mode, iconimage)
+
+# 搜索
+def addSearch(item):
+    name = BANNER_FMT % item.h1.text.encode('utf-8')
+    item_url = extractHref(item.h1.a)
+    iconimage = ''
+    if item_url:
+        mode = 'processSearch("%s")' % item_url
     else:
-        playall_title = '播放【' + title + '】所含曲目'
-        dispname = title
-    context = {'indent':str(True), 'playall_title':playall_title}
-    if params.has_key('indent'):
-        dispname = '    ' + dispname
+        mode = 'pass'
+    addDir(name, item_url, mode, iconimage)
 
-    addDir(dispname, url, 'processWebPage(hAlbumPage)', iconimg, context=context)
+def addSearchNav(item):
+    item_url = extractHref(item)
+    mode = 'processSearch("http://sou.kuwo.cn%s")' % item_url
+    addNav(item, mode)
 
+# 标签
+boardMusic = {'tag': (None, {'class':'itemUl'}), 'vect':addBoardMusic}
+boardMusicList = {'tag': (None, {'id':'container'}), 'vect':addBoardMusicList, 'child': boardMusic}
+board = {'tag':('a',{}), 'vect':addBoard}
+boardPage = {'tag':('ul',{'class':['borLr', 'chartList']}), 'child': board}
 
-def addPlayAllAlbum(item):
-    # just a banner for now
-    h5 = item.findPreviousSibling('h5')
-    if h5 and h5.contents and ('String' in str(type(h5.contents[0]))):
-        disp_title = re.sub('\s', '', h5.contents[0]).encode('utf-8')
-    elif h5 and h5.findChild('a') and h5.findChild('a').has_key('title'):
-        disp_title = h5.a['title'].encode('utf-8')
-    elif params.has_key('playall_adjust'):
-        disp_title = params['playall_adjust'] + '专辑'
-    else:
-        disp_title = '全部专辑'
-    addDir(disp_title,'','pass','',folder=False)
+artistMusic = {'tag':('li', {'class': 'clearfix'}), 'vect': addMusic}
+artistMusicNav = {'tag':('a',{}), 'vect':addArtistMusicNav}
+artistMusicNavPage = {'tag':('div',{'class': 'page'}), 'child':artistMusicNav}
+artistMusicPage = [artistMusic, artistMusicNavPage]
+artistListItem = {'tag':('li',{}), 'vect':addArtistList}
+artistList = {'tag':('ul',{'class': ['singer_pic_list', 'singer_name_list']}), 'child':artistListItem}
+artistNav = {'tag':('a',{}), 'vect':addArtistNav}
+artistNavPage = {'tag':('div',{'class': 'page'}), 'child':artistNav}
+artistListPage = [artistList, artistNavPage]
+artistCategory = {'tag':('div',{'class':'top'}), 'vect':addArtistCategory}
+artistPage = {'tag':('div',{'class':'singer'}), 'child':artistCategory}
 
+hotMusic = {'tag': ('script', {}), 'vect': addHotMusic}
+hotMusicList = {'tag':('li',{}), 'vect':addHotMusicList}
+hotMusicListPage = {'tag':('ul',{'class':'singer_list clearfix'}), 'child':hotMusicList}
+hotList = {'tag':('li',{}), 'vect':addHotList}
+hotPage = {'tag':('div',{'class':'hotlist'}), 'vect': addH1Banner, 'child': hotList}
 
-def addPlayAllArtist(item):
-    if item['class'] == 'picFrm':
-        if item.has_key('id') and item['id']=="recent_listener": # skip 最近谁在听
-            return
-    if item['class'] == 'f14b':
-        addCategoryBanner(item)
-        return
-    # just a banner for now
-    h5 = item.findPreviousSibling('h5')
-    if h5 and h5.contents and ('String' in str(type(h5.contents[0]))):
-        disp_title = re.sub('\s', '', h5.contents[0]).encode('utf-8')
-    elif h5 and h5.findChild('a') and h5.findChild('a').has_key('title'):
-        disp_title = h5.a['title'].encode('utf-8')
-    elif params.has_key('playall_adjust'):
-        disp_title = params['playall_adjust'] + '歌手'
-    else:
-        try:
-            # picFrm of 热门歌手 in Genre, 与xxx相似的歌手 in Artist page
-            disp_title = item.findPreviousSibling('h3').contents[2].contents[0].encode('utf-8')
-        except:
-            disp_title = '全部歌手'
-    addDir(disp_title,'','pass','',folder=False)
+albumMusic = {'tag':('li',{}), 'vect': addMusic}
+albumMusicList = {'tag':('div',{'class':'m_list'}), 'vect': addAlbumMusicList, 'child':albumMusic}
+album = {'tag':(None,{'class':'music clearfix'}), 'vect':addAlbum, 'child':None}
+albumNav = {'tag':('a', {}), 'vect':addAlbumNav}
+albumNavPage = {'tag':('div', {'class', 'page'}), 'child':albumNav}
+albums = [album, albumNavPage]
+albumList = {'tag':('li',{}), 'vect':addAlbumList, 'child':None}
+albumPage = {'tag':(None,{'class':"sdlist clearfix"}), 'vect':addH1Banner, 'child':albumList}
 
+playlistMusic = {'tag': ('script', {}), 'vect':addPlaylistMusic}
+playlistAlbum = {'tag':('div', {'class': 'albumItem'}), 'vect': addPlaylistAlbum}
+playlistBanner = {'tag':('p',{'class':['mTitBg', 'titYh', "titYh titLr"]}), 'vect':addPlaylist}
+playlistPage = {'tag':('div',{'class':'mw300'}), 'child': playlistBanner}
 
-def addDirMore(item):
-    title = ''
-    context = {}
-    if params.has_key('search_key'):
-        types = {'musicRs':'歌曲', 'artistRs':'歌手', 'albumRs':'专辑', 'lyricRs':'歌词', 'mvRs':'MV', 'playlistRs':'歌单'}
-        if item.has_key('id'):
-            search_type = item['id'].encode('utf-8')
-            if types.has_key(search_type):
-                title = '更多' + params['search_key'] + '的相关' + types[search_type]
-                context = {'search_type':search_type, 'search_key':params['search_key']}
-    if not title:
-        if item.h2 and item.h2.contents:
-            title = item.h2.contents[0].encode('utf-8')
-    if not title:
-        h2 = item.findPreviousSibling('h2')
-        if h2 and h2.contents:
-            title = h2.contents[0].encode('utf-8')
-    if (not support_MV) and (title.endswith('MV')):
-        return
-    addDir(title, str(item), 'processStoredPage(hNextPage)', '', context=context)
-
-
-def filterSearchPage(item):
-    if params.has_key('search_type') and item.has_key('id'):
-        if params['search_type'] != item['id'].encode('utf-8'):
-            return 'DRILLER_NO_DEEPER'
-
-
-def addPage(item):
-    url = item['href']
-    if url == '#@':
-        # linking to current page
-        return
-    title = item.contents[0].encode('utf-8')
-    if title in ['上一页']:
-        # XBMC '..' button goes to previous page, and much faster as it doesn't retrieve the http page.
-        return
-    context = {}
-    if 'javascript:getCategoryData' in url:
-        # u"javascript:getCategoryData('music',2,25,'','artistSong','lp','\u6d41\u884cPop','\u6d41\u884cPop');"
-        url = url.replace("\'", '')
-        m = re.search('javascript:getCategoryData\((.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*)\)', url)
-        if m:
-            (dataType,pn,ps,order,contId,ctype,cat1,cat2) = m.groups()
-        else:
-            return
-        url='http://yinyue.kuwo.cn/yy/st/getCatData'
-        if not pn:
-            pn = '1'
-        if not ps:
-            ps = '8'
-        post = 'cat1Name='+cat1.encode('utf-8')
-        post += '&cat2Name='+cat2.encode('utf-8')
-        post += '&ctype='+ctype.encode('utf-8')
-        post += '&type='+dataType.encode('utf-8')
-        post += '&pn='+pn.encode('utf-8')
-        post += '&ps='+ps.encode('utf-8')
-        post += '&order='+order.encode('utf-8')
-        post += '&contId='+contId.encode('utf-8')
-        context = {'urlpost':post}
-    elif 'javascript:getData' in url:
-        #"javascript:getData('music',2,25,'time','artistSong','周杰伦');"
-        #name=%E5%88%98%E5%BE%B7%E5%8D%8E&type=music&pn=2&ps=25&order=time&contId=artistSong
-        url = url.replace("\'", '')
-        m = re.search('javascript:getData\((.*),(.*),(.*),(.*),(.*),(.*)\)', url)
-        if m:
-            (dataType,pn,ps,order,contId,name) = m.groups()
-        else:
-            print('Failed javascript:getData, %s' % url)
-            return
-        url='http://yinyue.kuwo.cn/yy/st/getData'
-        if not pn:
-            pn = '1'
-        if not ps:
-            ps = '8'
-        post = 'name='+name.encode('utf-8')
-        post += '&type='+dataType.encode('utf-8')
-        post += '&pn='+pn.encode('utf-8')
-        post += '&ps='+ps.encode('utf-8')
-        post += '&order='+order.encode('utf-8')
-        post += '&contId='+contId.encode('utf-8')
-        try:
-            context = {'urlpost':post}
-        except:
-            print(post)
-
-    if params.has_key('search_type'):
-        context['search_type'] = params['search_type']
-        context['search_key'] = params['search_key']
-        addDir(title, url, 'processWebPage(hSearchMorePage)', '', context=context)
-    else:
-        addDir(title, url, 'processWebPage(hNextPage)', '', context=context)
-
-
-
-#
-# Kuwo html tags
-#
-tagBanners = ['mTitBg', 'titYh', 'titYh titLr']
-tagSubBanners = ['f14b']
-
-topMenuItem = {'tag':('a',{}), 'vect':addCategory, 'child':None} 
-topMenu = {'tag':(None,{'class':'navLeft'}), 'vect':None, 'child':topMenuItem} 
-
-subCategory = {'tag':('a',{}), 'vect':addFrame, 'child':None}
-subCategoryFrm = {'tag':(None,{'class':['borLr1', 'borLr', 'borLr botNone', 'borLr noLeft', 'chartList botNone'] + tagBanners}),
-                 'vect':addCategoryBanner, 'child':subCategory}
-
-subPlayList = {'tag':(None,{'class':['tgCont','gdCont']}), 'vect':addPlayList, 'child':None}
-subCategoryPlayList = {'tag':(None,{'class':['tgFrm', "tgFrm unDis"]}), 'vect':addPlayListBanner, 'child':subPlayList}
-
-subPlayListFocus = {'tag':('a',{}), 'vect':addPlayListFocus, 'child':None}
-subCategoryPlayListFocus = {'tag':(None,{'class':'focus'}), 'vect':addPlayListBanner, 'child':subPlayListFocus}
-
-chartTabBar = {'tag':(None,{'class':'chartTab'}), 'vect':addBillboardPhase, 'child':None} 
-
-songItem = {'tag':(None,{'class':re.compile('itemUl\d*')}), 'vect':addSong, 'child':None}
-songItem_show_artist = {'tag':(None,{'class':re.compile('itemUl\d*')}), 'vect':addSong, 'child':None, 'context':{'addlink_adjust':'show_artist'}}
-songContainer = {'tag':(None,{'id':"container"}), 'vect':addPlayAll, 'child':songItem_show_artist} 
-
-artistItem = {'tag':('li',{}), 'vect':addArtist, 'child':None}
-artistContainer = {'tag':(None,{'class':['sortFrm','numList newnumList'] + tagSubBanners}), 'vect':addCategoryBanner, 'child':artistItem} 
-artistAlphaBeta = {'tag':(None,{'class':"numList"}), 'vect':addAlphaBeta, 'child':None} 
-
-pageItem = {'tag':(None,{'class':'page'}), 'vect':addPage, 'child':None}
-
-songList = {'tag':(None,{'class':re.compile('listCont\d*')}), 'vect':addPlayAll, 'child':songItem}
-
-albumItem = {'tag':(None,{'class':re.compile('alBg\d*')}), 'vect':addAlbum, 'child':None}
-albumList = {'tag':(None,{'class':"albumFrm"}), 'vect':addPlayAllAlbum, 'child':albumItem}
-
-mvItem = {'tag':('li',{}), 'vect':addMV, 'child':None}
-mvList = {'tag':(None,{'class':re.compile("mvFrm\d*")}), 'vect':addPlayAllMV, 'child':mvItem}
-
-artistItem = {'tag':('li',{}), 'vect':addArtist, 'child':None}
-artistList = {'tag':(None,{'class':re.compile("sortFrm\d*|picFrm")}), 'vect':addPlayAllArtist, 'child':artistItem}
-
-classMore = {'tag':(None,{'class':"mBodFrm3 unDis"}), 'vect':addDirMore, 'child':None}
-artistTop10s = {'tag':(None,{'id':"top10Songs"}), 'vect':None, 'child':[songList, albumList, mvList]} 
-
-songSearchList = {'tag':(None,{'id':'index_music'}), 'vect':addPlayAll, 'child':songItem}
-lyricsSearchList = {'tag':(None,{'id':'index_lyric'}), 'vect':addPlayAll, 'child':songItem}
-
-searchResult = {'tag':(None,{'id':"allRs"}), 'vect':None, 'child':[songSearchList, artistList, albumList, lyricsSearchList, mvList]}
-resultNextPage = {'tag':(None,{'class':"bodFrm"}), 'vect':None, 'child':[songList, albumItem, mvList, pageItem]}
-resultMore = {'tag':(None,{'class':"bodFrm unDis"}), 'vect':addDirMore, 'child':None}
-
-hTop = [topMenu]
-hFrame = [subCategoryFrm]
-hPage = [chartTabBar,
-         songContainer,
-         artistContainer,
-         artistAlphaBeta,
-         albumItem,
-         pageItem
-         ]
-hPlaylistFrame = [subCategoryPlayListFocus, subCategoryPlayList]
-hArtistPage = [artistTop10s, artistList, classMore]
-hAlbumPage = [songList, albumList] 
-hNextPage = [songList, albumItem, mvList, pageItem]
-hSearchMorePage = [resultNextPage]
-hPlayListPage = [songList, albumList]
-hSearchResult = [searchResult, resultMore]
-
+searchArtist = {'tag':('div',{'class':'hotSinger'}), 'vect': addSearch,'child':artistListItem}
+searchMusic = {'tag':('div',{'class':'m_list'}), 'vect': addSearch, 'child':albumMusic}
+searchAlbumItem = {'tag':('li',{}), 'vect': addAlbum}
+searchAlbum = {'tag':('div',{'class':'album'}), 'vect': addSearch,'child':searchAlbumItem}
+searchNav = {'tag':('a', {}), 'vect':addSearchNav}
+searchNavPage = {'tag':('div', {'class', 'page'}), 'child':searchNav}
+searchList = [searchArtist, searchMusic, searchAlbum, searchNavPage]
 
 #
 # XBMC plugin
@@ -773,16 +534,10 @@ def addLink(title,artist,url,mode,iconimage='',total=0,video=False):
             print('addLink(%s, %s, %s, %s, %s)' % (title,artist,url,mode,iconimage))
         except:
             print('addLink(title?, artist?, %s, %s, %s)' % (url,mode,iconimage))
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+urllib.quote_plus(mode)
-    if artist:
-        displayname = artist + ' - ' + title
-    else:
-        displayname = title
-    displayname = '    ' + displayname
-    if video:
-        itemType = "Video" 
-    else:
-        itemType = "Music"
+    u = make_param({"url": url, "mode": mode})
+    displayname = artist + ' - ' + title if artist else title
+    displayname = INDENT_STR + displayname
+    itemType = "Video" if video else "Music"
     if xbmc:
         item=xbmcgui.ListItem(displayname, iconImage=iconimage, thumbnailImage=iconimage)
         item.setInfo( type=itemType, infoLabels={ "Title":title, "Artist":artist } )
@@ -791,7 +546,6 @@ def addLink(title,artist,url,mode,iconimage='',total=0,video=False):
         print(u)
         urlparams.append(u)
 
-
 def addDir(name, url, mode, iconimage='DefaultFolder.png', context={}, plot='', folder=True, total=0):
     if url == '#@':
         url = params['url']
@@ -799,107 +553,97 @@ def addDir(name, url, mode, iconimage='DefaultFolder.png', context={}, plot='', 
         url = URL_BASE + url
     if not xbmc:
         try:
-            print('addDir(%d: %s, %s, %s, %s, %s)' % (len(urlparams), name,str(url)[:300],mode,iconimage,str(context)[:300]))
+            print('addDir(%d: %s, %s, %s, %s, %s)' % (len(urlparams), name,str(url)[:MAX_TEST],mode,iconimage,str(context)[:MAX_TEST]))
         except:
             print('addDir(%d: %s, ?url, ?mode, %s)' % (len(urlparams), name,iconimage))
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+urllib.quote_plus(mode)
-    if context:
-        for k in context:
-            u += ("&%s=" % k) + urllib.quote_plus(context[k])
+    param = {"url": url, "mode": mode}
+    param.update(context)
+    u = make_param(param)
     if xbmc:
         item=xbmcgui.ListItem(name, iconImage=iconimage, thumbnailImage=iconimage)
         return xbmcplugin.addDirectoryItem(pluginhandle,url=u,listitem=item,isFolder=folder,totalItems=total)
     else:
-        if len(u) > 300:
+        if len(u) > MAX_TEST:
             print('addDir u len %d, saved in urlparams %d' % (len(u), len(urlparams)))
         else:
             print(u)
         urlparams.append(u)
 
-
 def endDir(cache=True):
     if xbmc:
         xbmcplugin.endOfDirectory(pluginhandle, cacheToDisc=True)
 
-
-def get_params():
-    print(sys.argv[0] + sys.argv[2][:300])
-    param={}
-    params=sys.argv[2]
-    if len(params)>=2:
-        cleanedparams=params.rsplit('?',1)
+def get_params(params):
+    param = {}
+    if len(params) >= 2:
+        cleanedparams = params.rsplit('?',1)
         if len(cleanedparams) == 2:
             cleanedparams = cleanedparams[1]
         else:
-            cleanedparams=params.replace('?','')
-        if (params[len(params)-1]=='/'):
-            params=params[0:len(params)-2]
-        pairsofparams=cleanedparams.split('&')
-        param={}
-        for i in range(len(pairsofparams)):
-            splitparams={}
-            splitparams=pairsofparams[i].split('=')
-            if (len(splitparams))==2:
-                param[splitparams[0]]=urllib.unquote_plus(splitparams[1])
+            cleanedparams = params.replace('?','')
+        param = dict(urllib2.urlparse.parse_qsl(cleanedparams))
+    print(param)
     return param
 
+def make_param(query, url = None):
+    if url == None: url = sys.argv[0] if xbmc else ""
+    param = "%s?%s" % (url, urllib.urlencode(query))
+    return param
 
-if not xbmc:
-    pluginhandle = 1
-else:
+if xbmc:
     pluginhandle = int(sys.argv[1])
 ##    xbmcplugin.setContent(pluginhandle, 'musicvideos')
 ##    addon = xbmcaddon.Addon('plugin.audio.kuwobox')
 ##    pluginpath = addon.getAddonInfo('path')
+else:
+    pluginhandle = 1
 
 params = {}
+
 def main():
     global params
-    params=get_params()
-    try:
-        mode=params["mode"]
-    except:
-        mode=None
-    if mode==None:
-        # params['url'] = URL_BASE
-        # processWebPage(hTop)
-        addCategoryFast()
-    else:
+    params = get_params(sys.argv[2])
+    mode = params.get("mode", None)
+    if mode:
         exec(mode)
+    else:
+        # params['url'] = URL_BASE
+        addDir('搜索', '', 'search()')
+        addDir('排行榜', 'http://yinyue.kuwo.cn/billboard_index.htm', 'processWebPage(boardPage)')
+        addDir('歌手', 'http://www.kuwo.cn/mingxing/', 'processWebPage(artistPage)')
+        addDir('分类', 'http://yinyue.kuwo.cn/category.htm', 'processWebPage(hotPage)')
+        addDir('专辑', 'http://www.kuwo.cn/album/', 'processWebPage(albumPage)')
+        addDir('淘歌单', 'http://fang.kuwo.cn/p/st/PlCat', 'processWebPage(playlistPage)');
+        endDir()
 
-if xbmc:
-    main()
-    
-if not xbmc:
+def test():
     # Unit Test without XBMC environment
-    urlparam = ''
-    test_url = [
-        'plugin://plugin.audio.kuwobox/?url=http%3A%2F%2Fyinyue.kuwo.cn%2Fcategory.htm&mode=processWebPage%28hFrame%29',
-        'plugin://plugin.audio.kuwobox/?url=http%3A%2F%2Ffang.kuwo.cn%2Fp%2Fweb%2FGetWebRadio%3Frname%3D%25E7%25BA%25AF%25E7%2599%25BD%25E7%2594%25B5%25E5%258F%25B0&mode=processWebPage%28hPage%29',
-        ]
-
     def UTP(urlparam):
         sys.argv = ['plugin://plugin.audio.kuwobox/', '-1', urlparam]
         main()
 
-    def utp_url(index):
-        sys.argv = ['plugin://plugin.audio.kuwobox/', '-1', urlparams[index]]
-        main()
-
-    def testMenu(items=[], url=None):
-        global urlparams
+    def testMenu(urlparams, items = [], url = None):
         print('testMenu(url="%s", items=%s)\n' % (url, items))
-        if url != None and type(url) == str:
+        if url and isinstance(url, str):
             UTP(url)
-        if items and type(items) != list:
+        if items and not isinstance(items, list):
             items = [items]
         for x in items:
             url = urlparams[x]
-            print('\n\n\n ******* TESTING %s\n' % url[:300])
+            print('\n\n\n ******* TESTING %s\n' % url[:MAX_TEST])
             UTP(url)
 
-    for urlparam in test_url:
-        UTP(urlparam)
-    if not test_url:
-        testMenu([], '')
-    
+    test_url = [
+        make_param({"url": 'http://yinyue.kuwo.cn/billboard_index.htm', "mode": "processWebPage(boardPage)"}),
+        ]
+
+    if test_url:
+        for urlparam in test_url:
+            UTP(urlparam)
+    else:
+        testMenu(urlparams, [], '')
+
+if xbmc:
+    main()
+else:
+    test()
