@@ -24,3 +24,9 @@ msgid "此频道没有HLS流"
 
 msgctxt "#30002"
 msgid "暂不支持此频道播放"
+
+msgctxt "#30003"
+msgid "频道设置"
+
+msgctxt "#30004"
+msgid "视频质量 (kbps)"

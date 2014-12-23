@@ -1,3 +1,9 @@
+2.0.3 (RunasSudo)
+- Improve handling of invalid stream URLs.
+- Allow running on older versions of XBMC.
+- Add quality selector.
+- Fix bug where stream would disconnect after a few minutes.
+
 2.0.2 (RunasSudo)
 - Improve code quality.
 - Fix bug with incorrect bitrates.

@@ -24,3 +24,9 @@ msgid "Channel has no HLS stream"
 
 msgctxt "#30002"
 msgid "Channel unavailable"
+
+msgctxt "#30003"
+msgid "Stream settings"
+
+msgctxt "#30004"
+msgid "Quality (kbps)"
