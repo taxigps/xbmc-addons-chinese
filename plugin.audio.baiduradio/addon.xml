@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.audio.baiduradio"
+    name="百度电台联盟(BaiduRadio)"
+    version="1.0.1"
+    provider-name="Robinttt,Osfans">
+    <extension
+        point="xbmc.python.pluginsource"
+        library="default.py">
+        <provides>audio</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary>BaiduRadio audio plugin</summary>
+        <summary lang="zh">百度电台联盟音频插件</summary>
+        <description>BaiduRadio audio plugin</description>
+        <description lang="zh">百度电台联盟音频插件，在线收听功能受电台播出时间和网络条件限制，个别台可能无法收听。</description>
+        <platform>all</platform>
+    </extension>
+</addon>
