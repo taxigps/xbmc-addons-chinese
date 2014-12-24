@@ -58,6 +58,7 @@ PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStre
 
 * 百度随心听 - plugin.audio.baidufm - Baidu fm music (Chinese)
 * 一听音乐 - plugin.audio.1ting - 1ting online music (Chinese)
+* 酷我音乐盒(KuwoBox) - plugin.audio.kuwobox - KuwoBox online music (Chinese)
 
 ## Program Add-ons
 
