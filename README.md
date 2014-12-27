@@ -32,18 +32,18 @@ For proper Chinese text display on xbmc, do the following steps:
 
 ## Video Add-ons
 
-* 5ivdo(5ivdo) - plugin.video.5ivdo - Online video from www.5ivdo.com (Chinese)
-* CNTV Live 中国网络电视台直播 - plugin.video.cntv-live - TV live channels from cntv.cn (Chinese)
-* 风行视频(Funshion) - plugin.video.funshion - Online videos from www.funshion.com (Chinese)
-* 酷6云中剧场(Ku6) - plugin.video.ku6 - Online video from www.juchang.com (Chinese)
-* 乐视网(LeTV) - plugin.video.letv - Online video from www.letv.com.cn (Chinese)
-* PPS影音(PPS.tv) - plugin.video.pps - Video from PPS for client side playback (Chinese)
-* PPS网络电视(PPStream) - plugin.video.ppstream - PPS online tv and movies (Chinese)
-* PPTV视频 - plugin.video.pptv - Online videos from www.pptv.com (Chinese)
-* 搜狐视频(SoHu) - plugin.video.sohuvideo - Online video from tv.sohu.com (Chinese)
-* 音悦台MV(YinYueTai) - plugin.video.yinyuetai - MV from www.yinyuetai.com (Chinese)
-* 优酷视频(YouKu) - plugin.video.youku - Online tv and movies from www.youku.com (Chinese)
-* 优酷视频2(YouKu2) - plugin.video.youku2 - Online tv and movies from www.youku.com (Chinese)
+* 5ivdo(5ivdo) - plugin.video.5ivdo - Online video from www.5ivdo.com
+* CNTV Live 中国网络电视台直播 - plugin.video.cntv-live - TV live channels from cntv.cn
+* 风行视频(Funshion) - plugin.video.funshion - Online videos from www.funshion.com
+* 酷6云中剧场(Ku6) - plugin.video.ku6 - Online video from www.juchang.com
+* 乐视网(LeTV) - plugin.video.letv - Online video from www.letv.com.cn
+* PPS影音(PPS.tv) - plugin.video.pps - Video from PPS for client side playback
+* PPS网络电视(PPStream) - plugin.video.ppstream - PPS online tv and movies
+* PPTV视频 - plugin.video.pptv - Online videos from www.pptv.com
+* 搜狐视频(SoHu) - plugin.video.sohuvideo - Online video from tv.sohu.com
+* 音悦台MV(YinYueTai) - plugin.video.yinyuetai - MV from www.yinyuetai.com
+* 优酷视频(YouKu) - plugin.video.youku - Online tv and movies from www.youku.com
+* 优酷视频2(YouKu2) - plugin.video.youku2 - Online tv and movies from www.youku.com
 
 Note: PPS影音(PPS.tv) and PPS网络电视(PPStream)
 
@@ -56,11 +56,12 @@ PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStre
 
 ## Music Add-ons
 
-* 一听音乐 - plugin.audio.1ting - 1ting online music (Chinese)
-* 百度随心听 - plugin.audio.baidufm - Baidu fm music (Chinese)
-* 百度电台联盟(BaiduRadio) - plugin.audio.baiduradio - Baidu online radio (Chinese)
-* 豆瓣FM(DoubanFM) - plugin.audio.DoubanFM - Douban online radio (Chinese)
-* 酷我音乐盒(KuwoBox) - plugin.audio.kuwobox - KuwoBox online music (Chinese)
+* 一听音乐 - plugin.audio.1ting - 1ting online music
+* 百度随心听 - plugin.audio.baidufm - Baidu fm music
+* 百度电台联盟(BaiduRadio) - plugin.audio.baiduradio - Baidu online radio
+* 豆瓣FM(DoubanFM) - plugin.audio.doubanfm - Douban online radio
+* 酷狗电台(KugouFM) - plugin.audio.kugoufm - Kugou FM radio
+* 酷我音乐盒(KuwoBox) - plugin.audio.kuwobox - KuwoBox online music
 
 ## Program Add-ons
 
