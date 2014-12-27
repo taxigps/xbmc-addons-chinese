@@ -1,0 +1,115 @@
+#EXTM3U
+#EXTINF:-1 tvg-id="cctv1" tvg-name="CCTV-1_综合" group-title="央视频道",CCTV-1 综合
+special://temp/
+#EXTINF:-1 tvg-id="cctv2" tvg-name="CCTV-2_财经" group-title="央视频道",CCTV-2 财经
+special://temp/
+#EXTINF:-1 tvg-id="cctv3" tvg-name="CCTV-3_综艺" group-title="央视频道",CCTV-3 综艺
+special://temp/
+#EXTINF:-1 tvg-id="cctv4" tvg-name="CCTV-4_(亚洲)" group-title="央视频道",CCTV-4 (亚洲)
+special://temp/
+#EXTINF:-1 tvg-id="cctveurope" tvg-name="CCTV-4_(欧洲)" group-title="央视频道",CCTV-4 (欧洲)
+special://temp/
+#EXTINF:-1 tvg-id="cctvamerica" tvg-name="CCTV-4_(美洲)" group-title="央视频道",CCTV-4 (美洲)
+special://temp/
+#EXTINF:-1 tvg-id="cctv5" tvg-name="CCTV-5_体育" group-title="央视频道",CCTV-5 体育
+special://temp/
+#EXTINF:-1 tvg-id="cctv6" tvg-name="CCTV-6_电影" group-title="央视频道",CCTV-6 电影
+special://temp/
+#EXTINF:-1 tvg-id="cctv7" tvg-name="CCTV-7_军事_农业" group-title="央视频道",CCTV-7 军事 农业
+special://temp/
+#EXTINF:-1 tvg-id="cctv8" tvg-name="CCTV-8_电视剧" group-title="央视频道",CCTV-8 电视剧
+special://temp/
+#EXTINF:-1 tvg-id="cctvjilu" tvg-name="CCTV-9_纪录" group-title="央视频道",CCTV-9 纪录
+special://temp/
+#EXTINF:-1 tvg-id="cctvdoc" tvg-name="CCTV-9_纪录(英)" group-title="央视频道",CCTV-9 纪录(英)
+special://temp/
+#EXTINF:-1 tvg-id="cctv10" tvg-name="CCTV-10_科教" group-title="央视频道",CCTV-10 科教
+special://temp/
+#EXTINF:-1 tvg-id="cctv11" tvg-name="CCTV-11_戏曲" group-title="央视频道",CCTV-11 戏曲
+special://temp/
+#EXTINF:-1 tvg-id="cctv12" tvg-name="CCTV-12_社会与法" group-title="央视频道",CCTV-12 社会与法
+special://temp/
+#EXTINF:-1 tvg-id="cctv13" tvg-name="CCTV-13_新闻" group-title="央视频道",CCTV-13 新闻
+special://temp/
+#EXTINF:-1 tvg-id="cctvchild" tvg-name="CCTV-14_少儿" group-title="央视频道",CCTV-14 少儿
+special://temp/
+#EXTINF:-1 tvg-id="cctv15" tvg-name="CCTV-15_音乐" group-title="央视频道",CCTV-15 音乐
+special://temp/
+#EXTINF:-1 tvg-id="cctv9" tvg-name="CCTV-NEWS" group-title="央视频道",CCTV-NEWS
+special://temp/
+#EXTINF:-1 tvg-id="cctv5plus" tvg-name="CCTV体育赛事" group-title="央视频道",CCTV体育赛事
+special://temp/
+#EXTINF:-1 tvg-id="anhui" tvg-name="安徽卫视" group-title="卫视频道",安徽卫视
+special://temp/
+#EXTINF:-1 tvg-id="btv1" tvg-name="北京卫视" group-title="卫视频道",北京卫视
+special://temp/
+#EXTINF:-1 tvg-id="bingtuan" tvg-name="兵团卫视" group-title="卫视频道",兵团卫视
+special://temp/
+#EXTINF:-1 tvg-id="chongqing" tvg-name="重庆卫视" group-title="卫视频道",重庆卫视
+special://temp/
+#EXTINF:-1 tvg-id="dongfang" tvg-name="东方卫视" group-title="卫视频道",东方卫视
+special://temp/
+#EXTINF:-1 tvg-id="dongnan" tvg-name="东南卫视" group-title="卫视频道",东南卫视
+special://temp/
+#EXTINF:-1 tvg-id="gansu" tvg-name="甘肃卫视" group-title="卫视频道",甘肃卫视
+special://temp/
+#EXTINF:-1 tvg-id="guangdong" tvg-name="广东卫视" group-title="卫视频道",广东卫视
+special://temp/
+#EXTINF:-1 tvg-id="guangxi" tvg-name="广西卫视" group-title="卫视频道",广西卫视
+special://temp/
+#EXTINF:-1 tvg-id="guizhou" tvg-name="贵州卫视" group-title="卫视频道",贵州卫视
+special://temp/
+#EXTINF:-1 tvg-id="hebei" tvg-name="河北卫视" group-title="卫视频道",河北卫视
+special://temp/
+#EXTINF:-1 tvg-id="henan" tvg-name="河南卫视" group-title="卫视频道",河南卫视
+special://temp/
+#EXTINF:-1 tvg-id="heilongjiang" tvg-name="黑龙江卫视" group-title="卫视频道",黑龙江卫视
+special://temp/
+#EXTINF:-1 tvg-id="hubei" tvg-name="湖北卫视" group-title="卫视频道",湖北卫视
+special://temp/
+#EXTINF:-1 tvg-id="jilin" tvg-name="吉林卫视" group-title="卫视频道",吉林卫视
+special://temp/
+#EXTINF:-1 tvg-id="jiangxi" tvg-name="江西卫视" group-title="卫视频道",江西卫视
+special://temp/
+#EXTINF:-1 tvg-id="kangba" tvg-name="康巴卫视" group-title="卫视频道",康巴卫视
+special://temp/
+#EXTINF:-1 tvg-id="liaoning" tvg-name="辽宁卫视" group-title="卫视频道",辽宁卫视
+special://temp/
+#EXTINF:-1 tvg-id="travel" tvg-name="旅游卫视" group-title="卫视频道",旅游卫视
+special://temp/
+#EXTINF:-1 tvg-id="neimenggu" tvg-name="内蒙古卫视" group-title="卫视频道",内蒙古卫视
+special://temp/
+#EXTINF:-1 tvg-id="ningxia" tvg-name="宁夏卫视" group-title="卫视频道",宁夏卫视
+special://temp/
+#EXTINF:-1 tvg-id="qinghai" tvg-name="青海卫视" group-title="卫视频道",青海卫视
+special://temp/
+#EXTINF:-1 tvg-id="shandong" tvg-name="山东卫视" group-title="卫视频道",山东卫视
+special://temp/
+#EXTINF:-1 tvg-id="sdetv" tvg-name="山东教育台" group-title="卫视频道",山东教育台
+special://temp/
+#EXTINF:-1 tvg-id="shenzhen" tvg-name="深圳卫视" group-title="卫视频道",深圳卫视
+special://temp/
+#EXTINF:-1 tvg-id="shan1xi" tvg-name="山西卫视" group-title="卫视频道",山西卫视
+special://temp/
+#EXTINF:-1 tvg-id="shan3xi" tvg-name="陕西卫视" group-title="卫视频道",陕西卫视
+special://temp/
+#EXTINF:-1 tvg-id="shenzhen" tvg-name="深圳卫视" group-title="卫视频道",深圳卫视
+special://temp/
+#EXTINF:-1 tvg-id="sichuan" tvg-name="四川卫视" group-title="卫视频道",四川卫视
+special://temp/
+#EXTINF:-1 tvg-id="tianjin" tvg-name="天津卫视" group-title="卫视频道",天津卫视
+special://temp/
+#EXTINF:-1 tvg-id="xizang" tvg-name="西藏卫视" group-title="卫视频道",西藏卫视
+special://temp/
+#EXTINF:-1 tvg-id="xiamen" tvg-name="厦门卫视" group-title="卫视频道",厦门卫视
+special://temp/
+#EXTINF:-1 tvg-id="xianggangweishi" tvg-name="香港卫视" group-title="卫视频道",香港卫视
+special://temp/
+#EXTINF:-1 tvg-id="xinjiang" tvg-name="新疆卫视" group-title="卫视频道",新疆卫视
+special://temp/
+#EXTINF:-1 tvg-id="yanbian" tvg-name="延边卫视" group-title="卫视频道",延边卫视
+special://temp/
+#EXTINF:-1 tvg-id="yunnan" tvg-name="云南卫视" group-title="卫视频道",云南卫视
+special://temp/
+#EXTINF:-1 tvg-id="zhejiang" tvg-name="浙江卫视" group-title="卫视频道",浙江卫视
+special://temp/

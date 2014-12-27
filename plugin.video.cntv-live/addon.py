@@ -6,8 +6,8 @@ import xbmcaddon
 import xbmcgui
 import xbmcplugin
 
-import traceback
 import re
+import traceback
 import urllib
 import urllib2
 import urlparse
@@ -110,7 +110,7 @@ def main():
 			
 			xbmc.Player().play(url)
 			
-		except Exception as e:
+		except Exception:
 			showNotification(30000)
 			print(traceback.format_exc())
 			return
@@ -356,10 +356,10 @@ def main():
 				li = xbmcgui.ListItem(categoryName)
 				xbmcplugin.addDirectoryItem(handle=addon_handle, url=sys.argv[0] + "?category=" + categoryID, listitem=li, isFolder=True)
 		
-		addCategory("yangshi", "央视频道")
-		addCategory("weishi", "卫视频道")
-		addCategory("shuzi", "数字频道")
-		addCategory("chengshi", "城市频道")
+		addCategory("yangshi", "National Channels 央视频道")
+		addCategory("weishi", "Provincial Channels 卫视频道")
+		addCategory("shuzi", "Digital Channels 数字频道")
+		addCategory("chengshi", "City-based Channels 城市频道")
 		
 		xbmcplugin.endOfDirectory(addon_handle)
 
