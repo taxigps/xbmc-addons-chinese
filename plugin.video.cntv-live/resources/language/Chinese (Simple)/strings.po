@@ -26,7 +26,19 @@ msgctxt "#30002"
 msgid "暂不支持此频道播放"
 
 msgctxt "#30003"
-msgid "频道设置"
+msgid "频道"
 
 msgctxt "#30004"
 msgid "视频质量 (kbps)"
+
+msgctxt "#30005"
+msgid "节目单"
+
+msgctxt "#30006"
+msgid "启用 IPTV 节目单"
+
+msgctxt "#30007"
+msgid "下载央视频道的节目单"
+
+msgctxt "#30008"
+msgid "下载卫视频道的节目单"
