@@ -70,7 +70,7 @@
     </extension>
 </addon>
 
-<addon id="plugin.audio.kugouFm"
+<addon id="plugin.audio.kugoufm"
 	name="酷狗电台(KugouFM)"
 	version="1.0.0"
 	provider-name="keygle,osfans">
