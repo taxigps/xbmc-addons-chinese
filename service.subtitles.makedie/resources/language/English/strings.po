@@ -1,0 +1,33 @@
+msgid ""
+msgstr ""
+
+#English
+
+msgctxt "#32001"
+msgid "Text subtitles save as UTF-8"
+msgstr ""
+
+msgctxt "#32002"
+msgid "Simplified and Traditional conversion"
+msgstr ""
+
+msgctxt "#32003"
+msgid "disable"
+msgstr ""
+
+msgctxt "#32004"
+msgid "Simplified"
+msgstr ""
+
+msgctxt "#32005"
+msgid "Traditional"
+msgstr ""
+
+msgctxt "#32006"
+msgid "Choose subtitle file"
+msgstr ""
+
+msgctxt "#32007"
+msgid "Use Shooter Player API (may become slower)"
+msgstr ""
+
