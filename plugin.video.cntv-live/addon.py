@@ -44,11 +44,11 @@ def main():
 				
 				#Apply nasty hacks
 				#url = url.replace("tv.fw.live.cntv.cn", "tvhd.fw.live.cntv.cn") #China - 403 Forbidden, old
-				url = url.replace("cctv1.vtime.cntv.cloudcdn.net:8000", "cctv1.vtime.cntv.cloudcdn.net")
+				url = url.replace("vtime.cntv.cloudcdn.net:8000", "vtime.cntv.cloudcdn.net")
 				
 				print("Trying URL {0}".format(url))
 				
-				if "dianpian.mp4" in url:
+				if "dianpian" in url:
 					return None
 					
 				else:
@@ -109,8 +109,9 @@ def main():
 			print("Loading URL {0}".format(url))
 			
 			auth = urlparse.parse_qs(urlparse.urlparse(url)[4])["AUTH"][0]
+			print("Got AUTH {0}".format(auth))
 			
-			url = url + "|" + urllib.urlencode( { "Cookie" : auth } )
+			url = url + "|" + urllib.urlencode( { "Cookie" : "AUTH=" + auth } )
 			
 			print("Built URL {0}".format(url))
 			
