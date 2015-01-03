@@ -37,35 +37,43 @@ def getQualityRange(quality):
 def main():
 	if param.startswith("?stream="):
 		def tryHLSStream(jsondata, streamName):
+			print("Trying stream {0}".format(streamName))
 			if jsondata["hls_url"].has_key(streamName):
 				url = jsondata["hls_url"][streamName]
 				url = url.replace("b=100-300", "b=" + getQualityRange(addon.getSetting("quality"))) #Set the desired bandwidth
 				
 				#Apply nasty hacks
-				url = url.replace("tv.fw.live.cntv.cn", "tvhd.fw.live.cntv.cn") #China - 403 Forbidden
+				#url = url.replace("tv.fw.live.cntv.cn", "tvhd.fw.live.cntv.cn") #China - 403 Forbidden, old
+				url = url.replace("cctv1.vtime.cntv.cloudcdn.net:8000", "cctv1.vtime.cntv.cloudcdn.net")
+				
+				print("Trying URL {0}".format(url))
 				
 				if "dianpian.mp4" in url:
 					return None
 					
 				else:
-					#Download and check if it's the actual HLS stream or a link to the actual stream
-					resp = urllib2.urlopen(url)
-					lines = resp.read().decode("utf-8").split("\n")
-					isStreamLink = False
-					for line in lines:
-						if line.startswith("#EXT-X-STREAM-INF"):
-							isStreamLink = True
-							break
-					
-					if isStreamLink:
-						print("Stream link detected.")
-						#Download and parse the M3U8 file
+					try:
+						#Download and check if it's the actual HLS stream or a link to the actual stream
+						resp = urllib2.urlopen(url)
+						lines = resp.read().decode("utf-8").split("\n")
+						isStreamLink = False
 						for line in lines:
-							if not line.startswith("#"):
-								url = line #Use the first stream listed
+							if line.startswith("#EXT-X-STREAM-INF"):
+								isStreamLink = True
 								break
-					
-					return url
+						
+						if isStreamLink:
+							print("Stream link detected.")
+							#Download and parse the M3U8 file
+							for line in lines:
+								if not line.startswith("#"):
+									url = line #Use the first stream listed
+									break
+						
+						return url
+					except Exception:
+						print(traceback.format_exc())
+						return None
 			else:
 				return None
 		
@@ -78,23 +86,21 @@ def main():
 		
 		try:
 			#Locate the M3U8 file
-			resp = urllib2.urlopen("http://vdn.live.cntv.cn/api2/liveHtml5.do?channel=pa://cctv_p2p_hd" + param[8:] + "&client=html5")
+			resp = urllib2.urlopen("http://vdn.live.cntv.cn/api2/live.do?channel=pa://cctv_p2p_hd" + param[8:])
 			data = resp.read().decode("utf-8")
 			
 			url = None
-			match = re.compile("'({.+?})';", re.DOTALL).search(data)
-			if match:
-				jsondata = jsonimpl.loads(match.group(1))
-				if jsondata.has_key("hls_url"):
-					#Try a bunch of URLs
-					url = url or tryHLSStream(jsondata, "hls3") #Preferred
-					url = url or tryHLSStream(jsondata, "hls4")
-					url = url or tryHLSStream(jsondata, "hls1")
-					url = url or tryHLSStream(jsondata, "hls2")
-					url = url or tryHLSStream(jsondata, "hls5")
-				else:
-					showNotification(30001)
-					return
+			jsondata = jsonimpl.loads(data)
+			if jsondata.has_key("hls_url"):
+				#Try a bunch of URLs
+				url = url or tryHLSStream(jsondata, "hls3") #Preferred
+				url = url or tryHLSStream(jsondata, "hls4")
+				url = url or tryHLSStream(jsondata, "hls1")
+				url = url or tryHLSStream(jsondata, "hls2")
+				url = url or tryHLSStream(jsondata, "hls5")
+			else:
+				showNotification(30001)
+				return
 			
 			if url is None:
 				showNotification(30002)
