@@ -17,15 +17,15 @@ def getHttpData(u, query):
 
 def getSingerPic(title, size = 200):
     #根据歌手获得相应的信息
-    singerList = title.split('-')
-    if (singerList[0]).strip():
-        query = {'singerName': singerList[0], 
+    singerList = re.findall('(【.*?】)?(.*?)-', title)
+    if singerList:
+        query = {'singerName': singerList[0][1],
                  'size': size,
                  'd': time.time()*1000}
         singerUrl = 'getSingerHead_new.php'
         singerInfo = getHttpData(singerUrl, query)
-        return json.loads(singerInfo)['url']
-    return None
+        return json.loads(singerInfo).get('url', '')
+    return ''
 
 def getSongInfo(hashId):
     #根据hash 获得mp3的相应信息
@@ -53,6 +53,4 @@ def getFmList(page, pagesize = 30):
     return reqJson
 
 if __name__ == '__main__':
-    pprint(getSongs(1,1))
-    hash = "2D080543989D822CE5BB36A89EF62A10"
-    #pprint(getSongInfo(hash))
+    pprint(getSingerPic("【上海话】顶楼的马戏团 - 上海童年"))
