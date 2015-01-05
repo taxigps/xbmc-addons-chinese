@@ -1,0 +1,33 @@
+msgid ""
+msgstr ""
+
+#Chinese Simplified
+
+msgctxt "#32001"
+msgid "Text subtitles save as UTF-8"
+msgstr "文本字幕保存为UTF-8编码"
+
+msgctxt "#32002"
+msgid "Simplified and Traditional conversion"
+msgstr "文本字幕简繁转换"
+
+msgctxt "#32003"
+msgid "disable"
+msgstr "禁用"
+
+msgctxt "#32004"
+msgid "Simplified"
+msgstr "简体"
+
+msgctxt "#32005"
+msgid "Traditional"
+msgstr "繁体"
+
+msgctxt "#32006"
+msgid "Choose subtitle file"
+msgstr "请选择要使用的字幕文件"
+
+msgctxt "#32007"
+msgid "Use Shooter Player API (may become slower)"
+msgstr "自动搜索时同时搜索射手影音库(可能会使搜索变慢)"
+

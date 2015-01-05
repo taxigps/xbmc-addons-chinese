@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <setting id="transUTF8" type="bool" label="32001" default="false"/>
+    <setting id="transJianFan" type="enum" enable="eq(-1,true)" label="32002" lvalues="32003|32004|32005" default="0"/>
+    <setting id="subSourceAPI" type="bool" label="32007" default="true"/>
+</settings>

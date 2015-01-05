@@ -1,0 +1,22 @@
+1.0.6
+- fixed: redirect search by title to fake shooter: sub.makedie.me
+
+1.0.5
+- fixed: can't get subtitles by title because website closed
+
+1.0.4
+- reduce unneeded coding convertion to download faster
+
+1.0.3
+- added search subtitles by title
+
+1.0.2
+- added setting to save subtitles as UTF-8
+- added setting for Simplified and Traditional conversion
+- changed to use zlib to decompress incomplete zipped subtitle
+
+1.0.1
+- fixed to show language flag
+
+1.0.0
+- move the service out of XBMC Subtitles

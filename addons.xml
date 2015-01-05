@@ -413,6 +413,34 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
   </extension>
 </addon>
 
+<addon id="service.subtitles.makedie"
+       name="Shooter(fake)"
+       version="1.0.6"
+       provider-name="fffonion">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+    <import addon="script.module.chardet" version="2.1.1"/>
+    <import addon="script.module.beautifulsoup4" version="4.3.2"/>
+    <import addon="script.module.html5lib" version="0.1.0"/>
+  </requires>
+  <extension point="xbmc.subtitle.module"
+             library="service.py" />
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">Shooter(fake)</summary>
+    <summary lang="zh">射手(伪)字幕</summary>
+    <summary lang="zh_TW">射手(伪)字幕</summary>
+    <description lang="en">Search and download subtitles from Shooter-fake (sub.makedie.me)</description>
+    <description lang="zh">从射手网(伪)（sub.makedie.me）下载字幕，修改自taxigps的射手网插件</description>
+    <description lang="zh_TW">從射手網(偽)（sub.makedie.me）下載字幕，修改自taxigps的射手網插件</description>
+    <platform>all</platform>
+    <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+    <!--<forum>http://forum.xbmc.org/showthread.php?tid=199644</forum>-->
+    <website></website>
+    <email></email>
+    <source>https://github.com/fffonion/service.subtitles.makedie</source>
+  </extension>
+</addon>
+
 <addon id="service.subtitles.subhd"
        name="Sub HD"
        version="1.0.0"
