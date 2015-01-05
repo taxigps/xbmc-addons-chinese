@@ -344,8 +344,7 @@ def addArtistCategory(item):
 
 # 分类
 def addHotMusic(item):
-    global tree
-    l = re.findall('"musiclist":(\[.+\]),"rids"', tree.text)
+    l = re.findall('"musiclist":(\[.+\]),"rids"', item.text)
     if l:
         l = eval(l[0])
         mids = "/".join([d['musicrid'] for d in l])
@@ -507,7 +506,7 @@ albumMusic = {'tag':('li',{}), 'vect': addMusic}
 albumMusicList = {'tag':('div',{'class':'m_list'}), 'vect': addAlbumMusicList, 'child':albumMusic}
 album = {'tag':(None,{'class':'music clearfix'}), 'vect':addAlbum, 'child':None}
 albumNav = {'tag':('a', {}), 'vect':addAlbumNav}
-albumNavPage = {'tag':('div', {'class', 'page'}), 'child':albumNav}
+albumNavPage = {'tag':('div', {'class': 'page'}), 'child':albumNav}
 albums = [album, albumNavPage]
 albumList = {'tag':('li',{}), 'vect':addAlbumList, 'child':None}
 albumPage = {'tag':(None,{'class':"sdlist clearfix"}), 'vect':addH1Banner, 'child':albumList}
@@ -522,7 +521,7 @@ searchMusic = {'tag':('div',{'class':'m_list'}), 'vect': addSearch, 'child':albu
 searchAlbumItem = {'tag':('li',{}), 'vect': addAlbum}
 searchAlbum = {'tag':('div',{'class':'album'}), 'vect': addSearch,'child':searchAlbumItem}
 searchNav = {'tag':('a', {}), 'vect':addSearchNav}
-searchNavPage = {'tag':('div', {'class', 'page'}), 'child':searchNav}
+searchNavPage = {'tag':('div', {'class': 'page'}), 'child':searchNav}
 searchList = [searchArtist, searchMusic, searchAlbum, searchNavPage]
 
 #
