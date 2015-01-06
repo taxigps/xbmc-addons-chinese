@@ -11,95 +11,238 @@ SingerHtml = "/group.html"
 songBasehtml = "http://f.1ting.com"
 randHtml = "/rand.php"
 imgBaseHtml = "http://img.1ting.com/images/singer/s"
+rankHtml = "/rank.html"
 
-def request(url):
-    url = webHtml + url
-    req = urllib2.Request(url)     # create one connection
-    response = urllib2.urlopen(req)      # get the response        
-    resHttpData = response.read()        # get all the webpage html data in string 
-    return resHttpData
+MODE_NONE = -1
+MODE_MENU = 0
+
+MODE_SINGER_GROUP = 1
+MODE_SINGER_LIST = 2
+MODE_SINGER = 3
+MODE_ALBUM = 5
+MODE_SONG = 7
+MODE_SONG_ITEM = 6
+
+MODE_RAND = 11
+
+MODE_RANK = 21
+MODE_RANK_SONG = 22
+MODE_RANK_SINGER = 23
+MODE_RANK_ALBUM = 24
+
+#name, mode, url, icon
+menu = [('歌手', MODE_SINGER_GROUP), 
+        ('随便一听', MODE_RAND), 
+        ('排行榜', MODE_RANK)]
+
+def hyperlink(s):
+    return '[COLOR FF1E90FF]%s[/COLOR]' % s
+
+def banner(s):
+    return '[COLOR FFDEB887]【%s】[/COLOR]' % s
+
+def getMenu():
+    return menu
+
+def isFolder(mode):
+    return mode != MODE_NONE
+
+def request(url, soup = True):
+    if not url.startswith('http'): url = webHtml + url
+    print('request', url)
+    req = urllib2.Request(url)           # create one connection
+    response = urllib2.urlopen(req)      # get the response
+    if not response: return
+    cont = response.read()        # get all the webpage html data in string
+    response.close()
+    return BeautifulSoup(cont, 'html.parser') if soup else cont
 
 def getSongUrl(url):
-    if url:
-        req = urllib2.Request(songBasehtml + url)
-        req.add_header("Cookie", "PIN=cnGQFFSRmPRxcDj2aUSnAg==")
-        url = urllib2.urlopen(req).geturl()
+    if not url: return
+    req = urllib2.Request(songBasehtml + url)
+    req.add_header("Cookie", "PIN=cnGQFFSRmPRxcDj2aUSnAg==")
+    url = urllib2.urlopen(req).geturl()
     return url
 
-def getSongAddr(audioUrl):
-    resHttpData = request(audioUrl).replace('\r\n', '')
-    match = re.findall("\[(\[.*?\])\]", resHttpData)
+def getSongList(url):
+    lists = []
+    resHttpData = request(url, False)
+    match = re.search("\[\[.*?\]\]", resHttpData)
     if not match: return
-    info = json.loads(unescape(match[0]))
-    d = {}
-    d['artist'] = info[1].encode('utf-8')
-    d['title'] = info[3].encode('utf-8')
-    d['album'] = info[5].encode('utf-8')
-    d['icon'] = info[8].encode('utf-8')
-    d['url'] = getSongUrl(info[7].encode('utf-8'))
-    return d
-
-def getRandList():
-    resHttpData = request(randHtml)
-    match = re.findall("Jsonp\((.*?)\)    </script>", resHttpData)[0]
-    info = json.loads(match)
-    result = info.get('results', [])
-    songList = []
-    for i in result:
+    result = json.loads(unescape(match.group()))
+    for info in result:
+        name = info[3].encode('utf-8')
+        url = info[7].encode('utf-8')
+        icon = info[8].encode('utf-8')
         d = {}
+        d['artist'] = info[1].encode('utf-8')
+        d['title'] = name
+        d['album'] = info[5].encode('utf-8')
+        lists.append((name, MODE_SONG_ITEM, url, icon, d))
+    return lists
+
+def getRand():
+    lists = []
+    resHttpData = request(randHtml, False)
+    match = re.search("Jsonp\((.*?)\)    </script>", resHttpData)
+    if not match: return
+    info = json.loads(match.group(1))
+    result = info.get('results', [])
+    for i in result:
+        name = i['song_name'].encode('utf-8')
+        icon = i['album_cover'].encode('utf-8')
+        url = i['song_filepath'].encode('utf-8')
+        d = {}
+        d['title'] = name
         d['artist'] = i['singer_name'].encode('utf-8')
-        d['title'] = i['song_name'].encode('utf-8')
         d['album'] = i['album_name'].encode('utf-8')
-        d['icon'] = i['album_cover'].encode('utf-8')
-        d['song_filepath'] = i['song_filepath'].encode('utf-8')
-        songList.append(d)
-    return songList
+        lists.append((name, MODE_SONG_ITEM, url, icon, d))
+    return lists
 
 def getSingerGroup():
-    resHttpData = request(SingerHtml)
-    tree = BeautifulSoup(resHttpData)
-    soup = tree.find_all('div', {'class':'group-menu-component'})
     lists = []
+    tree = request(SingerHtml)
+    soup = tree.find_all('div', {'class':'group-menu-component'})
     for i in soup:
         for a in i.find_all('a'):
-            lists.append((a['href'].strip('#'), a.text.encode('utf-8')))
+            name = a.text.encode('utf-8')
+            url = a['href']
+            mode = MODE_SINGER_LIST
+            if url == '#':
+                name = banner(name)
+                mode = MODE_NONE
+            lists.append((name, mode, url))
     return lists
 
 def getSingerIcon(url, size = 210):
-    num = re.findall("singer_(.*?)\.html", url)[0]
+    match = re.search("singer_(.*?)\.html", url)
+    if not match: return
+    num = match.group(1)
     return "%s%d_%s.jpg" % (imgBaseHtml, size, num)
 
-def getSingerList(url):
-    resHttpData = request(url)
-    tree = BeautifulSoup(resHttpData)
-    singerList = []
+def getSingerList(url = SingerHtml):
+    lists = []
+    tree = request(url)
     soup = tree.find('div', {'class': 'singerCommend'})
     soup = tree.find_all('a', {'class': 'singerName'})
     if soup:
-        singerList.append(('', '推荐'))
+        lists.append((banner('推荐'),))
     for a in soup:
-        d = (a['href'], a.text)
-        singerList.append(d)
-    soup = tree.find_all('ul', {'class':'allSinger'})
-    singerMatch = re.compile('<a href="([\s\S]*?)">([\s\S]*?)</a></li>', re.DOTALL)
+        url = a['href']
+        icon = getSingerIcon(url)
+        lists.append((a.text.encode('utf-8'), MODE_SINGER, url, icon))
+    soup = tree.find_all('ul', {'class': 'allSinger'})
     if soup:
-        singerList.append(('', '全部'))
+        lists.append((banner('全部'),))
     for i in soup:
-        singerList += singerMatch.findall(unescape(str(i)))      #get the listitem of all singer
-    return singerList
+        for a in i.find_all('a'):
+            lists.append((a.text.encode('utf-8'), MODE_SINGER, a['href']))
+    return lists
 
-def getSongList(pUrl, page = 1):
-    paramSinger = re.findall("singer_(.*?)\.html", pUrl)[0] #/singer/b6/singer_2299.html
-    UrlSinger = "/singer/%s/song/%d/index.html" % (paramSinger, page)   # get the url of the singer's songs
-    resHttpData = request(UrlSinger)
-    songMatch = re.compile('<li><input name="checked" type="checkbox" value="[\s\S]*?"/><a href="([\s\S]*?)" target="_1ting" title="[\s\S]*?">([\s\S]*?)</a></li>', re.DOTALL)
-    songList = songMatch.findall(resHttpData)  # get the listitem of all song's id, the id of song is used to find the song, use the id to find the song when play the song 
-    if '上一页' in resHttpData:          # this isn't the first page, has prior page
-        songList.insert(0, ('-100','上一页'))              # add the prior page in songlist
-    if '下一页' in resHttpData:          # this isn't the first page, has prior page
-        songList.append(('-300', '下一页'))                 
-    return songList
+def addPages(soup, mode, lists):
+    if soup:
+        a = soup.find('a', text='上一页')
+        if a: lists.insert(0, (hyperlink(a.text.encode('utf-8')), mode, a['href']))
+        a = soup.find('a', text='下一页')
+        if a: lists.append((hyperlink(a.text.encode('utf-8')), mode, a['href']))
+    return lists
+
+def getSingerSong(url):
+    match = re.search("singer_(.*?)\.html", url) #/singer/b6/singer_2299.html
+    if match:
+        url = "/singer/%s/song/" % (match.group(1))   # get the url of the singer's songs
+    lists = []
+    tree = request(url)
+    soup = tree.find('div', {'class': 'songList'})
+    for i in soup.find_all('ul'):
+        for a in i.find_all('a'):
+            lists.append((a.text.encode('utf-8'), MODE_SONG, a['href']))
+    soup = soup.find_next_sibling()
+    mode = MODE_SINGER
+    lists = addPages(soup, mode, lists)
+    return lists
+
+def getRank():
+    lists = []
+    tree = request(rankHtml)
+    soup = tree.find('div', {'class': 'lbar'})
+    for dl in soup.find_all('dl'):
+        name = banner(dl.dt.text.encode('utf-8'))
+        lists.append((name,))
+        for a in dl.dd.ul.find_all('a'):
+            name = a.text.encode('utf-8')
+            if '唱片' in name or '专辑' in name: mode = MODE_RANK_ALBUM
+            elif '歌手' in name: mode = MODE_RANK_SINGER
+            else: mode = MODE_RANK_SONG
+            lists.append((name, mode, a['href']))
+    return lists
+
+def getRankSong(url):
+    lists = []
+    tree = request(url)
+    soup = tree.find('div', {'class': 'songList'})
+    for i in soup.find_all('ul'):
+        for a in i.find_all('a'):
+            lists.append((a.text.encode('utf-8'), MODE_SONG, a['href']))
+    return lists
+
+def getRankAlbum(url):
+    lists = []
+    tree = request(url)
+    soup = tree.find('div', {'class': 'albumList'})
+    soup = soup.find('ul', {'class': 'albumUL'})
+    for li in soup.find_all('li'):
+        title = '%s - %s (%s)' % (
+                li.find('span', {'class': 'albumName'}).text,
+                li.find('span', {'class': 'singerName'}).text,
+                li.find('span', {'class': 'albumDate'}).text)
+        a = li.find('a', {'class': 'albumPlay'})
+        icon = li.find('img', {'class': 'albumPic'})['src']
+        lists.append((title.encode('utf-8'), MODE_ALBUM, a['href'], icon))
+    soup = soup.find_next_sibling()
+    mode = MODE_RANK_ALBUM
+    lists = addPages(soup, mode, lists)
+    return lists
+
+def getRankSinger(url):
+    lists = []
+    tree = request(url)
+    soup = tree.find('div', {'class': 'singerList'})
+    soup = soup.find('ul', {'class': 'singerUL'})
+    for li in soup.find_all('li'):
+        a = li.find('a', {'class': 'singerName'})
+        url = a['href']
+        icon = getSingerIcon(url)
+        lists.append((a.text.encode('utf-8'), MODE_SINGER, url, icon))
+    soup = soup.find_next_sibling()
+    mode = MODE_RANK_SINGER
+    lists = addPages(soup, mode, lists)
+    return lists
+
+def getList(pMode, url):
+    l = []
+    if pMode == MODE_MENU:
+        l = getMenu()
+    elif pMode == MODE_SINGER_GROUP:
+        l = getSingerGroup()
+    elif pMode == MODE_SINGER_LIST:
+        l = getSingerList(url)
+    elif pMode == MODE_SINGER:
+        l = getSingerSong(url)
+    elif pMode == MODE_RAND:
+        l = getRand()
+    elif pMode == MODE_RANK:
+        l = getRank()
+    elif pMode == MODE_RANK_SONG:
+        l = getRankSong(url)
+    elif pMode == MODE_RANK_SINGER:
+        l = getRankSinger(url)
+    elif pMode == MODE_RANK_ALBUM:
+        l = getRankAlbum(url)
+    elif pMode == MODE_ALBUM:
+        l = getSongList(url)
+    return l
 
 if __name__ == '__main__':
-    getSingerList(SingerHtml)
-    #print getSongList('/singer/b6/singer_2299.html')
+    for i in getSingerAlbum("/singer/502/album/"):
+        print i
