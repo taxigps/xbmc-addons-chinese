@@ -2,10 +2,11 @@
 <addons>
 <addon id="plugin.audio.1ting"
     name="一听音乐"
-    version="2.1.0"
+    version="2.2.0"
     provider-name="arthurqi,osfans">
     <requires>
         <import addon="script.module.beautifulsoup4" version="4.3.2"/>
+        <import addon="script.module.keyboard.chinese" version="1.0.0" optional="true"/>
     </requires>
     <extension
         point="xbmc.python.pluginsource"

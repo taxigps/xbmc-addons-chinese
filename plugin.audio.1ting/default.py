@@ -36,7 +36,7 @@ def play(name, mode, url, icon, info):
     url = music.getSongUrl(url)
     xbmc.Player().play(url, li)
 
-def playItem(params):
+def playSong(params):
     name = params['title']
     icon = params['icon']
     mode = params['mode']
@@ -44,13 +44,33 @@ def playItem(params):
     info = {'title': name, 'artist': params['artist'], 'album': params['album']}
     play(name, mode, url, icon, info)
 
-def playSong(url):
-    song = music.getSongList(url)
-    if song:
-        name, mode, url, icon, info = song[0]
-        play(name, mode, url, icon, info)
+def playList(url):
+    song = music.getPlayList(url)[0]
+    if len(song) == 5:
+        play(*song)
     else:
-        xbmcgui.Dialog().notification(url, '该歌曲不存在或者由于版权到期而下线!', xbmcgui.NOTIFICATION_ERROR)
+        xbmcgui.Dialog().notification(url, song[0], xbmcgui.NOTIFICATION_ERROR)
+
+def get_keyword():
+    try:
+        import ChineseKeyboard as m
+    except:
+        m = xbmc
+    keyboard = m.Keyboard('','请输入歌名,专辑或歌手进行搜索,支持简拼.')
+    #xbmc.sleep(1500)
+    keyboard.doModal()
+    if keyboard.isConfirmed():
+        keyword = keyboard.getText()
+        return keyword
+
+def search():
+    q = get_keyword()
+    print 'q', q
+    if q:
+        url = music.getSearchUrl(q)
+        return music.getSearchList(url)
+    else:
+        return []
 
 def get_params():         # get part of the url, help to judge the param of the url, direcdory
     param = {}
@@ -66,14 +86,18 @@ def get_params():         # get part of the url, help to judge the param of the 
     return param
 
 paramlist = get_params()
-
-pMode = int(paramlist.get("mode", music.MODE_MENU))
+mode = paramlist.get("mode", music.MODE_MENU)
 url = paramlist.get("url", "")
 
-l = music.getList(pMode, url)
+l = []
+
+if mode == music.MODE_SONG:
+    playSong(paramlist)
+elif mode == music.MODE_PLAYLIST:
+    playList(url)
+elif mode == music.MODE_SEARCH:
+    l = search()
+else:
+    l = music.getList(mode, url)
 if l:
     addList(l)
-elif pMode == music.MODE_SONG:
-    playSong(url)
-elif pMode == music.MODE_SONG_ITEM:
-    playItem(paramlist)
