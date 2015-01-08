@@ -418,7 +418,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="service.subtitles.makedie"
        name="Shooter(fake)"
-       version="1.0.6"
+       version="1.0.7"
        provider-name="fffonion">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
