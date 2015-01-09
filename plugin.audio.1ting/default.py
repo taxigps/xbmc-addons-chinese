@@ -12,10 +12,10 @@ def addList(lists):
     for i in lists:
         name = i[0]
         mode = i[1] if len(i) > 1 else music.MODE_NONE
+        li = xbmcgui.ListItem(name)
         isFolder = music.isFolder(mode)
         query = {"mode": mode}
         if len(i) > 2: query["url"] = i[2]
-        li = xbmcgui.ListItem(name)
         if len(i) > 3:
             icon = i[3]
             query['icon'] = icon
@@ -38,9 +38,9 @@ def play(name, mode, url, icon, info):
 
 def playSong(params):
     name = params['title']
-    icon = params['icon']
     mode = params['mode']
     url = params['url']
+    icon = params['icon']
     info = {'title': name, 'artist': params['artist'], 'album': params['album']}
     play(name, mode, url, icon, info)
 
@@ -65,14 +65,13 @@ def get_keyword():
 
 def search():
     q = get_keyword()
-    print 'q', q
     if q:
         url = music.getSearchUrl(q)
         return music.getSearchList(url)
     else:
         return []
 
-def get_params():         # get part of the url, help to judge the param of the url, direcdory
+def get_params():
     param = {}
     params = sys.argv[2]
     if len(params) >= 2:

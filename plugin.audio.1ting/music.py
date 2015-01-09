@@ -124,13 +124,13 @@ def songItem(title, url, artist, album, icon):
         name = title
     return (name, mode, url, icon, d)
 
-def pageList(tree, mode, lists):
-    soup = tree.find('div', {'class': 'cPages'})
+def pageList(tree, mode, lists, baseurl = ''):
+    soup = tree.find('div', {'class': ['cPages', 'pages']})
     if soup:
-        a = soup.find('a', text='上一页')
-        if a: lists.insert(0, linkItem(a, mode))
-        a = soup.find('a', text='下一页')
-        if a: lists.append(linkItem(a, mode))
+        a = soup.find('a', text=['上一页', '«上一页'])
+        if a: lists.insert(0, linkItem(a, mode, True, baseurl))
+        a = soup.find('a', text=['下一页', '下一页»'])
+        if a: lists.append(linkItem(a, mode, True, baseurl))
     return lists
 
 def albumList(soup):
@@ -369,13 +369,8 @@ def getSearchList(url):
         soups = tree.find_all('div', {'class': 'singerList'})
         for soup in soups:
             lists += singerList(soup)
-        soup = tree.find('div', {'class': 'pages'})
-        if soup:
-            baseurl = url.split('?')[0]
-            a = soup.find('a', text='«上一页')
-            if a: lists.insert(0, linkItem(a, mode, True, baseurl))
-            a = soup.find('a', text='下一页»')
-            if a: lists.append(linkItem(a, mode, True, baseurl))
+        baseurl = url.split('?')[0]
+        lists = pageList(tree, mode, lists, baseurl)
     return lists
 
 def getList(mode, url):
