@@ -323,6 +323,8 @@ def progListMovie(name, url, cat, filtrs, page, listpage):
             if (p_area != None):
                 p_list += '[COLOR FF00FFFF][' + p_area.encode('utf-8') + '][/COLOR]'
 
+        if not vlist[i]['duration']: #osfans add
+            vlist[i]['duration'] = '0'
         p_dx = int(vlist[i]['duration'])
         if ((p_dx != None) and (p_dx > 0)):
             p_duration= "[%02d:%02d]" %  (int(p_dx / 60), (p_dx % 60))
