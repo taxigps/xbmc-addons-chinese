@@ -1,12 +1,13 @@
 ﻿# -*- coding: utf-8 -*-
 
-import sys
+import sys, os
 import xbmc, xbmcgui, xbmcaddon
 try:
     import simplejson
 except ImportError:
     import json as simplejson
 import httplib
+from bs4 import BeautifulSoup
 
 __addon__      = xbmcaddon.Addon()
 __cwd__        = __addon__.getAddonInfo('path').decode("utf-8")
@@ -28,6 +29,7 @@ CTL_BUTTON_LEFT       = 305
 CTL_BUTTON_RIGHT      = 306
 CTL_BUTTON_IP_ADDRESS = 307
 
+CTL_LABEL_EDIT        = 310
 CTL_LABEL_HEADING     = 311
 
 CTL_BUTTON_BACKSPACE  = 8
@@ -76,7 +78,6 @@ class InputWindow(xbmcgui.WindowXMLDialog):
         self.Kodi14 = False
         self.CTL_NUM_START = 48
         self.CTL_NUM_END   = 57
-        self.CTL_LABEL_EDIT = 310
         self.strEdit = kwargs.get("default").decode('utf-8') or u""
         self.strHeading = kwargs.get("heading") or ""
         self.bIsConfirmed = False
@@ -91,13 +92,6 @@ class InputWindow(xbmcgui.WindowXMLDialog):
 
     def onInit(self):
         try:
-            pCtl = self.getControl(self.CTL_LABEL_EDIT)
-            self.getControl(self.CTL_LABEL_EDIT).setLabel(self.strEdit)
-        except:
-            self.CTL_LABEL_EDIT = 312
-            self.getControl(self.CTL_LABEL_EDIT).setText(self.strEdit)
-            #self.getControl(self.CTL_LABEL_EDIT).setEnabled(False)
-        try:
             pCtl = self.getControl(self.CTL_NUM_START)
         except:
             self.Kodi14 = True
@@ -105,19 +99,56 @@ class InputWindow(xbmcgui.WindowXMLDialog):
             self.CTL_NUM_END   = 109
             self.getControl(CTL_BUTTON_LAYOUT).setLabel("")
         self.initControl()
+        self.CTL_EDIT.setLabel(self.strEdit)
         self.getControl(CTL_LABEL_HEADING).setLabel(self.strHeading)
         self.getControl(CTL_BUTTON_CHINESE).setLabel('中文')
         self.UpdateButtons()
 
     def initControl(self):
-        pEdit = self.getControl(self.CTL_LABEL_EDIT)
-        px = pEdit.getX()
-        py = pEdit.getY()
-        pw = pEdit.getWidth()
-        ph = pEdit.getHeight()
+        skinid = xbmc.getSkinDir()
+        skinpath = xbmcaddon.Addon(skinid).getAddonInfo('path')
+        print skinpath
+        aspect = xbmc.getInfoLabel('Skin.AspectRatio')
+        print aspect
+        f = open(os.path.join(skinpath, 'addon.xml'))
+        data = f.read()
+        soup = BeautifulSoup(data)
+        it = soup.find('res', attrs={"aspect":aspect})
+        print it
+        folder = it.get('folder').encode('utf-8')
+        print folder
+        f = open(os.path.join(skinpath, folder, 'DialogKeyboard.xml'))
+        data = f.read()
+        f.close()
+        soup = BeautifulSoup(data)
+        it = soup.find('control', attrs={"type":"label", "id":"310"})
+        if not it:
+            it = soup.find('control', attrs={"type":"edit", "id":"312"})
+            add = True
+        else:
+            add = False
+        print it
+        try:
+            px = int(it.left.text)
+        except:
+            px = int(it.posx.text)
+        try:
+            py = int(it.top.text)
+        except:
+            py = int(it.posy.text)
+        pw = int(it.width.text)
+        ph = int(it.height.text)
+        font = it.font.text.encode('utf-8')
+        xbfont_center_x = 0x00000002
+        xbfont_center_y = 0x00000004
+        if add:
+            self.CTL_EDIT = xbmcgui.ControlLabel(px, py, pw, ph, '', font, alignment=xbfont_center_y|xbfont_center_x)
+            self.addControl(self.CTL_EDIT)
+        else:
+            self.CTL_EDIT = self.getControl(CTL_LABEL_EDIT)
         self.listw = pw - 95
-        self.CTL_HZCODE = xbmcgui.ControlLabel(px, py + ph, 90, 30, '')
-        self.CTL_HZLIST = xbmcgui.ControlLabel(px + 95, py + ph, pw - 95, 30, '')
+        self.CTL_HZCODE = xbmcgui.ControlLabel(px, py + ph, 90, 30, '', font)
+        self.CTL_HZLIST = xbmcgui.ControlLabel(px + 95, py + ph, pw - 95, 30, '', font)
         self.addControl(self.CTL_HZCODE)
         self.addControl(self.CTL_HZLIST)
 
@@ -278,10 +309,7 @@ class InputWindow(xbmcgui.WindowXMLDialog):
         self.UpdateLabel()
 
     def UpdateLabel(self):
-        if self.CTL_LABEL_EDIT == 310:
-            self.getControl(self.CTL_LABEL_EDIT).setLabel(self.strEdit)
-        else:
-            self.getControl(self.CTL_LABEL_EDIT).setText(self.strEdit)
+        self.CTL_EDIT.setLabel(self.strEdit)
 
     def Backspace(self):
         if self.bChinese and len(self.hzcode)>0:
