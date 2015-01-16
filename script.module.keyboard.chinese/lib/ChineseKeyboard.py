@@ -107,16 +107,12 @@ class InputWindow(xbmcgui.WindowXMLDialog):
     def initControl(self):
         skinid = xbmc.getSkinDir()
         skinpath = xbmcaddon.Addon(skinid).getAddonInfo('path')
-        print skinpath
         aspect = xbmc.getInfoLabel('Skin.AspectRatio')
-        print aspect
         f = open(os.path.join(skinpath, 'addon.xml'))
         data = f.read()
         soup = BeautifulSoup(data)
         it = soup.find('res', attrs={"aspect":aspect})
-        print it
         folder = it.get('folder').encode('utf-8')
-        print folder
         f = open(os.path.join(skinpath, folder, 'DialogKeyboard.xml'))
         data = f.read()
         f.close()
@@ -127,7 +123,6 @@ class InputWindow(xbmcgui.WindowXMLDialog):
             add = True
         else:
             add = False
-        print it
         try:
             px = int(it.left.text)
         except:
