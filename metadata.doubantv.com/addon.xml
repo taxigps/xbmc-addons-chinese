@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="metadata.doubantv.com"
+       name="doubantv"
+       version="1.0.0"
+       provider-name="janplus">
+  <requires>
+    <import addon="xbmc.metadata" version="1.0"/>
+    <import addon="metadata.common.imdb.com" version="2.7.8"/>
+  </requires>
+  <extension point="xbmc.metadata.scraper.tvshows"
+             language="zh"
+             library="doubantv.xml"/>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">Douban TV Scraper</summary>
+    <summary lang="zh">豆瓣电视剧刮削器</summary>
+    <description lang="en">Download TV information from movie.douban.com</description>
+    <description lang="zh">从豆瓣网获取电视剧资料。豆瓣所有的内容，分类，筛选，排序都由用户产生和决定。豆瓣帮助你通过你喜爱的东西找到志同道合者，然后通过他们找到更多的好东西。</description>
+    <platform>all</platform>
+  </extension>
+</addon>
