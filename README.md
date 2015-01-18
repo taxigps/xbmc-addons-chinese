@@ -73,6 +73,10 @@ PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStre
 * subom - service.subtitles.subom - Search and download subtitles from subom.net
 * Shooter(Fake) - service.subtitles.makedie - Search and download subtitles from sub.makedie.me
 
+## TV Scraper Add-ons
+
+* doubantv - metadata.doubantv.com - Download TV information from movie.douban.com
+
 [1]: http://bbs.htpc1.com/forum-225-1.html
 [2]: http://xbmc.org/forum/showthread.php?t=64250
 [3]: https://github.com/taxigps/xbmc-addons-chinese/raw/master/repo/repository.xbmc-addons-chinese/repository.xbmc-addons-chinese-1.2.0.zip
