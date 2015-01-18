@@ -78,11 +78,13 @@ def addfont(addonid, folder):
         else:
             list.append(id)
     sel = xbmcgui.Dialog().select('请选择参照字体(%s)' % (folder.encode('utf-8')), list)
-    xml = fontsets[sel].toxml()
-    xml = re.sub('<filename>.*?</filename>', '<filename>arial.ttf</filename>', xml)
-    xml = re.sub('<fontset id=[^>]*>', '<fontset id="Arial">', xml, 1)
-    arial = minidom.parseString(xml)
-    root.appendChild(arial.documentElement)
+    arial = fontsets[sel].cloneNode(True)
+    arial.setAttribute("id","Arial")
+    arial.removeAttribute("idloc")
+    for node in arial.getElementsByTagName("filename"):
+        newText = doc.createTextNode("arial.ttf")
+        node.replaceChild(newText, node.firstChild)
+    root.appendChild(arial)
     f = open(filepath, 'w')
     doc.writexml(f, addindent="    ", newl="\n")
     f.close()
