@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scraper framework="1.1" date="2013-05-21">
+	<NfoUrl dest="3">
+		<RegExp input="$$1" output="&lt;details&gt;&lt;url function=&quot;GetUrlByIMDBId&quot;&gt;http://movie.douban.com/j/subject_suggest?q=tt\1&lt;/url&gt;&lt;details&gt;" dest="3">
+			<expression>imdb....?/title/tt([0-9]*)</expression>
+		</RegExp>
+		<RegExp input="$$1" output="&lt;details&gt;&lt;url function=&quot;GetUrlByIMDBId&quot;&gt;http://movie.douban.com/j/subject_suggest?q=tt\1&lt;/url&gt;&lt;details&gt;" dest="3+">
+			<expression>imdb....?/Title\?([0-9]*)</expression>
+		</RegExp>
+	</NfoUrl>
+	<GetUrlByIMDBId dest="3">
+		<RegExp input="$$1" output="&lt;details&gt;&lt;url&gt;http://api.douban.com/v2/movie/subject/\1&lt;/url&gt;&lt;id&gt;\1&lt;/id&gt;&lt;details&gt;" dest="3">
+			<expression>&quot;url&quot;:&quot;http:\\/\\/movie.douban.com\\/subject\\/([0-9]+)\\/[^&quot;]*&quot;</expression>
+		</RegExp>
+	</GetUrlByIMDBId>
+	<CreateSearchUrl dest="3">
+		<RegExp input="$$1" output="&lt;url&gt;http://api.douban.com/v2/movie/search?q=\1&lt;/url&gt;" dest="3">
+			<expression noclean="1"/>
+		</RegExp>
+	</CreateSearchUrl>
+	<GetSearchResults dest="8">
+		<RegExp input="$$3" output="&lt;results sorted=&quot;yes&quot;&gt;\1&lt;/results&gt;" dest="8">
+			<RegExp input="$$1" output="&lt;entity&gt;&lt;title&gt;\1 - \2 (\3)&lt;/title&gt;&lt;url&gt;http://api.douban.com/v2/movie/subject/\4&lt;/url&gt;&lt;id&gt;\4&lt;/id&gt;&lt;/entity&gt;" dest="3+">
+				<expression repeat="yes">&quot;title&quot;:&quot;([^&quot;]*)&quot;,&quot;original_title&quot;:&quot;([^&quot;]*)&quot;,&quot;subtype&quot;:&quot;tv&quot;,&quot;directors&quot;:\[[^\]]*\],&quot;year&quot;:&quot;(\d*)&quot;,&quot;images&quot;:\{[^\}]*\},&quot;alt&quot;:&quot;[^&quot;]*&quot;,&quot;id&quot;:&quot;(\d*)&quot;</expression>
+			</RegExp>
+			<expression noclean="1"/>
+		</RegExp>
+	</GetSearchResults>
+	<GetDetails dest="3">
+		<RegExp input="$$5" output="&lt;details&gt;\1&lt;/details&gt;" dest="3">
+			<RegExp input="$$2" output="&lt;id&gt;\1&lt;/id&gt;" dest="5">
+				<expression/>
+			</RegExp>
+			<RegExp input="$$1" output="&lt;title&gt;\1&lt;/title&gt;" dest="5+">
+				<expression noclean="1">&quot;title&quot;:&quot;(.+?)&quot;</expression>
+			</RegExp>
+			<RegExp input="$$1" output="&lt;originaltitle&gt;\1&lt;/originaltitle&gt;&lt;title&gt;\1&lt;/title&gt;" dest="5+">
+				<expression noclean="1">&quot;original_title&quot;:&quot;(.+?)&quot;</expression>
+			</RegExp>
+			<!-- <RegExp input="$$1" output="&lt;premiered&gt;\1-01-01&lt;/premiered&gt;" dest="5+"> -->
+			<!-- 	<expression noclean="1">&quot;year&quot;:&quot;(.+?)&quot;</expression> -->
+			<!-- </RegExp> -->
+			<RegExp input="$$1" output="&lt;votes&gt;\1&lt;/votes&gt;" dest="5+">
+				<expression noclean="1">&quot;ratings_count&quot;:(\d+)</expression>
+			</RegExp>
+			<RegExp input="$$1" output="&lt;rating&gt;\1&lt;/rating&gt;" dest="5+">
+				<expression noclean="1">&quot;average&quot;:([\d\.]+)</expression>
+			</RegExp>
+			<RegExp input="$$1" output="\1" dest="8">
+				<expression noclean="1">&quot;genres&quot;:\[(.+?)\]</expression>
+			</RegExp>
+			<RegExp input="$$8" output="&lt;genre&gt;\1&lt;/genre&gt;" dest="5+">
+				<expression noclean="1" repeat="yes">&quot;(.+?)&quot;</expression>
+			</RegExp>
+			<RegExp input="$$1" output="\1" dest="8">
+				<expression noclean="1">&quot;countries&quot;:\[(.+?)\]</expression>
+			</RegExp>
+			<RegExp input="$$8" output="&lt;country&gt;\1&lt;/country&gt;" dest="5+">
+				<expression noclean="1" repeat="yes">&quot;(.+?)&quot;</expression>
+			</RegExp>
+			<RegExp input="$$1" output="&lt;plot&gt;\1&lt;/plot&gt;" dest="5+">
+				<expression noclean="1">&quot;summary&quot;:&quot;(.+?)&quot;</expression>
+			</RegExp>
+			<RegExp input="$$1" output="\1" dest="8">
+				<expression noclean="1" clear="yes">&quot;directors&quot;:\[(.+?)\]</expression>
+			</RegExp>
+			<RegExp input="$$8" output="&lt;director&gt;\1&lt;/director&gt;" dest="5+">
+				<expression noclean="1" repeat="yes">&quot;name&quot;:&quot;(.+?)&quot;</expression>
+			</RegExp>
+			<RegExp input="$$1" output="\1" dest="8">
+				<expression noclean="1" clear="yes">&quot;writers&quot;:\[(.+?)\]</expression>
+			</RegExp>
+			<RegExp input="$$8" output="&lt;credits&gt;\1&lt;/credits&gt;" dest="5+">
+				<expression noclean="1" repeat="yes">&quot;name&quot;:&quot;(.+?)&quot;</expression>
+			</RegExp>
+			<RegExp input="$$1" output="\1" dest="8">
+				<expression noclean="1" clear="yes">&quot;casts&quot;:\[(.+?)\]</expression>
+			</RegExp>
+			<RegExp input="$$8" output="&lt;actor&gt;&lt;thumb&gt;http://\2/img/celebrity/large/\3.jpg&lt;/thumb&gt;&lt;name&gt;\4&lt;/name&gt;&lt;/actor&gt;" dest="5+">
+				<expression noclean="1" repeat="yes">&quot;avatars&quot;:(null,|.*?&quot;large&quot;:&quot;http:\\/\\/(.+?)\\/img\\/celebrity\\/large\\/(.+?).jpg&quot;.*?)&quot;alt&quot;:.+?&quot;name&quot;:&quot;(.+?)&quot;</expression>
+			</RegExp>
+			<RegExp input="$$2" output="&lt;url cache=&quot;\1-poster.html&quot; function=&quot;GetPoster&quot;&gt;http://movie.douban.com/subject/\1/photos?type=R&lt;/url&gt;" dest="5+">
+				<expression/>
+			</RegExp>
+			<RegExp conditional="!tmdbfanart" input="$$2" output="&lt;url cache=&quot;\1-fanart.html&quot; function=&quot;GetFanart&quot;&gt;http://movie.douban.com/subject/\1/photos?type=S&lt;/url&gt;" dest="5+">
+				<expression/>
+			</RegExp>
+			<RegExp input="$$2" output="&lt;url function=&quot;GetDetailsFromHTML&quot;&gt;http://movie.douban.com/subject/\1&lt;/url&gt;" dest="5+">
+				<expression/>
+			</RegExp>
+			<RegExp input="$$2" output="&lt;episodeguide&gt;&lt;url cache=&quot;\1-eps.html&quot;&gt;http://movie.douban.com/subject/\1&lt;/url&gt;&lt;/episodeguide&gt;" dest="5+">
+				<expression></expression>
+			</RegExp>            
+			<expression noclean="1"/>
+		</RegExp>
+	</GetDetails>	
+	<GetDetailsFromHTML dest="5">
+		<RegExp input="$$6" output="&lt;details&gt;\1&lt;/details&gt;" dest="5">
+            <RegExp input="$$1" output="&lt;premiered&gt;\1&lt;/premiered&gt;" dest="6">
+              <expression noclean="1">首播:&lt;/span&gt;.*?&gt;(.*?)&lt;/span&gt;</expression>
+            </RegExp>
+			<expression noclean="1"/>
+		</RegExp>
+	</GetDetailsFromHTML>
+	<GetPoster dest="5">
+		<RegExp input="$$6" output="&lt;details&gt;\1&lt;/details&gt;" dest="5">
+			<RegExp input="$$1" output="&lt;thumb preview=&quot;\1thumb\2&quot;&gt;\1raw\2&lt;/thumb&gt;" dest="6">
+				<expression repeat="yes" noclean="1,2">&lt;div class=&quot;cover&quot;&gt;\s*&lt;a href=&quot;http://movie.douban.com/photos/photo/[0-9]+/&quot;&gt;\s*&lt;img src=&quot;(http://[^/]+/view/photo/)thumb(/public/[^\.]+\.jpg)&quot; /&gt;</expression>
+			</RegExp>
+			<expression noclean="1"/>
+		</RegExp>
+	</GetPoster>
+	<GetFanart dest="5">
+		<RegExp input="$$6" output="&lt;details&gt;&lt;fanart&gt;\1&lt;/fanart&gt;&lt;/details&gt;" dest="5">
+			<RegExp input="$$1" output="&lt;thumb preview=&quot;\1thumb\2&quot;&gt;\1raw\2&lt;/thumb&gt;" dest="6">
+				<expression repeat="yes" noclean="1,2">&lt;div class=&quot;cover&quot;&gt;\s*&lt;a href=&quot;http://movie.douban.com/photos/photo/[0-9]+/&quot;&gt;\s*&lt;img src=&quot;(http://[^/]+/view/photo/)thumb(/public/[^\.]+\.jpg)&quot; /&gt;</expression>
+			</RegExp>
+			<expression noclean="1"/>
+		</RegExp>
+	</GetFanart>
+
+    <!-- Douban API does not provide episode info -->
+	<GetEpisodeList dest="8">
+		<RegExp input="$$9" output="&lt;episodeguide&gt;\1&lt;/episodeguide&gt;" dest="8">
+		  <RegExp input="$$2" output="\1" dest="13">
+		    <expression>subject/(\d+)</expression>
+		  </RegExp>
+          <RegExp input="$$1" output="\1" dest="14">
+            <expression>&quot;episode_list&quot;&gt;(.*?)&lt;/div&gt;</expression>
+          </RegExp>
+          <RegExp input="$$14" output="&lt;episode&gt;&lt;url cache=&quot;douban-$$13-\1.html&quot;&gt;http://movie.douban.com/subject/$$13/episode/\1&lt;/url&gt;&lt;epnum&gt;\1&lt;/epnum&gt;&lt;season&gt;1&lt;/season&gt;&lt;/episode&gt;" dest="9">
+            <expression repeat="yes">(\d+)</expression>
+          </RegExp>
+		  <expression noclean="1"/>
+		</RegExp>
+	</GetEpisodeList>
+
+	<GetEpisodeDetails dest="4">
+		<RegExp input="$$5" output="&lt;details&gt;\1&lt;/details&gt;" dest="4">
+			<RegExp input="$$3" output="\1" dest="9">
+			  <expression>episode/(\d+)</expression>
+			</RegExp>
+			<RegExp input="$$1" output="&lt;title&gt;\1&lt;/title&gt;" dest="5+">
+			  <expression trim="1,2">&lt;title&gt;(.*?)&lt;/title&gt;</expression>
+			</RegExp>
+			<RegExp input="$$1" output="&lt;plot&gt;\1&lt;/plot&gt;" dest="5+">
+			  <expression trim="1,2">&lt;p id=&quot;link-report&quot;&gt;.*?&lt;span class=&quot;all&quot;&gt;(.*?)&lt;/span&gt;</expression>
+			</RegExp>
+			<expression noclean="1"/>
+		</RegExp>
+	</GetEpisodeDetails>
+  </scraper>
