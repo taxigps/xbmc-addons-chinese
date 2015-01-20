@@ -5,8 +5,17 @@
 
 import os, sys, re, zipfile, shutil
 
+def cp(src, dst):
+    if os.path.exists(src):
+        shutil.copyfile(src, dst)
+
 def release(plugin, version):
     # zip dir
+    zipdir = 'repo/%s' % (plugin)
+    if not os.path.exists(zipdir):
+        os.mkdir(zipdir)
+
+    # zip repo
     zipname = 'repo/%s/%s-%s.zip' % (plugin, plugin, version)
     f = zipfile.ZipFile(zipname, 'w', zipfile.ZIP_DEFLATED)
     for dirpath, dirnames, filenames in os.walk(plugin):
@@ -14,11 +23,15 @@ def release(plugin, version):
             f.write(os.path.join(dirpath,filename))
     f.close()
 
+    # copy icon
+    src = '%s/icon.png' % (plugin)
+    dst = 'repo/%s/icon.png' % (plugin)
+    cp(src, dst)
+
     # copy change log
     src = '%s/changelog.txt' % plugin
-    if os.path.lexists(src):
-        dst = 'repo/%s/changelog-%s.txt' % (plugin, version)
-        shutil.copyfile(src, dst)
+    dst = 'repo/%s/changelog-%s.txt' % (plugin, version)
+    cp(src, dst)
 
 def getVersion(plugin):
     name = '%s/addon.xml' % plugin
