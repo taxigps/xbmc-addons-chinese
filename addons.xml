@@ -150,6 +150,22 @@
     </extension>
 </addon>
 
+<addon id="plugin.video.bilibili" name="bilibili" version="0.2.1" provider-name="Syndim">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+    <import addon="script.module.xbmcswift2" version="2.4.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="addon.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <platform>all</platform>
+    <language></language>
+    <summary>XBMC Bilibili Plugin</summary>
+    <description>XBMC BiliBili Plugin</description>
+  </extension>
+</addon>
+
 <addon id="plugin.video.cntv-live" name="CNTV Live 中国网络电视台直播" version="2.0.6" provider-name="RunasSudo">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0" />
