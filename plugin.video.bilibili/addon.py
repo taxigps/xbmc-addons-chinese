@@ -83,7 +83,7 @@ def _play_video(urls_info, show_comments='1'):
         player.show_subtitle = False
     player.play(playlist)
     #while(not xbmc.abortRequested):
-    #    xbmc.sleep(100)
+    xbmc.sleep(100)
 
 
 # 首页
