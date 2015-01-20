@@ -23,7 +23,7 @@ class Bili():
         self.LIST_TYPE = LIST_TYPE                                  # 列表类型
         self.INTERFACE_URL = INTERFACE_URL                          # 视频地址请求页面地址
         self.COMMENT_URL = COMMENT_URL                              # 评论页面地址
-        self.URL_PARAMS = re.compile('cid=(\d+)&aid=\d+')           # 匹配视频请求ID(cid)
+        self.URL_PARAMS = re.compile('cid=(\d+)&(?:bili-)?aid=\d+')           # 匹配视频请求ID(cid)
         self.URL_PARAMS2 = re.compile("cid:'(\d+)'")                # 匹配另一种页面上的视频请求ID(cid)
         # 匹配视频列表
         self.PARTS = re.compile("<option value=.{1}(/video/av\d+/index_\d+\.html).*>(.*)</option>")
