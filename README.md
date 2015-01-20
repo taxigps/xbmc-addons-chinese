@@ -63,6 +63,7 @@ PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStre
 * 豆瓣FM(DoubanFM) - plugin.audio.doubanfm - Douban online radio
 * 酷狗电台(KugouFM) - plugin.audio.kugoufm - Kugou FM radio
 * 酷我音乐盒(KuwoBox) - plugin.audio.kuwobox - KuwoBox online music
+* 中国广播(Radiocn) - plugin.audio.radiocn - Radio.cn online radio
 
 ## Program Add-ons
 
