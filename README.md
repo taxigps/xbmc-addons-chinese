@@ -34,14 +34,14 @@ For proper Chinese text display on xbmc, do the following steps:
 
 * 5ivdo(5ivdo) - plugin.video.5ivdo - Online video from www.5ivdo.com
 * 哔哩哔哩(bilibili) - plugin.video.bilibili - Online video from www.bilibili.com
-* CNTV Live 中国网络电视台直播 - plugin.video.cntv-live - TV live channels from cntv.cn
+* CNTV Live 中国网络电视台直播 - plugin.video.cntv-live - TV live channels from www.cntv.cn
 * 风行视频(Funshion) - plugin.video.funshion - Online videos from www.funshion.com
 * 酷6云中剧场(Ku6) - plugin.video.ku6 - Online video from www.juchang.com
 * 乐视网(LeTV) - plugin.video.letv - Online video from www.letv.com.cn
 * PPS影音(PPS.tv) - plugin.video.pps - Video from PPS for client side playback
 * PPS网络电视(PPStream) - plugin.video.ppstream - PPS online tv and movies
 * PPTV视频 - plugin.video.pptv - Online videos from www.pptv.com
-* 搜狐视频(SoHu) - plugin.video.sohuvideo - Online video from tv.sohu.com
+* 搜狐视频(SoHu) - plugin.video.sohuvideo - Online video from [tv.sohu.com](http://tv.sohu.com/)
 * 音悦台MV(YinYueTai) - plugin.video.yinyuetai - MV from www.yinyuetai.com
 * 优酷视频(YouKu) - plugin.video.youku - Online tv and movies from www.youku.com
 * 优酷视频2(YouKu2) - plugin.video.youku2 - Online tv and movies from www.youku.com
@@ -57,13 +57,13 @@ PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStre
 
 ## Music Add-ons
 
-* 一听音乐 - plugin.audio.1ting - 1ting online music
-* 百度随心听 - plugin.audio.baidufm - Baidu fm music
-* 百度电台联盟(BaiduRadio) - plugin.audio.baiduradio - Baidu online radio
-* 豆瓣FM(DoubanFM) - plugin.audio.doubanfm - Douban online radio
-* 酷狗电台(KugouFM) - plugin.audio.kugoufm - Kugou FM radio
-* 酷我音乐盒(KuwoBox) - plugin.audio.kuwobox - KuwoBox online music
-* 中国广播(Radiocn) - plugin.audio.radiocn - Radio.cn online radio
+* 一听音乐 - plugin.audio.1ting - [1ting](http://www.1ting.com) online music
+* 百度随心听 - plugin.audio.baidufm - [Baidu](http://fm.baidu.com) FM music
+* 百度电台联盟(BaiduRadio) - plugin.audio.baiduradio - [Baidu](http://list.mp3.baidu.com/radio/iframe.html) FM radio
+* 豆瓣FM(DoubanFM) - plugin.audio.doubanfm - [Douban](http://douban.fm/) FM music
+* 酷狗电台(KugouFM) - plugin.audio.kugoufm - [Kugou](http://m.kugou.com) FM music
+* 酷我音乐盒(KuwoBox) - plugin.audio.kuwobox - [KuwoBox](http://www.kuwo.cn/) online music
+* 中国广播(Radiocn) - plugin.audio.radiocn - [Radio.cn](http://www.radio.cn/) FM radio
 
 ## Program Add-ons
 
@@ -72,8 +72,8 @@ PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStre
 ## Subtitle Add-ons
 
 * Sub HD - service.subtitles.subhd - Search and download subtitles from www.subhd.com
-* subom - service.subtitles.subom - Search and download subtitles from subom.net
-* Shooter(Fake) - service.subtitles.makedie - Search and download subtitles from sub.makedie.me
+* subom - service.subtitles.subom - Search and download subtitles from [subom](http://subom.net/)
+* Shooter(Fake) - service.subtitles.makedie - Search and download subtitles from [sub.makedie.me](http://sub.makedie.me)
 
 ## TV Scraper Add-ons
 
