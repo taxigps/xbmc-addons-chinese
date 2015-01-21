@@ -59,11 +59,11 @@ PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStre
 
 * 一听音乐 - plugin.audio.1ting - [1ting](http://www.1ting.com) online music
 * 百度随心听 - plugin.audio.baidufm - [Baidu](http://fm.baidu.com) FM music
-* 百度电台联盟(BaiduRadio) - plugin.audio.baiduradio - [Baidu](http://list.mp3.baidu.com/radio/iframe.html) FM radio
+* 百度电台联盟(BaiduRadio) - plugin.audio.baiduradio - [Baidu](http://list.mp3.baidu.com/radio/iframe.html) radio
 * 豆瓣FM(DoubanFM) - plugin.audio.doubanfm - [Douban](http://douban.fm/) FM music
 * 酷狗电台(KugouFM) - plugin.audio.kugoufm - [Kugou](http://m.kugou.com) FM music
 * 酷我音乐盒(KuwoBox) - plugin.audio.kuwobox - [KuwoBox](http://www.kuwo.cn/) online music
-* 中国广播(Radiocn) - plugin.audio.radiocn - [Radio.cn](http://www.radio.cn/) FM radio
+* 中国广播(Radiocn) - plugin.audio.radiocn - [Radio.cn](http://www.radio.cn/) radio
 
 ## Program Add-ons
 
