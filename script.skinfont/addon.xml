@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.skinfont"
-    name="Skin Font" version="1.0.1" provider-name="taxigps">
+    name="Skin Font" version="1.0.2" provider-name="taxigps">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
   </requires>

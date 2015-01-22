@@ -67,23 +67,28 @@ def addfont(addonid, folder):
     root = doc.documentElement
     fontsets = root.getElementsByTagName('fontset')
     list = []
+    arial_pos = None
     for i in range(0,len(fontsets)):
         id = fontsets[i].getAttribute('id')
         if id.lower() == 'arial':
             ret = xbmcgui.Dialog().yesno('Skin Font', 'Arial皮肤字体已存在。', '要重新生成Arial字体吗？')
             if not ret:
                 return
-            root.removeChild(fontsets[i])
-            del fontsets[i]
-        else:
-            list.append(id)
+            arial_pos = i
+        list.append(id)
     sel = xbmcgui.Dialog().select('请选择参照字体(%s)' % (folder.encode('utf-8')), list)
+    if sel < 0:
+        return
     arial = fontsets[sel].cloneNode(True)
     arial.setAttribute("id","Arial")
-    arial.removeAttribute("idloc")
+    if arial.getAttribute("idloc") and sel != arial_pos:
+        arial.removeAttribute("idloc")
     for node in arial.getElementsByTagName("filename"):
         newText = doc.createTextNode("arial.ttf")
         node.replaceChild(newText, node.firstChild)
+    if arial_pos:
+        root.removeChild(fontsets[arial_pos])
+        del fontsets[arial_pos]
     root.appendChild(arial)
     f = open(filepath, 'w')
     doc.writexml(f, addindent="    ", newl="\n")
