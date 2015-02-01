@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.module.keyboard.chinese"
     name="Chinese keyboard"
-    version="2.0.3"
+    version="2.0.4"
     provider-name="Taxigps">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>

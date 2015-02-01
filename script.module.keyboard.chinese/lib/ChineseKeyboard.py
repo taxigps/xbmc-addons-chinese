@@ -9,9 +9,13 @@ except ImportError:
 import httplib
 from bs4 import BeautifulSoup
 
-__addon__      = xbmcaddon.Addon()
-__cwd__        = __addon__.getAddonInfo('path').decode("utf-8")
+__addon__      = xbmcaddon.Addon("script.module.keyboard.chinese")
 __language__   = __addon__.getLocalizedString
+__cwd__        = xbmc.translatePath(__addon__.getAddonInfo('path')).decode("utf-8")
+__profile__    = xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode("utf-8")
+
+XBMC_SKIN  = xbmc.getSkinDir()
+SKINS_PATH = os.path.join(__profile__, "resources", "skins")
 
 ACTION_PREVIOUS_MENU = 10
 
@@ -30,7 +34,11 @@ CTL_BUTTON_RIGHT      = 306
 CTL_BUTTON_IP_ADDRESS = 307
 
 CTL_LABEL_EDIT        = 310
+CTL_EDIT_EDIT         = 312
 CTL_LABEL_HEADING     = 311
+
+CTL_LABEL_HZCODE      = 400
+CTL_LABEL_HZLIST      = 401
 
 CTL_BUTTON_BACKSPACE  = 8
 
@@ -98,54 +106,12 @@ class InputWindow(xbmcgui.WindowXMLDialog):
             self.CTL_NUM_START = 100
             self.CTL_NUM_END   = 109
             self.getControl(CTL_BUTTON_LAYOUT).setLabel("")
-        self.initControl()
-        self.CTL_EDIT.setLabel(self.strEdit)
+        pEdit = self.getControl(CTL_LABEL_EDIT)
+        self.listw = pEdit.getWidth() - 95
+        self.getControl(CTL_LABEL_EDIT).setLabel(self.strEdit)
         self.getControl(CTL_LABEL_HEADING).setLabel(self.strHeading)
         self.getControl(CTL_BUTTON_CHINESE).setLabel('中文')
         self.UpdateButtons()
-
-    def initControl(self):
-        skinid = xbmc.getSkinDir()
-        skinpath = xbmcaddon.Addon(skinid).getAddonInfo('path')
-        aspect = xbmc.getInfoLabel('Skin.AspectRatio')
-        f = open(os.path.join(skinpath, 'addon.xml'))
-        data = f.read()
-        soup = BeautifulSoup(data)
-        it = soup.find('res', attrs={"aspect":aspect})
-        folder = it.get('folder').encode('utf-8')
-        f = open(os.path.join(skinpath, folder, 'DialogKeyboard.xml'))
-        data = f.read()
-        f.close()
-        soup = BeautifulSoup(data)
-        it = soup.find('control', attrs={"type":"label", "id":"310"})
-        if not it:
-            it = soup.find('control', attrs={"type":"edit", "id":"312"})
-            add = True
-        else:
-            add = False
-        try:
-            px = int(it.left.text)
-        except:
-            px = int(it.posx.text)
-        try:
-            py = int(it.top.text)
-        except:
-            py = int(it.posy.text)
-        pw = int(it.width.text)
-        ph = int(it.height.text)
-        font = it.font.text.encode('utf-8')
-        xbfont_center_x = 0x00000002
-        xbfont_center_y = 0x00000004
-        if add:
-            self.CTL_EDIT = xbmcgui.ControlLabel(px, py, pw, ph, '', font, alignment=xbfont_center_y|xbfont_center_x)
-            self.addControl(self.CTL_EDIT)
-        else:
-            self.CTL_EDIT = self.getControl(CTL_LABEL_EDIT)
-        self.listw = pw - 95
-        self.CTL_HZCODE = xbmcgui.ControlLabel(px, py + ph, 90, 30, '', font)
-        self.CTL_HZLIST = xbmcgui.ControlLabel(px + 95, py + ph, pw - 95, 30, '', font)
-        self.addControl(self.CTL_HZCODE)
-        self.addControl(self.CTL_HZLIST)
 
     def onFocus(self, controlId):
         self.controlId = controlId
@@ -199,7 +165,7 @@ class InputWindow(xbmcgui.WindowXMLDialog):
                     if ch >= ord('A') and ch <= ord('Z'):
                         if self.bChinese:
                             self.hzcode += chr(ch + 32)
-                            self.CTL_HZCODE.setLabel(self.hzcode)
+                            self.getControl(CTL_LABEL_HZCODE).setLabel(self.hzcode)
                             self.GetChineseWord()
                         else:
                             if self.keyType <> CAPS:
@@ -209,7 +175,7 @@ class InputWindow(xbmcgui.WindowXMLDialog):
                         i = self.pos + ch -48
                         if i < (self.pos + self.num):
                             self.hzcode = ""
-                            self.CTL_HZCODE.setLabel(self.hzcode)
+                            self.getControl(CTL_LABEL_HZCODE).setLabel(self.hzcode)
                             self.Character(self.words[i])
                     elif self.bChinese and ch in (ord('<'), ord(',')) and len(self.words) > 0:
                         self.ChangeWordList(-1)
@@ -230,12 +196,12 @@ class InputWindow(xbmcgui.WindowXMLDialog):
         if self.bChinese:
             # show the button depressed
             self.getControl(CTL_BUTTON_CHINESE).setSelected(True)
-            self.CTL_HZCODE.setVisible(True)
-            self.CTL_HZLIST.setVisible(True)
+            self.getControl(CTL_LABEL_HZCODE).setVisible(True)
+            self.getControl(CTL_LABEL_HZLIST).setVisible(True)
         else:
             self.getControl(CTL_BUTTON_CHINESE).setSelected(False)
-            self.CTL_HZCODE.setVisible(False)
-            self.CTL_HZLIST.setVisible(False)
+            self.getControl(CTL_LABEL_HZCODE).setVisible(False)
+            self.getControl(CTL_LABEL_HZLIST).setVisible(False)
         if self.keyType == CAPS:
             self.getControl(CTL_BUTTON_CAPS).setSelected(True)
         else:
@@ -304,12 +270,12 @@ class InputWindow(xbmcgui.WindowXMLDialog):
         self.UpdateLabel()
 
     def UpdateLabel(self):
-        self.CTL_EDIT.setLabel(self.strEdit)
+        self.getControl(CTL_LABEL_EDIT).setLabel(self.strEdit)
 
     def Backspace(self):
         if self.bChinese and len(self.hzcode)>0:
             self.hzcode = self.hzcode[:-1]
-            self.CTL_HZCODE.setLabel(self.hzcode)
+            self.getControl(CTL_LABEL_HZCODE).setLabel(self.hzcode)
             self.GetChineseWord()
         elif len(self.strEdit) > 0:
             self.strEdit = self.strEdit[:-1]
@@ -331,7 +297,7 @@ class InputWindow(xbmcgui.WindowXMLDialog):
                 i = self.pos + iButton - self.CTL_NUM_START
                 if i < (self.pos + self.num):
                     self.hzcode = ""
-                    self.CTL_HZCODE.setLabel(self.hzcode)
+                    self.getControl(CTL_LABEL_HZCODE).setLabel(self.hzcode)
                     self.Character(self.words[i])
             else:
                 self.Character(chr(iButton - self.CTL_NUM_START + 48))
@@ -346,7 +312,7 @@ class InputWindow(xbmcgui.WindowXMLDialog):
             elif self.keyType == LOWER:
                 if self.bChinese:
                   self.hzcode += ch
-                  self.CTL_HZCODE.setLabel(self.hzcode)
+                  self.getControl(CTL_LABEL_HZCODE).setLabel(self.hzcode)
                   self.GetChineseWord()
                   return
             self.Character(ch)
@@ -367,7 +333,7 @@ class InputWindow(xbmcgui.WindowXMLDialog):
                 return False
             self.api_bg += 20
             self.api_ed += 20
-        self.CTL_HZLIST.setLabel("")
+        self.getControl(CTL_LABEL_HZLIST).setLabel("")
         if len(self.hzcode) > 0:
             url = BAIDU_API_URL % (self.hzcode, self.api_bg, self.api_ed)
             httpdata = self.HTTP.Get(url)
@@ -426,16 +392,17 @@ class InputWindow(xbmcgui.WindowXMLDialog):
         if self.pos > 0: hzlist = '<' + hzlist
         if (self.pos + self.num < len(self.words)) or self.GetChineseWord(False):
             hzlist += '>'
-        self.CTL_HZLIST.setLabel(hzlist)
+        self.getControl(CTL_LABEL_HZLIST).setLabel(hzlist)
 
 class Keyboard:
     def __init__( self, default='', heading='' ):
         self.bIsConfirmed = False
         self.strEdit = default
         self.strHeading = heading
+        self.initWindowXML()
 
     def doModal (self):
-        self.win = InputWindow("DialogKeyboard.xml", __cwd__, heading=self.strHeading, default=self.strEdit )
+        self.win = InputWindow("DialogKeyboardChinese.xml", __profile__, XBMC_SKIN, heading=self.strHeading, default=self.strEdit )
         self.win.doModal()
         self.bIsConfirmed = self.win.isConfirmed()
         self.strEdit = self.win.getText()
@@ -449,3 +416,78 @@ class Keyboard:
 
     def getText(self):
         return self.strEdit
+
+    def initWindowXML(self):
+        skinpath = xbmc.translatePath(xbmcaddon.Addon(XBMC_SKIN).getAddonInfo('path')).decode("utf-8")
+        aspect = xbmc.getInfoLabel('Skin.AspectRatio')
+        with open(os.path.join(skinpath, 'addon.xml')) as xmlfile:
+            data = xmlfile.read()
+        xmlfile.close()
+        soup = BeautifulSoup(data)
+        it = soup.find('res', attrs={"aspect":aspect})
+        folder = it.get('folder')
+
+        xmlpath = os.path.join(SKINS_PATH, XBMC_SKIN, folder, "DialogKeyboardChinese.xml")
+        if os.path.exists(xmlpath):
+            return
+
+        try: os.makedirs(os.path.join(SKINS_PATH, XBMC_SKIN, folder))
+        except: pass
+        with open(os.path.join(skinpath, folder, 'DialogKeyboard.xml')) as xmlfile:
+            data = xmlfile.read()
+        xmlfile.close()
+        soup = BeautifulSoup(data)
+        it = soup.find('control', attrs={"type":"label", "id":CTL_LABEL_EDIT})
+        if not it:
+            it = soup.find('control', attrs={"type":"edit", "id":CTL_EDIT_EDIT})
+            it['id'] = CTL_LABEL_EDIT
+            it['type'] = 'label'
+        try:
+            px = int(it.left.text)
+        except:
+            px = int(it.posx.text)
+        try:
+            py = int(it.top.text)
+        except:
+            py = int(it.posy.text)
+        pw = int(it.width.text)
+        ph = int(it.height.text)
+        font = it.font.text.encode('utf-8')
+        tag_HZCODE = self.newLabelTag(soup, CTL_LABEL_HZCODE, px, py + ph, 90, 30, font)
+        tag_HZLIST = self.newLabelTag(soup, CTL_LABEL_HZLIST, px + 95, py + ph, pw - 95, 30, font)
+        it.parent.append(tag_HZCODE)
+        it.parent.append(tag_HZLIST)
+
+        it = soup.find('control', attrs={"id":CTL_BUTTON_CHINESE})
+        it['type'] = 'radiobutton'
+        it = soup.find('control', attrs={"id":CTL_BUTTON_CAPS})
+        it['type'] = 'radiobutton'
+        it = soup.find('control', attrs={"id":CTL_BUTTON_SYMBOLS})
+        it['type'] = 'radiobutton'
+
+        with open(xmlpath, "wb") as xmlfile:
+            xmlfile.write(str(soup))
+        xmlfile.close()
+        #xbmc.executebuiltin("ReloadSkin()")
+
+    def newLabelTag(self, soup, id, x, y, w, h, font):
+        tag_control = soup.new_tag('control', id=id, type="label")
+        tag_left = soup.new_tag('left')
+        tag_left.string = str(x)
+        tag_control.append(tag_left)
+        tag_top = soup.new_tag('top')
+        tag_top.string = str(y)
+        tag_control.append(tag_top)
+        tag_width = soup.new_tag('width')
+        tag_width.string = str(w)
+        tag_control.append(tag_width)
+        tag_height = soup.new_tag('height')
+        tag_height.string = str(h)
+        tag_control.append(tag_height)
+        tag_font = soup.new_tag('font')
+        tag_font.string = font
+        tag_control.append(tag_font)
+        tag_textcolor = soup.new_tag('textcolor')
+        tag_textcolor.string = 'yellow'
+        tag_control.append(tag_textcolor)
+        return tag_control
