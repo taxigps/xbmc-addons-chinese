@@ -205,7 +205,7 @@ def progList(name,id,page,cat,area,year,p5,p6,p11,order):
         dialog = xbmcgui.Dialog()
         ok = dialog.ok(__addonname__, '没有符合此条件的视频！')
     else:
-        matchpages = re.compile('<a href="[^"]*">(\d+)</a>', re.DOTALL).findall(match[0])
+        matchpages = re.compile('<a title="\d+" href="[^"]*">(\d+)</a>', re.DOTALL).findall(match[0])
         totalpages = int(matchpages[-1])
         if totalpages < currpage:
             totalpages = currpage
