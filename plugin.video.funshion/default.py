@@ -11,8 +11,9 @@ except ImportError:
 ########################################################################
 # 风行视频(Funshion)"
 ########################################################################
-# v1.0.11 2014.06.15 (cmeng)
-# - Add handler for unsupported catalog in seriesList
+# v1.0.13 2015.02.14 (cmeng)
+# - Change algorithm for auto filter extraction
+# - Update video list extract per new site site
 
 # Plugin constants 
 __addon__     = xbmcaddon.Addon()
@@ -20,8 +21,13 @@ __addonname__ = __addon__.getAddonInfo('name')
 __profile__     = xbmc.translatePath(__addon__.getAddonInfo('profile'))
 cookieFile = __profile__ + 'cookies.funshion'
 
-CHANNEL_LIST = [['电影','movie'],['电视剧','tv'],['动漫','cartoon'],['综艺','variety'],['新闻','news'],['娱乐','ent'],['体育','sports'],['搞笑','joke'],['时尚','fashion'],['生活','life'],['旅游','tour'],['科技','tech']]
-ORDER_LIST = [['mo','最近更新'], ['z4','最受欢迎'], ['ka','评分最高'], ['re','最新上映']]
+#CHANNEL_LIST = [['电影','movie'],['电视剧','tv'],['动漫','cartoon'],['综艺','variety'],['新闻','news'],['娱乐','ent'],['体育','sports'],['搞笑','joke'],['时尚','fashion'],['生活','life'],['旅游','tour'],['科技','tech']]
+CHANNEL_LIST = [['c-e794b5e5bdb1', '电影'], ['c-e794b5e8a786e589a7', '电视剧'], ['c-e58aa8e6bcab', '动漫'], ['c-e7bbbce889ba', '综艺'], ['c-e5beaee794b5e5bdb1', '微电影'], \
+ ['c-e99fb3e4b990', '音乐'], ['c-e7baaae5bd95e78987', '纪录片'], ['c-e5a8b1e4b990', '娱乐'], ['c-e4bd93e882b2', '体育'], ['c-e6909ee7ac91', '搞笑'], \
+ ['c-e696b0e997bb', '新闻'], ['c-e69785e6b8b8', '旅游'], ['c-e6b1bde8bda6', '汽车'], ['c-e6b8b8e6888f', '游戏'], ['c-e7be8ee5a5b3', '美女'], \
+ ['c-e697b6e5b09a', '时尚'], ['c-e6af8de5a9b4', '母婴'], ['c-e581a5e5bab7', '健康'], ['c-e7a791e68a80', '科技'], ['c-e7949fe6b4bb', '生活'], ['c-e5869be4ba8b', '军事']]
+
+SERIES_LIST = ['电视剧', '动漫', '综艺']
 COLOR_LIST = ['[COLOR FFFF0000]','[COLOR FF00FF00]','[COLOR FFFFFF00]','[COLOR FF00FFFF]','[COLOR FFFF00FF]']
 
 RES_LIST = [['tv','标清'], ['dvd','高清'], ['high-dvd','超清']]
@@ -78,48 +84,51 @@ def searchDict(dlist,idx):
 
 ##################################################################################
 # Routine to fetch and build video filter list
+# Filters are automatically extracted for each category.
 # Common routine for all categories
 ##################################################################################
 def getListSEL(listpage):
     titlelist = []
     catlist = []
     itemList = []
-
+    
     # extract categories selection
-    match = re.compile('<div class="sort-.+?fix">(.+?)</ul>', re.DOTALL).findall(listpage)
+    match = re.compile('<div class="ls-nav-bar.+?>(.+?)</div>', re.DOTALL).findall(listpage)
     for k, list in enumerate(match):
-        title = re.compile('<div class="select-subtitle">(.+?)</div>').findall(list)
-        itemLists = re.compile('<a href="/[a-z]+?/[a-z]+?/(.+?)/".+?>(.+?)</a>').findall(list)
+        title = re.compile('<label class="bar-name">(.+?)</label>').findall(list)
+        itemLists = re.compile('<a href="/[a-z]+?/(.+?)/">(.+?)</a>').findall(list)
         if (len(itemLists) > 1):
             itemList  = [[x[0],x[1].strip()] for x in itemLists]
-    
             item1 = itemList[0][0].split('.')
             item2 = itemList[1][0].split('.')
-            ilist = len(item1)
-            # find the variable location
-            for j in range(ilist):
-                if (item1[j] == item2[j]): continue
-                break
-
+            ilist1 = len(item1)
+            ilist2 = len(item2)
+            
+            # get the index of the current item variables 
+            for j in range(ilist2):
+                if not (item2[j] in item1):
+                    break
+                
             icnt = len(itemList)
-            for i in range (icnt-1, -1, -1): # must do in reverse to remove item
+            # must do in reverse if to remove any item from array
+            for i in range (icnt-1, -1, -1):
                 if (itemList[i][1] == "取消选中"):
                     itemList.remove(itemList[i])
                     continue
-                itemx = itemList[i][0].split('.')
-                itemList[i][0] = itemx[j]
-            titlelist.append(title[0])
+                # no filter for first item selection i.e. "全部"
+                if (i == 0) and (ilist1 < ilist2):
+                    itemList[i][0] = ''
+                else:
+                    itemx = itemList[i][0].split('.')
+                    itemList[i][0] = itemx[j]
+            
+            if len(title):
+                titlelist.append(title[0])
+            else: # Order selection - missing label
+                titlelist.append('排序方式')
             catlist.append(itemList)
+            # print k, itemLists, title, itemList   
 
-    # extract order selection if any
-    matchp = re.compile('<div class="sort-tab-line bgcfff fix">(.+?)</div>', re.DOTALL).findall(listpage)
-    if len(matchp):
-        titlelist.append('排序方式')
-        itemLists = re.compile('<a href="/[a-z]+?/[a-z]+?/(.+?)\..+?><span>(.+?)</span>').findall(matchp[0])
-        itemList  = [[x[0],x[1].strip()] for x in itemLists]
-    catlist.append(itemList)
-
-    # print titlelist, catlist
     return titlelist, catlist   
 
 ##################################################################################
@@ -133,6 +142,9 @@ def updateListSEL(name, type, cat, filtrs, page, listpage):
     cat =''
     selection = ''
     for icat, title in enumerate(titlelist):
+        # skip video category selection
+        if (title == "分类"): 
+            continue
         fltrList = [x[0] for x in catlist[icat]]
         list = [x[1] for x in catlist[icat]]
         sel = -1
@@ -149,7 +161,8 @@ def updateListSEL(name, type, cat, filtrs, page, listpage):
             ctype += title
         cat += COLOR_LIST[icat%5] + ctype + '[/COLOR]|'
         selx = catlist[icat][sel][0]
-        selection += '.'+selx
+        if (selx != ''): # no need to add blank filter
+            selection += '.'+selx
     filtrs = selection
     cat = cat[:-1]
     
@@ -161,8 +174,12 @@ def updateListSEL(name, type, cat, filtrs, page, listpage):
 def rootList():
     totalItems = len(CHANNEL_LIST)
     cat = "全部"
-    for name, type in CHANNEL_LIST:
-        li = xbmcgui.ListItem(name)
+    # for i, type, name in enumerate(CHANNEL_LIST):
+    i = 0 
+    for type, name in CHANNEL_LIST:
+        i += 1
+        ilist = "[COLOR FF00FFFF]%s. %s[/COLOR]" % (i, name)
+        li = xbmcgui.ListItem(ilist)
         u = sys.argv[0]+"?mode=1&name="+urllib.quote_plus(name)+"&type="+urllib.quote_plus(type)+"&cat="+cat+"&filtrs=&page=1"+"&listpage="
         xbmcplugin.addDirectoryItem(int(sys.argv[1]),u,li,True,totalItems)
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -171,20 +188,22 @@ def rootList():
 def progList(name, type, cat, filtrs, page, listpage):
     if page is None: page = 1
     # p_url = 'http://list.funshion.com/%s/pg-%s%s/'
-    p_url = 'http://www.funshion.com/list/%s/pg-%s%s/'
+    ## p_url = 'http://www.funshion.com/list/%s/pg-%s%s/'
+    p_url = "http://www.fun.tv/retrieve/%s.n-e5bdb1e78987%s.pg-%s"
+    
     if  (listpage == None):
-        url = p_url % (type, page, '.s-e6ada3e78987')
+        url = p_url % (type, '', page)
         link = getHttpData(url)
 
-        match = re.compile('<div class="select-title"(.+?</div>)</div>', re.DOTALL).findall(link)
+        match = re.compile('<div class="ls-nav">(.+?</div>)</div>', re.DOTALL).findall(link)
         if match:
             listpage = match[0]
-        match = re.compile('<div class="sort-tab fix">(.+?</div>)', re.DOTALL).findall(link)
+        match = re.compile('<div class="ls-sort">(.+?</div>)', re.DOTALL).findall(link)
         if len(match):
             listpage += match[0]
         cat = updateListSEL(name, type, cat, filtrs, 0, listpage)
     else:
-        url = p_url % (type, page, filtrs)
+        url = p_url % (type, filtrs, page)
         link=getHttpData(url)
 
     # Fetch & build video titles list for user selection, highlight user selected filtrs  
@@ -194,10 +213,10 @@ def progList(name, type, cat, filtrs, page, listpage):
     
     if link == None: return
     # Movie, Video, Series, Variety & Music types need different routines
-    if type in ('tv', 'cartoon', 'variety'): # 电视剧, 动漫,  综艺
+    if name in SERIES_LIST:
         isdir = True
         mode = 2
-    elif type in ('movie'): # 电影
+    elif name in ('电影'): # 电影
         isdir = False
         mode = 3
     else: # 娱乐,新闻,体育,搞笑,时尚,生活,旅游,科技
@@ -206,23 +225,24 @@ def progList(name, type, cat, filtrs, page, listpage):
         playlist=xbmc.PlayList(0) # use Music playlist for temporary storage
         playlist.clear()
  
-    match = re.compile("<div class='item-unit fx-.+?'>(.+?)</div></div>", re.DOTALL).findall(link)
+    match = re.compile('<div class="mod-vd-i.+?>(.+?)</div></div>', re.DOTALL).findall(link)
     totalItems = len(match) + 1
     
+    # COLOR_LIST = ['[COLOR FFFF0000]','[COLOR FF00FF00]','[COLOR FFFFFF00]','[COLOR FF00FFFF]','[COLOR FFFF00FF]']
     for i in range(0,len(match)):
         match1 = re.compile("/vplay/[a-z]+-(.+?)/").findall(match[i])
         p_id = match1[0]
  
-        match1 = re.compile('<img src=.+?_lazysrc=[\'|"]+(.+?)[\'|"]+.+?title="(.+?)"').findall(match[i])
+        match1 = re.compile('<img src=.+?_lazysrc=[\'|"]+(.+?)[\'|"]+.+?alt="(.+?)"').findall(match[i])
         p_thumb = match1[0][0]
         p_name = match1[0][1].replace('&quot;','"')
 
         p_name1 = str(i+1) + '. ' + p_name + ' '
-        match1 = re.compile("<span class='sright'>(.+?)</span>").findall(match[i])
+        match1 = re.compile('<span>(.+?)</span>').findall(match[i])
         if len(match1):
-            p_name1 += '(' + match1[0] + ') '
+            p_name1 += '[COLOR FF00FFFF](' + match1[0] + ')[/COLOR] '
 
-        match1 = re.compile('class="item-score">(.+?)</span>').findall(match[i])
+        match1 = re.compile('<b class="score">(.+?)</b>').findall(match[i])
         if len(match1):
             p_rating = match1[0]
             p_name1 += '[COLOR FFFF00FF][' + p_rating + '][/COLOR]'
@@ -232,12 +252,12 @@ def progList(name, type, cat, filtrs, page, listpage):
         elif match[i].find("class='ico-dvd hdvd'")>0:
             p_name1 += ' [COLOR FF00FFFF][高清][/COLOR]'
     
-        match1 = re.compile('<i class="mark-update">(.+?)</i>').findall(match[i])
+        match1 = re.compile('<i class="tip">(.+?)</i>').findall(match[i])
         if len(match1):
             p_duration = match1[0]
             p_name1 += ' [COLOR FF00FF00][' + p_duration + '][/COLOR]'
         
-        match1 = re.compile('<p class="item-dp">(.+?)</p>').findall(match[i])
+        match1 = re.compile('<p class="desc">(.+?)</p>').findall(match[i])
         if len(match1):
             p_desp = match1[0]
             p_name1 += ' (' + p_desp + ')'
