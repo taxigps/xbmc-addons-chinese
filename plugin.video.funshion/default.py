@@ -11,9 +11,8 @@ except ImportError:
 ########################################################################
 # 风行视频(Funshion)"
 ########################################################################
-# v1.0.13 2015.02.14 (cmeng)
-# - Change algorithm for auto filter extraction
-# - Update video list extract per new site site
+# v1.1.0 2015.02.15 (cmeng)
+# - Update video list fetching for new categories and per new site
 
 # Plugin constants 
 __addon__     = xbmcaddon.Addon()
@@ -28,6 +27,7 @@ CHANNEL_LIST = [['c-e794b5e5bdb1', '电影'], ['c-e794b5e8a786e589a7', '电视�
  ['c-e697b6e5b09a', '时尚'], ['c-e6af8de5a9b4', '母婴'], ['c-e581a5e5bab7', '健康'], ['c-e7a791e68a80', '科技'], ['c-e7949fe6b4bb', '生活'], ['c-e5869be4ba8b', '军事']]
 
 SERIES_LIST = ['电视剧', '动漫', '综艺']
+MOVIE_LIST = ['电影', '微电影']
 COLOR_LIST = ['[COLOR FFFF0000]','[COLOR FF00FF00]','[COLOR FFFFFF00]','[COLOR FF00FFFF]','[COLOR FFFF00FF]']
 
 RES_LIST = [['tv','标清'], ['dvd','高清'], ['high-dvd','超清']]
@@ -189,7 +189,11 @@ def progList(name, type, cat, filtrs, page, listpage):
     if page is None: page = 1
     # p_url = 'http://list.funshion.com/%s/pg-%s%s/'
     ## p_url = 'http://www.funshion.com/list/%s/pg-%s%s/'
-    p_url = "http://www.fun.tv/retrieve/%s.n-e5bdb1e78987%s.pg-%s"
+    
+    if (name in SERIES_LIST) or (name in MOVIE_LIST):
+        p_url = "http://www.fun.tv/retrieve/%s.n-e5bdb1e78987%s.pg-%s"
+    else:
+        p_url = "http://www.fun.tv/retrieve/%s%s.pg-%s"
     
     if  (listpage == None):
         url = p_url % (type, '', page)
@@ -216,7 +220,7 @@ def progList(name, type, cat, filtrs, page, listpage):
     if name in SERIES_LIST:
         isdir = True
         mode = 2
-    elif name in ('电影'): # 电影
+    elif name in MOVIE_LIST:
         isdir = False
         mode = 3
     else: # 娱乐,新闻,体育,搞笑,时尚,生活,旅游,科技
@@ -233,7 +237,7 @@ def progList(name, type, cat, filtrs, page, listpage):
         match1 = re.compile("/vplay/[a-z]+-(.+?)/").findall(match[i])
         p_id = match1[0]
  
-        match1 = re.compile('<img src=.+?_lazysrc=[\'|"]+(.+?)[\'|"]+.+?alt="(.+?)"').findall(match[i])
+        match1 = re.compile('<img src=.+?_lazysrc=[\'|"]+(.*?)[\'|"]+.+?alt="(.+?)"').findall(match[i])
         p_thumb = match1[0][0]
         p_name = match1[0][1].replace('&quot;','"')
 
@@ -269,9 +273,9 @@ def progList(name, type, cat, filtrs, page, listpage):
         if (mode == 4): playlist.add(p_id, li)
 
     # Construct page selection
-    match = re.compile('class="page-index">(.+?)<span class=\'pglast\'>', re.DOTALL).findall(link)
+    match = re.compile('<div class="pager-wrap fix">(.+?)</div>', re.DOTALL).findall(link)
     if match:
-        match1 = re.compile("<a href='.+?'>(\d+)</a>", re.DOTALL).findall(match[0])
+        match1 = re.compile("<a[\s]+?href='.+?'>(\d+)</a>", re.DOTALL).findall(match[0])
         plist=[str(page)]
         for num in match1:
             if (num not in plist):

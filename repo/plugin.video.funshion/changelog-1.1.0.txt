@@ -2,7 +2,7 @@
 # 风行视频(Funshion)"
 ########################################################################
 # v1.1.0 2015.02.15 (cmeng)
-# - Update video list fetching for new categories and per new site 
+# - Update video list fetching for new categories and per new site
 
 # v1.0.13 2015.02.14 (cmeng)
 # - Change algorithm for auto filter extraction
