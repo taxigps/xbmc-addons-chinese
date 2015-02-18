@@ -19,9 +19,6 @@ msgstr ""
 msgctxt "#30000"
 msgid "Unknown error"
 
-msgctxt "#30001"
-msgid "Channel has no HLS stream"
-
 msgctxt "#30002"
 msgid "Channel unavailable"
 
@@ -42,3 +39,12 @@ msgid "Download EPG for National Channels"
 
 msgctxt "#30008"
 msgid "Download EPG for Provincial Channels"
+
+msgctxt "#30009"
+msgid "CNTV Live"
+
+msgctxt "#30010"
+msgid "Getting channel information"
+
+msgctxt "#30011"
+msgid "Trying"

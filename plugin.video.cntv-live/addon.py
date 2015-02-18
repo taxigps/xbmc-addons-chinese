@@ -7,6 +7,7 @@ import xbmcgui
 import xbmcplugin
 
 import re
+import socket
 import traceback
 import urllib
 import urllib2
@@ -21,6 +22,8 @@ addon_name = addon.getAddonInfo("name")
 addon_path = xbmc.translatePath(addon.getAddonInfo("path"))
 addon_handle = int(sys.argv[1])
 xbmcplugin.setContent(addon_handle, "movies")
+
+TIMEOUT_S = 1.0
 
 param = sys.argv[2]
 
@@ -40,70 +43,91 @@ def main():
 			print("Trying stream {0}".format(streamName))
 			if jsondata["hls_url"].has_key(streamName):
 				url = jsondata["hls_url"][streamName]
-				url = url.replace("b=100-300", "b=" + getQualityRange(addon.getSetting("quality"))) #Set the desired bandwidth
 				
 				#Apply nasty hacks
-				#url = url.replace("tv.fw.live.cntv.cn", "tvhd.fw.live.cntv.cn") #China - 403 Forbidden, old
 				url = url.replace("vtime.cntv.cloudcdn.net:8000", "vtime.cntv.cloudcdn.net")
 				
 				print("Trying URL {0}".format(url))
 				
 				if "dianpian" in url:
 					return None
-					
 				else:
-					try:
-						#Download and check if it's the actual HLS stream or a link to the actual stream
-						resp = urllib2.urlopen(url)
-						lines = resp.read().decode("utf-8").split("\n")
-						isStreamLink = False
-						for line in lines:
-							if line.startswith("#EXT-X-STREAM-INF"):
-								isStreamLink = True
-								break
-						
-						if isStreamLink:
-							print("Stream link detected.")
-							#Download and parse the M3U8 file
-							for line in lines:
-								if not line.startswith("#"):
-									url = line #Use the first stream listed
-									break
-						
-						return url
-					except Exception:
-						print(traceback.format_exc())
-						return None
+					return url
 			else:
 				return None
 		
-		def tryHDSStream(jsondata, streamName):
+		def tryFLVStream(jsondata, streamName):
 			if jsondata["hds_url"].has_key(streamName):
 				url = jsondata["hds_url"][streamName]
 				url = url + "&hdcore=2.11.3"
 				
 				return url
 		
+		pDialog = xbmcgui.DialogProgress()
+		pDialog.create(addon.getLocalizedString(30009), addon.getLocalizedString(30010))
+		pDialog.update(0)
 		try:
 			#Locate the M3U8 file
 			resp = urllib2.urlopen("http://vdn.live.cntv.cn/api2/live.do?channel=pa://cctv_p2p_hd" + param[8:])
 			data = resp.read().decode("utf-8")
 			
+			if pDialog.iscanceled(): return
+			
 			url = None
+			hostname = None
 			jsondata = jsonimpl.loads(data)
+			
 			if jsondata.has_key("hls_url"):
-				#Try a bunch of URLs
-				url = url or tryHLSStream(jsondata, "hls3") #Preferred
-				url = url or tryHLSStream(jsondata, "hls4")
-				url = url or tryHLSStream(jsondata, "hls1")
-				url = url or tryHLSStream(jsondata, "hls2")
-				url = url or tryHLSStream(jsondata, "hls5")
-			else:
-				showNotification(30001)
-				return
+				if jsondata["hls_url"].has_key("hls3"):
+					try:
+						tmpurl = jsondata["hls_url"]["hls3"]
+						#Apply nasty hacks.
+						tmpurl = tmpurl.replace("vtime.cntv.cloudcdn.net:8000", "vtime.cntv.cloudcdn.net") #Global (HDS/FLV) - wrong port
+						tmpurl = tmpurl.replace("tv.fw.live.cntv.cn", "tvhd.fw.live.cntv.cn") #China - 403 Forbidden
+						
+						#Change quality.
+						tmpurl = tmpurl.replace("b=100-300", "b={0}".format(getQualityRange(addon.getSetting("quality"))))
+						
+						tmphostname = urlparse.urlparse(tmpurl).netloc
+						addrinfos = socket.getaddrinfo(tmphostname, 80)
+						
+						tries = 0
+						for addrinfo in addrinfos:
+							if addrinfo[1] == socket.SOCK_STREAM:
+								if tries >= 3: #Only try 3 IPs. More is futile, because broken-DNS channels don't work anyway.
+									break
+								tries = tries + 1
+								
+								address = addrinfo[4][0]
+								pDialog.update(33 + tries * 11, "{0} {1} (HLS)".format(addon.getLocalizedString(30011), address))
+								
+								try:
+									tmpurl = tmpurl.replace(tmphostname, address)
+									
+									req = urllib2.Request(tmpurl)
+									req.add_header("Host", tmphostname)
+									conn = urllib2.urlopen(req, timeout=TIMEOUT_S)
+									conn.read(8) #Try reading a few bytes
+									
+									#If we're still running, the connection was successful.
+									hostname = tmphostname
+									url = tmpurl
+									break
+								except Exception:
+									print("{0} failed.".format(address))
+									print(traceback.format_exc())
+					except Exception:
+						print("hls3 failed.")
+						print(traceback.format_exc())
+			
+			if pDialog.iscanceled(): return
+			
+			#if url is None and jsondata.has_key("hls_url"):
+			#	tryHLSStream(jsondata, "hls4")
 			
 			if url is None:
 				showNotification(30002)
+				pDialog.close()
 				return
 			
 			print("Loading URL {0}".format(url))
@@ -111,15 +135,17 @@ def main():
 			auth = urlparse.parse_qs(urlparse.urlparse(url)[4])["AUTH"][0]
 			print("Got AUTH {0}".format(auth))
 			
-			url = url + "|" + urllib.urlencode( { "Cookie" : "AUTH=" + auth } )
+			url = url + "|" + urllib.urlencode( { "Cookie" : "AUTH=" + auth, "Host" : hostname } )
 			
 			print("Built URL {0}".format(url))
 			
+			pDialog.close()
 			xbmc.Player().play(url)
 			
 		except Exception:
 			showNotification(30000)
 			print(traceback.format_exc())
+			pDialog.close()
 			return
 
 	elif param.startswith("?city="):

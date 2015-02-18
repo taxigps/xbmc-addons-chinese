@@ -19,9 +19,6 @@ msgstr ""
 msgctxt "#30000"
 msgid "未知错误"
 
-msgctxt "#30001"
-msgid "此频道没有HLS流"
-
 msgctxt "#30002"
 msgid "暂不支持此频道播放"
 
@@ -42,3 +39,12 @@ msgid "下载央视频道的节目单"
 
 msgctxt "#30008"
 msgid "下载卫视频道的节目单"
+
+msgctxt "#30009"
+msgid "中国网络电视台直播"
+
+msgctxt "#30010"
+msgid "下载频道 information"
+
+msgctxt "#30011"
+msgid "试"
