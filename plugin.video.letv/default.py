@@ -2,6 +2,7 @@
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, re, string, sys, os, gzip, StringIO
 import math, os.path, httplib, time
 import cookielib
+import base64
 
 try:
     from ChineseKeyboard import Keyboard as Apps
@@ -16,7 +17,8 @@ except ImportError:
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
-# Version 1.3.8 2014-12-06 (cmeng)
+# Version 1.4.0 2015-02-19 (cmeng)
+# - Add Letv video link decode routine
 # - Change settings for dual languages support
 # - Retry if "Exception" in json data fetch
 
@@ -32,13 +34,17 @@ __settings__    = xbmcaddon.Addon(id=__addonid__)
 __profile__     = xbmc.translatePath( __settings__.getAddonInfo('profile') )
 cookieFile = __profile__ + 'cookies.letv'
 
-UserAgent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
+## UserAgent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
+UserAgent = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 VIDEO_LIST = [['1','电影','&o=9'],['2','电视剧','&o=9'],['5','动漫','&o=9'],['11','综艺','&o=9&s=1'],['3','明星','&a=-1']]
 UGC_LIST = [['4','体育','&o=1'],['3','娱乐','&o=9'],['9','音乐','&o=17'],['20','风尚','&o=1'],['16','纪录片','&o=1'],['22','财经','&o=1'],['14','汽车','&o=1'],['23','旅游','&o=1']]
 
 VIDEO_RES = [["标清",'sd'],["高清",'hd'],["普通",''],["未注","null"]]
 CLASS_MODE = [['10','电影'],['5','电视剧'],['5','动漫'],['11','综艺'],['21','明星'],['11','娱乐'],['10','音乐']]
 COLOR_LIST = ['[COLOR FFFF0000]','[COLOR FF00FF00]','[COLOR FFFFFF00]','[COLOR FF00FFFF]','[COLOR FFFF00FF]']
+
+FLVCD_PARSER_PHP = 'http://www.flvcd.com/parse.php'
+FLVCD_DIY_URL = 'http://www.flvcd.com/diy/diy00'
 
 ##################################################################################
 # Routine to fetech url site data using Mozilla browser
@@ -75,6 +81,7 @@ def getHttpData(url):
     opener = urllib2.build_opener(proxy_support, urllib2.HTTPCookieProcessor(cj))
     req = urllib2.Request(url)
     req.add_header('User-Agent', UserAgent)
+    # req.add_header('cookie', 'PHPSESSID=ruebtvftj69ervhpt24n1b86i3')
     
     for k in range(3): # give 3 trails to fetch url data
         try:
@@ -87,8 +94,10 @@ def getHttpData(url):
             httpdata = response.read()
             response.close()
             # Retry if exception: {"exception":{....
-            if not (httpdata[2:11] == "exception") :
+            if not "exception" in httpdata:
                 cj.save(cookieFile, ignore_discard=True, ignore_expires=True)
+                # for cookie in cj:
+                #     print('%s --> %s'%(cookie.name,cookie.value))
                 break
 
     httpdata = re.sub('\r|\n|\t', '', httpdata)
@@ -96,7 +105,7 @@ def getHttpData(url):
     if len(match):
         charset = match[0].lower()
         if (charset != 'utf-8') and (charset != 'utf8'):
-            httpdata = unicode(httpdata, charset,'replace').encode('utf8')
+            httpdata = unicode(httpdata, charset,'replace').encode('utf-8')
     return httpdata
 
 ##################################################################################
@@ -129,15 +138,22 @@ def getListSEL(listpage):
     
             item1 = itemList[0][0].split('_')
             item2 = itemList[1][0].split('_')
-            ilist = len(item1)
-            # find the variable location
-            for j in range(ilist):
-                if (item1[j] == item2[j]): continue
-                break
+            ilist1 = len(item1)
+            ilist2 = len(item2)
+            
+            # get the index of the current item variables 
+            for j in range(ilist2):
+                if not (item2[j] in item1):
+                    break
+            
             icnt = len(itemList)
+                            # no filter for first item selection i.e. "全部"
             for i in range (icnt):
-                itemx = itemList[i][0].split('_')
-                itemList[i][0] = itemx[j]
+                if (i == 0) and (ilist1 < ilist2):
+                    itemList[i][0] = ''
+                else:
+                    itemx = itemList[i][0].split('_')
+                    itemList[i][0] = itemx[j]
         
             titlelist.append(title[0])
             catlist.append(itemList)
@@ -183,7 +199,8 @@ def updateListSEL(name, url, cat, filtrs, page, listpage):
         cat += COLOR_LIST[icat%5] + ctype + '[/COLOR]|'
         selcat = re.compile('([a-z]+)').findall(selx)[0]
         catlen = len(selcat)
-        selection += '&'+selcat+'='+selx[catlen:]
+        if (selx != ''): # no need to add blank filter
+            selection += '&'+selcat+'='+selx[catlen:]
     filtrs = selection
     cat = cat[:-1]
     
@@ -323,10 +340,9 @@ def progListMovie(name, url, cat, filtrs, page, listpage):
             if (p_area != None):
                 p_list += '[COLOR FF00FFFF][' + p_area.encode('utf-8') + '][/COLOR]'
 
-        if not vlist[i]['duration']: #osfans add
-            vlist[i]['duration'] = '0'
-        p_dx = int(vlist[i]['duration'])
-        if ((p_dx != None) and (p_dx > 0)):
+        p_sdx = vlist[i]['duration']
+        if ((p_sdx != None) and (len(p_sdx) > 0) and (int(p_sdx) > 0)):
+            p_dx = int(p_sdx)
             p_duration= "[%02d:%02d]" %  (int(p_dx / 60), (p_dx % 60))
             p_list += '[COLOR FFFFFF00]' + p_duration +'[/COLOR]'
             
@@ -547,7 +563,7 @@ def progListStarVideo(name, url, page, thumb):
         except KeyError:
             p_thumb = vlist[i]['images']['160*120']
         except: p_thumb = ''
-
+        
         p_name = p_list = str(i+1) + '. ' + p_title + ' '
         p_category = vlist[i]['categoryName']
         if ((p_category != None) and len(p_category)):
@@ -570,7 +586,7 @@ def progListStarVideo(name, url, page, thumb):
 
         li = xbmcgui.ListItem(p_list, iconImage='', thumbnailImage=p_thumb)
         # li.setInfo(type = "Video", infoLabels = {"Title":p_list, "Artist":p_name})
-        u = sys.argv[0]+"?mode=20"+"&name="+urllib.quote_plus(p_name)+"&url="+urllib.quote_plus(v_url)+"&thumb="+urllib.quote_plus(p_thumb)
+        u = sys.argv[0]+"?mode=10"+"&name="+urllib.quote_plus(p_name)+"&url="+urllib.quote_plus(v_url)+"&thumb="+urllib.quote_plus(p_thumb)
         xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True, totalItems)
         playlist.add(v_url, li)
         
@@ -803,73 +819,89 @@ def letvSearchList(name, page):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))    
     
 ##################################################################################
-# LeTV Video Link Decode Algorithm & Player
+# LeTV Video Link Decode Algorithm
 # Extract all the video list and start playing first found valid link
-# User may press <SPACE> bar to select video resolution for playback
+# http://www.letv.com/ptv/vplay/1967644.html
+##################################################################################
+def let_key(value, key):
+    for i in range(key):
+        value = 2147483647 & (value >> 1) | (value & 1) << 31
+    return value
+
+def letu_time(stime):
+    key = 773625421
+    value = let_key(stime, key % 13)
+    value = value ^ key
+    value = let_key(value, key % 17)
+    return value
+
+def decrypt_url(url):
+    videoRes = int(__addon__.getSetting('video_resolution'))
+    videoType = ['350', '1000', '1300', '1080p', '720p']
+    vparamap = {0:'1000', 1:'720p', 2:'1080p'}
+    
+    t_url='http://api.letv.com/mms/out/video/playJson?id=%s&platid=1&splatid=101&format=1&nextvid=20262893&tkey=%s&domain=www.letv.com'
+    t_url2 = '%s%s&ctv=pc&m3v=1&termid=1&format=2&hwtype=un&ostype=Windows8.1&tag=letv&sign=letv&expect=3'
+    
+    dialog = xbmcgui.Dialog()
+    pDialog = xbmcgui.DialogProgress()
+    ret = pDialog.create('匹配视频', '请耐心等候! 尝试匹配视频文件 ...')
+    
+    id = re.compile('/vplay/(.+?).html').findall(url)[0]
+    c_time = letu_time( int(time.time()) )
+    pDialog.update(20)
+    
+    j_url = t_url % (id, c_time)
+    link = getHttpData(j_url)
+    pDialog.update(40)
+    
+    content = simplejson.loads(link)
+    try:
+        playurl = content['playurl']
+        pDialog.update(60)
+    except:
+        dialog.ok(__addonname__, '无法播放：多次未匹配到视频文件，请选择其它视频')
+        return ''
+    
+    domain = str(playurl['domain'][0])
+    vodRes = playurl['dispatch']
+    vod = None
+    while ((vod == None) and (videoRes >= 0)):
+        vRes = vparamap.get(videoRes, 0)
+        vod = vodRes.get(vRes)[0]
+        videoRes -= 1
+    if vod == None:
+        vod = playurl['dispatch']['1000'][0]
+    # print "playurl: ", vRes, vod
+
+    p_url  = t_url2 % (domain, vod)
+    p_url = re.sub('ios', 'no', p_url)
+    link2 = getHttpData(p_url)
+    pDialog.update(80)
+    
+    match = re.compile('\[CDATA\[(.+?)\]\]').findall(link2)
+    # print "parameters:", p_url, link2, match
+    pDialog.close() 
+
+    if len(match):
+        v_url = match[0]
+        return (v_url)
+    else:
+        #if '解析失败' in link:
+        dialog.ok(__addonname__, '无法播放：多次未匹配到视频文件，请选择其它视频')
+        return ''
+
 ##################################################################################
 def playVideoLetv(name,url,thumb):
-    VIDEO_CODE=[['bHY=','bHY/'],['dg==','dj9i'],['dg==','dTgm'],['Zmx2','Zmx2']]
-    dialog = xbmcgui.Dialog()
-
-    link = getHttpData(url)
-    match = re.compile('{v:\[(.+?)\]').findall(link)
-    # link[0]:"标清-SD" ; link[1]:"高清-HD"
-    if match:
-        matchv = re.compile('"(.+?)"').findall(match[0])
-        if matchv:
-            playlist=xbmc.PlayList(1)
-            playlist.clear()
-            if videoRes == 1: # Play selected HD and fallback to SD if HD failed
-                vlist = reversed(range(len(matchv)))
-            else: # Play selected SD and HD as next item in playlist
-                vlist = range(len(matchv))
-                
-            for j in vlist:
-                if matchv[j] == "": continue
-                #algorithm to generate the video link code
-                vidx = matchv[j].find('MT')
-                vidx = -1 # force to start at 24
-                if vidx < 0:
-                    vid = matchv[j][24:+180]  # extract max VID code length
-                else:
-                    vid = matchv[j][vidx:+180]
-                    
-                for k in range(0, len(VIDEO_CODE)):
-                    vidcode = re.split(VIDEO_CODE[k][1], vid)
-                    if len(vidcode) > 1 :                 
-                        vid = vidcode[0] + VIDEO_CODE[k][0]
-                        break
-                    
-                # fail to decipher, use alternate method to play    
-                if len(vidcode) == 1:
-                    #print 'vidcode: ', vidcode
-                    #print "Use alternative player"
-                    playVideo(name,url,thumb)
-                    return
-                #else:                        
-                p_url = 'http://g3.letv.cn/vod/v1/' + vid + '?format=1&b=388&expect=3&host=www_letv_com&tag=letv&sign=free'
-                link = getHttpData(p_url)
-                link = link.replace("\/", "/")
-                match = re.compile('{.+?"location": "(.+?)" }').findall(link)
-                if match:
-                    for i in range(len(match)):
-                        p_name = name +' ['+ VIDEO_RES[j][0] +']' 
-                        listitem = xbmcgui.ListItem(p_name, thumbnailImage = __addonicon__)
-                        listitem.setInfo(type="Video",infoLabels={"Title":p_name})
-                        playlist.add(match[i], listitem)
-                        break # skip the rest if any (1 of 3) video links access successful
-                    break # play user selected video resolution only
-                else:
-                    ok = dialog.ok(__addonname__, '无法播放：未匹配到视频文件，请选择其它视频')
-            xbmc.Player().play(playlist)
-        else:
-            ok = dialog.ok(__addonname__, '无法播放：需收费，请选择其它视频')  
-    else:
-        match = re.compile('<dd class="ddBtn1">.+?title="(.+?)" class="btn01">').findall(link)
-        if match and match[0] == "点播购买":
-            ok = dialog.ok(__addonname__, '无法播放：需收费，请选择其它视频')
-        else:
-            ok = dialog.ok(__addonname__, '无法播放：未匹配到视频文件，请选择其它视频')
+    v_url = decrypt_url(url)
+    if len(v_url):
+        playlist=xbmc.PlayList(1)
+        playlist.clear()
+        print "video link: " + v_url
+        listitem = xbmcgui.ListItem(name, thumbnailImage = __addonicon__)
+        listitem.setInfo(type="Video",infoLabels={"Title":name})
+        playlist.add(v_url, listitem)
+        xbmc.Player().play(playlist)
 
 ##################################################################################
 def playVideo(name,url,thumb):
@@ -883,12 +915,12 @@ def playVideo(name,url,thumb):
     # p_url = "http://www.flvcd.com/parse.php?kw="+url+"&format="+str(videoRes)
     p_url = "http://www.flvcd.com/parse.php?kw="+url+"&format="+vparamap.get(videoRes,0)
     for i in range(5): # Retry specified trials before giving up (seen 9 trials max)
-       if (pDialog.iscanceled()):
-           pDialog.close() 
-           return
-       pDialog.update(20*i)
+        if (pDialog.iscanceled()):
+            pDialog.close() 
+            return
+        pDialog.update(20*i)
 
-       try: # stop xbmc from throwing error to prematurely terminate video search
+        try: # stop xbmc from throwing error to prematurely terminate video search
             link = getHttpData(p_url)
             if '加密视频' in link:
                 ok = dialog.ok(__addonname__, '无法播放：该视频为加密视频')
@@ -898,8 +930,10 @@ def playVideo(name,url,thumb):
                 return
             else:
                 match=re.compile('下载地址：\s*<a href="(.+?)" target="_blank" class="link"').findall(link)
-                if len(match): break
-       except:
+                if not len(match):
+                    match = flvcd(link)
+                break
+        except:
            pass   
     
     if len(match):
@@ -907,6 +941,7 @@ def playVideo(name,url,thumb):
         playlist=xbmc.PlayList(1)
         playlist.clear()
         for i in range(0,len(match)):
+            print "video link: " + match[i]
             listitem = xbmcgui.ListItem(name, thumbnailImage = __addonicon__)
             listitem.setInfo(type="Video",infoLabels={"Title":name+" 第"+str(i+1)+"/"+str(len(match))+" 节"})
             playlist.add(match[i], listitem)
@@ -916,6 +951,35 @@ def playVideo(name,url,thumb):
         pDialog.close() 
         ok = dialog.ok(__addonname__, '无法播放：多次未匹配到视频文件，请选择其它视频')
 
+def flvcd(urlData):
+    flvDnLink = "http://wwwa.flvcd.com/downparse.php?t=%s&name=%s&url=%s&tsn=%s&msKey=%s&passport=%s"
+
+    # get hidden values in form
+    mform = re.compile('<form name="mform" action="(.+?)"(.+?)</form>').findall(urlData)
+    attrs = re.compile('<input type="hidden" name="(.+?)" value="(.*?)">').findall(mform[0][1])
+    
+    if not len(mform):
+        return ""
+    
+    flvDn = mform[0][0] + "?"
+    for attr in attrs:
+        flvDn += attr[0] + "=" + attr[1]+"&" 
+    
+    data = getHttpData(flvDn[:-1])
+    flvcd_id = re.compile('xdown\.php\?id=(\d+)').findall(data)
+    if len(flvcd_id) <= 0:
+        return []
+
+    data = getHttpData(FLVCD_DIY_URL + flvcd_id[0] + '.htm')
+    p_url = re.compile('<U>(.+?)<C>').findall(data)
+    if len(p_url) <= 0:
+        return ""
+    else:
+        link = getHttpData(p_url[0])
+        link = link.replace("\/", "/")
+        match = re.compile('{.+?"location": "(.+?)" }').findall(link)
+        return match
+   
 ##################################################################################
 # Continuous Player start playback from user selected video
 # User backspace to previous menu will not work - playlist = last selected
@@ -1054,6 +1118,7 @@ except:
 try:
     thumb = urllib.unquote_plus(params["thumb"])
 except:
+    thumb = ' '
     pass
 try:
     listpage = urllib.unquote_plus(params["listpage"])
@@ -1080,7 +1145,8 @@ elif mode == 8:
 elif mode == 9:
     updateListSEL(name, url, cat, filtrs, page, listpage)
 elif mode == 10:
-    playVideo(name,url,thumb)
+    playVideoLetv(name,url,thumb)
+    ## playVideo(name,url,thumb)
 elif mode == 12:
     playVideoLetv(name,url,thumb)
 elif mode == 20:
