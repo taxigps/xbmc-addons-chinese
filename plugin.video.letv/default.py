@@ -17,10 +17,10 @@ except ImportError:
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
-# Version 1.4.0 2015-02-19 (cmeng)
-# - Add Letv video link decode routine
-# - Change settings for dual languages support
-# - Retry if "Exception" in json data fetch
+# Version 1.4.1 2015-02-20 (cmeng)
+# - update ugc video link fetching method
+# - Add new categories [亲子, 热点]
+# - include exceptions handler during video link fetch (support ugc cont playback)
 
 # See changelog.txt for previous history
 ########################################################################
@@ -36,8 +36,9 @@ cookieFile = __profile__ + 'cookies.letv'
 
 ## UserAgent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
 UserAgent = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
-VIDEO_LIST = [['1','电影','&o=9'],['2','电视剧','&o=9'],['5','动漫','&o=9'],['11','综艺','&o=9&s=1'],['3','明星','&a=-1']]
-UGC_LIST = [['4','体育','&o=1'],['3','娱乐','&o=9'],['9','音乐','&o=17'],['20','风尚','&o=1'],['16','纪录片','&o=1'],['22','财经','&o=1'],['14','汽车','&o=1'],['23','旅游','&o=1']]
+VIDEO_LIST = [['1','电影','&o=9'],['2','电视剧','&o=51'],['5','动漫','&o=9'],['11','综艺','&o=9&s=3'],['3','明星','&a=-1']]
+UGC_LIST = [['4','体育','&o=1'],['3','娱乐','&o=9'],['9','音乐','&o=17'],['20','风尚','&o=1'],['16','纪录片','&o=1'],\
+            ['22','财经','&o=1'],['14','汽车','&o=1'],['23','旅游','&o=1'],['34','亲子','&o=9'],['30','热点','&o=1']]
 
 VIDEO_RES = [["标清",'sd'],["高清",'hd'],["普通",''],["未注","null"]]
 CLASS_MODE = [['10','电影'],['5','电视剧'],['5','动漫'],['11','综艺'],['21','明星'],['11','娱乐'],['10','音乐']]
@@ -423,7 +424,7 @@ def progListSeries(name, url, thumb):
         for i in range(0, len(matchp)):
             match1 = re.compile('<img.+?src="(.+?)"').findall(matchp[i])
             p_thumb = match1[0]
-            match1 = re.compile('<p class="p1">.+?href="(.+?)"[\s]*title="(.+?)">(.+?)</a>').findall(matchp[i])
+            match1 = re.compile('<p class="p1">.+?href="(.+?)"[\s]*title="(.+?)".+?>(.+?)</a>').findall(matchp[i])
             p_url = match1[0][0]
             p_name = match1[0][1]
             sn = match1[0][2]
@@ -828,73 +829,74 @@ def let_key(value, key):
         value = 2147483647 & (value >> 1) | (value & 1) << 31
     return value
 
-def letu_time(stime):
+## ---------------------------- ##
+def letv_time():
+    stime = int(time.time())
     key = 773625421
     value = let_key(stime, key % 13)
     value = value ^ key
     value = let_key(value, key % 17)
     return value
 
+## ---------------------------- ##
+# Available videoType = ['350', '1000', '1300', '1080p', '720p']
 def decrypt_url(url):
     videoRes = int(__addon__.getSetting('video_resolution'))
-    videoType = ['350', '1000', '1300', '1080p', '720p']
-    vparamap = {0:'1000', 1:'720p', 2:'1080p'}
-    
+    vparamap = {0:'1300', 1:'720p', 2:'1080p'}
+
     t_url='http://api.letv.com/mms/out/video/playJson?id=%s&platid=1&splatid=101&format=1&nextvid=20262893&tkey=%s&domain=www.letv.com'
     t_url2 = '%s%s&ctv=pc&m3v=1&termid=1&format=2&hwtype=un&ostype=Windows8.1&tag=letv&sign=letv&expect=3'
     
-    dialog = xbmcgui.Dialog()
-    pDialog = xbmcgui.DialogProgress()
-    ret = pDialog.create('匹配视频', '请耐心等候! 尝试匹配视频文件 ...')
-    
     id = re.compile('/vplay/(.+?).html').findall(url)[0]
-    c_time = letu_time( int(time.time()) )
-    pDialog.update(20)
-    
+    c_time = letv_time()
     j_url = t_url % (id, c_time)
-    link = getHttpData(j_url)
-    pDialog.update(40)
-    
-    content = simplejson.loads(link)
+
     try:
+        link = getHttpData(j_url)
+        content = simplejson.loads(link)
         playurl = content['playurl']
-        pDialog.update(60)
     except:
-        dialog.ok(__addonname__, '无法播放：多次未匹配到视频文件，请选择其它视频')
         return ''
     
-    domain = str(playurl['domain'][0])
+    domain = playurl['domain'][0]
     vodRes = playurl['dispatch']
     vod = None
     while ((vod == None) and (videoRes >= 0)):
         vRes = vparamap.get(videoRes, 0)
-        vod = vodRes.get(vRes)[0]
+        try:
+            vod = vodRes.get(vRes)[0]
+        except: pass
         videoRes -= 1
     if vod == None:
-        vod = playurl['dispatch']['1000'][0]
+        try:
+            vod = playurl['dispatch']['1000'][0]
+        except KeyError:
+            vod = playurl['dispatch']['350'][0]
+        except:
+            return ''
     # print "playurl: ", vRes, vod
 
     p_url  = t_url2 % (domain, vod)
     p_url = re.sub('ios', 'no', p_url)
-    link2 = getHttpData(p_url)
-    pDialog.update(80)
-    
-    match = re.compile('\[CDATA\[(.+?)\]\]').findall(link2)
-    # print "parameters:", p_url, link2, match
-    pDialog.close() 
-
-    if len(match):
+    try:
+        link2 = getHttpData(p_url)
+        match = re.compile('\[CDATA\[(.+?)\]\]').findall(link2)
         v_url = match[0]
+        # print "parameters:", p_url, link2, match
         return (v_url)
-    else:
+    except:
         #if '解析失败' in link:
-        dialog.ok(__addonname__, '无法播放：多次未匹配到视频文件，请选择其它视频')
         return ''
 
 ##################################################################################
 def playVideoLetv(name,url,thumb):
+    dialog = xbmcgui.Dialog()
+    pDialog = xbmcgui.DialogProgress()
+    pDialog.create('匹配视频', '请耐心等候! 尝试匹配视频文件 ...')
+    
     v_url = decrypt_url(url)
     if len(v_url):
+        pDialog.close() 
         playlist=xbmc.PlayList(1)
         playlist.clear()
         print "video link: " + v_url
@@ -902,7 +904,82 @@ def playVideoLetv(name,url,thumb):
         listitem.setInfo(type="Video",infoLabels={"Title":name})
         playlist.add(v_url, listitem)
         xbmc.Player().play(playlist)
+    else:
+        #if '解析失败' in link:
+        dialog.ok(__addonname__, '无法播放：未匹配到视频文件，请选择其它视频')
+   
+##################################################################################
+# Continuous Player start playback from user selected video
+# User backspace to previous menu will not work - playlist = last selected
+##################################################################################
+def playVideoUgc(name,url,thumb):
+    videoRes = int(__addon__.getSetting('video_resolution'))
+    videoplaycont = __addon__.getSetting('video_vplaycont')
 
+    playlistA=xbmc.PlayList(0)
+    playlist=xbmc.PlayList(1)
+    playlist.clear()
+
+    v_pos = int(name.split('.')[0])-1
+    psize = playlistA.size()
+    ERR_MAX = 10
+    errcnt = 0
+    k=0
+    
+    pDialog = xbmcgui.DialogProgress()
+    ret = pDialog.create('匹配视频', '请耐心等候! 尝试匹配视频文件 ...')
+    
+    for x in range(psize):
+        # abort if ERR_MAX or more access failures and no video playback
+        if (errcnt >= ERR_MAX and k == 0):
+            pDialog.close() 
+            dialog = xbmcgui.Dialog()
+            ok = dialog.ok(__addonname__, '无法播放：多次未匹配到视频文件，请选择其它视频')
+            break 
+        
+        if x < v_pos: continue
+        p_item=playlistA.__getitem__(x)
+        p_url=p_item.getfilename(x)
+        p_list =p_item.getdescription(x)
+
+        #li = xbmcgui.ListItem(p_list, iconImage = '', thumbnailImage = thumb)
+        li = xbmcgui.ListItem(p_list)
+        li.setInfo(type = "Video", infoLabels = {"Title":p_list})  
+        
+        if re.search('http://www.letv.com/', p_url):  #fresh video item link fetch
+            for i in range(5): # Retry specified trials before giving up (seen 9 trials max)
+                if (pDialog.iscanceled()):
+                    pDialog.close() 
+                    x = psize # terminate any old thread
+                    return
+                pDialog.update(errcnt*100/ERR_MAX + 100/ERR_MAX/5*i)
+                try: # stop xbmc from throwing error to prematurely terminate video search
+                    v_url = decrypt_url(url)
+                    if len(v_url):
+                        break
+                    else:
+                        print "letv video link: " + p_url
+                except:
+                    pass
+
+            if not len(v_url):
+                errcnt += 1 # increment consequetive unsuccessful access
+                continue
+            err_cnt = 0 # reset error count
+            playlistA.remove(p_url) # remove old url
+            playlistA.add(v_url, li, x)  # keep a copy of v_url in Audio Playlist
+        else:
+            v_url = p_url
+            
+        playlist.add(v_url, li, k)
+        k +=1
+        if k == 1:
+            pDialog.close() 
+            xbmc.Player(1).play(playlist)
+        if videoplaycont == 'false': break
+        
+##################################################################################    
+# Routine to extra video link using flvcd - not use (url link fetech problem)
 ##################################################################################
 def playVideo(name,url,thumb):
     videoRes = int(__addon__.getSetting('video_resolution'))
@@ -978,13 +1055,10 @@ def flvcd(urlData):
         link = getHttpData(p_url[0])
         link = link.replace("\/", "/")
         match = re.compile('{.+?"location": "(.+?)" }').findall(link)
-        return match
-   
+        return match        
+
 ##################################################################################
-# Continuous Player start playback from user selected video
-# User backspace to previous menu will not work - playlist = last selected
-##################################################################################
-def playVideoUgc(name,url,thumb):
+def playVideoUgcX(name,url,thumb):
     videoRes = int(__addon__.getSetting('video_resolution'))
     videoplaycont = __addon__.getSetting('video_vplaycont')
 
