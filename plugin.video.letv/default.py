@@ -17,10 +17,10 @@ except ImportError:
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
-# Version 1.4.1 2015-02-20 (cmeng)
-# - update ugc video link fetching method
-# - Add new categories [亲子, 热点]
-# - include exceptions handler during video link fetch (support ugc cont playback)
+# Version 1.4.2 2015-02-20 (cmeng)
+# - update 综艺  video link extraction per site change
+# - fix series video link extraction error
+# - add thumb to playlist items
 
 # See changelog.txt for previous history
 ########################################################################
@@ -40,8 +40,9 @@ VIDEO_LIST = [['1','电影','&o=9'],['2','电视剧','&o=51'],['5','动漫','&o=
 UGC_LIST = [['4','体育','&o=1'],['3','娱乐','&o=9'],['9','音乐','&o=17'],['20','风尚','&o=1'],['16','纪录片','&o=1'],\
             ['22','财经','&o=1'],['14','汽车','&o=1'],['23','旅游','&o=1'],['34','亲子','&o=9'],['30','热点','&o=1']]
 
+SERIES_LIST = ['电视剧','动漫']
+MOVIE_LIST = ['电影','综艺']
 VIDEO_RES = [["标清",'sd'],["高清",'hd'],["普通",''],["未注","null"]]
-CLASS_MODE = [['10','电影'],['5','电视剧'],['5','动漫'],['11','综艺'],['21','明星'],['11','娱乐'],['10','音乐']]
 COLOR_LIST = ['[COLOR FFFF0000]','[COLOR FF00FF00]','[COLOR FFFFFF00]','[COLOR FF00FFFF]','[COLOR FFFF00FF]']
 
 FLVCD_PARSER_PHP = 'http://www.flvcd.com/parse.php'
@@ -245,7 +246,9 @@ def mainMenu():
                     mode = '1'
                 url = p_url + x_url
 
-                li = xbmcgui.ListItem(str(i) + '. ' + name)
+                # li = xbmcgui.ListItem(str(i) + '. ' + name)
+                ilist = "[COLOR FF00FFFF]%s. %s[/COLOR]" % (i, name)
+                li = xbmcgui.ListItem(ilist)
                 u = sys.argv[0]+"?mode="+mode+"&name="+urllib.quote_plus(name)+"&url="+urllib.quote_plus(url)+"&cat="+urllib.quote_plus(cat)+"&filtrs="+urllib.quote_plus(filtrs)+"&page=1"+"&listpage="+listpage
                 xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True, totalItems)
     
@@ -255,7 +258,9 @@ def mainMenu():
             if (name == namex):
                 i = i + 1
                 url = p_url + x_url
-                li = xbmcgui.ListItem(str(i) + '. ' + name)
+                # li = xbmcgui.ListItem(str(i) + '. ' + name)
+                ilist = "[COLOR FF00FFFF]%s. %s[/COLOR]" % (i, name)
+                li = xbmcgui.ListItem(ilist)
                 u = sys.argv[0]+"?mode=8"+"&name="+urllib.quote_plus(name)+"&url="+urllib.quote_plus(url)+"&cat="+urllib.quote_plus(cat)+"&filtrs="+urllib.quote_plus(filtrs)+"&page=1"+"&listpage="+listpage
                 xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True, totalItems)
 
@@ -291,29 +296,28 @@ def progListMovie(name, url, cat, filtrs, page, listpage):
     if link == None: return
     
     # Movie, Video, Series, Variety & Music titles need different routines
-    if ((name == '电视剧') or (name == '动漫')):
+    if (name in SERIES_LIST):
         isDir = True
         mode = '2'
-    elif ((name == '电影') or (name == '综艺')):
+    elif (name in MOVIE_LIST):
         isDir = False
         mode = '10'
 
     # fetch and build the video series episode list
     content = simplejson.loads(link)
-    vlist = content['data_list']
+    if (name == '综艺'):
+        vlist = content['album_list']
+    else:
+        vlist = content['data_list']
     totalItems = len(vlist)
     for i in range(0, totalItems):
         p_name = vlist[i]['name'].encode('utf-8')
-        if ((name == '电视剧') or (name == '动漫')):
+        if (name in SERIES_LIST):
             aid = str(vlist[i]['aid'])
             if (name == '电视剧'): v_url = 'http://www.letv.com/tv/%s.html' % aid
             else: v_url = 'http://www.letv.com/comic/%s.html' % aid
         else:
-            if (name == '综艺'):
-                vid = str(vlist[i]['vid'])
-                p_name = p_name.split("：")[0]
-            else: # '电影'
-                vid = str(vlist[i]['vids'].split(',')[0])
+            vid = str(vlist[i]['vids'].split(',')[0])
             v_url  = 'http://www.letv.com/ptv/vplay/%s.html' % vid
 
         try: 
@@ -913,7 +917,6 @@ def playVideoLetv(name,url,thumb):
 # User backspace to previous menu will not work - playlist = last selected
 ##################################################################################
 def playVideoUgc(name,url,thumb):
-    videoRes = int(__addon__.getSetting('video_resolution'))
     videoplaycont = __addon__.getSetting('video_vplaycont')
 
     playlistA=xbmc.PlayList(0)
@@ -942,8 +945,8 @@ def playVideoUgc(name,url,thumb):
         p_url=p_item.getfilename(x)
         p_list =p_item.getdescription(x)
 
-        #li = xbmcgui.ListItem(p_list, iconImage = '', thumbnailImage = thumb)
-        li = xbmcgui.ListItem(p_list)
+        # li = xbmcgui.ListItem(p_list)
+        li = p_item # pass all li items including the embedded thumb image
         li.setInfo(type = "Video", infoLabels = {"Title":p_list})  
         
         if re.search('http://www.letv.com/', p_url):  #fresh video item link fetch
@@ -954,7 +957,7 @@ def playVideoUgc(name,url,thumb):
                     return
                 pDialog.update(errcnt*100/ERR_MAX + 100/ERR_MAX/5*i)
                 try: # stop xbmc from throwing error to prematurely terminate video search
-                    v_url = decrypt_url(url)
+                    v_url = decrypt_url(p_url)
                     if len(v_url):
                         break
                     else:
