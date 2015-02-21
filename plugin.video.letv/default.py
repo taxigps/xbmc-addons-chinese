@@ -17,10 +17,10 @@ except ImportError:
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
-# Version 1.4.2 2015-02-20 (cmeng)
-# - update 综艺  video link extraction per site change
-# - fix series video link extraction error
-# - add thumb to playlist items
+# Version 1.4.3 2015-02-21 (cmeng)
+# - add getPages() routine for common access
+# - fix problem in 明星 getPages call
+# - add subCategory information in MOVIE_LIST
 
 # See changelog.txt for previous history
 ########################################################################
@@ -215,6 +215,33 @@ def updateListSEL(name, url, cat, filtrs, page, listpage):
         progListUgc(name, url, cat, filtrs, page , listpage)        
 
 ##################################################################################
+# Routine to generate 'pages' list for selection
+# Based on 30 items per page and total items count p_itemCount
+# Pages exclude current selected page
+##################################################################################
+def getPages(p_itemCount, page):
+    c_pageNum = int(page)
+    p_pageSize = 30
+    p_pageTotal = ((p_itemCount + p_pageSize - 1) / p_pageSize) + 1
+    p_pageMid = int(p_pageTotal / 2)
+    
+    if (c_pageNum <= p_pageMid):
+        p_pageEnd = min(8, p_pageTotal)
+        pages = range(1, p_pageEnd)
+        p_pageFromEnd = max((p_pageTotal - 2), (p_pageEnd + 1))
+    else:
+        pages = range(2)
+        p_pageFromEnd = max((p_pageTotal - 8), 2)
+        
+    for x in range(p_pageFromEnd, p_pageTotal):
+        pages.append(x)
+        
+    if c_pageNum in pages:
+        pages.remove(c_pageNum)
+    
+    return pages 
+
+##################################################################################
 # Routine to fetch & build LeTV 网络电视 main menu
 # - video list as per [VIDEO_LIST]
 # - ugc list as per [UGC_LIST]
@@ -246,7 +273,6 @@ def mainMenu():
                     mode = '1'
                 url = p_url + x_url
 
-                # li = xbmcgui.ListItem(str(i) + '. ' + name)
                 ilist = "[COLOR FF00FFFF]%s. %s[/COLOR]" % (i, name)
                 li = xbmcgui.ListItem(ilist)
                 u = sys.argv[0]+"?mode="+mode+"&name="+urllib.quote_plus(name)+"&url="+urllib.quote_plus(url)+"&cat="+urllib.quote_plus(cat)+"&filtrs="+urllib.quote_plus(filtrs)+"&page=1"+"&listpage="+listpage
@@ -258,7 +284,6 @@ def mainMenu():
             if (name == namex):
                 i = i + 1
                 url = p_url + x_url
-                # li = xbmcgui.ListItem(str(i) + '. ' + name)
                 ilist = "[COLOR FF00FFFF]%s. %s[/COLOR]" % (i, name)
                 li = xbmcgui.ListItem(ilist)
                 u = sys.argv[0]+"?mode=8"+"&name="+urllib.quote_plus(name)+"&url="+urllib.quote_plus(url)+"&cat="+urllib.quote_plus(cat)+"&filtrs="+urllib.quote_plus(filtrs)+"&page=1"+"&listpage="+listpage
@@ -272,6 +297,7 @@ def mainMenu():
 # - selected page & filters (user selectable)
 # - video items list
 # - user selectable pages
+# http://list.letv.com/apin/chandata.json?c=1&d=1&md=&o=9&p=3&s=1
 ##################################################################################
 def progListMovie(name, url, cat, filtrs, page, listpage):
     fltrCategory = fetchID(VIDEO_LIST, name)
@@ -305,17 +331,16 @@ def progListMovie(name, url, cat, filtrs, page, listpage):
 
     # fetch and build the video series episode list
     content = simplejson.loads(link)
-    if (name == '综艺'):
-        vlist = content['album_list']
-    else:
-        vlist = content['data_list']
+    vlist = content['album_list']
     totalItems = len(vlist)
     for i in range(0, totalItems):
         p_name = vlist[i]['name'].encode('utf-8')
+        # get series listing of the video
         if (name in SERIES_LIST):
             aid = str(vlist[i]['aid'])
             if (name == '电视剧'): v_url = 'http://www.letv.com/tv/%s.html' % aid
             else: v_url = 'http://www.letv.com/comic/%s.html' % aid
+        # get first video link for direct play back
         else:
             vid = str(vlist[i]['vids'].split(',')[0])
             v_url  = 'http://www.letv.com/ptv/vplay/%s.html' % vid
@@ -328,22 +353,23 @@ def progListMovie(name, url, cat, filtrs, page, listpage):
 
         p_title = p_name
         p_list = str(i+1) + '. ' + p_title + ' '
-        try:
+
+        try: # Extract rating information
             p_rating = float(vlist[i]['rating'])
             if (p_rating != None and p_rating > 0.01):
                 p_rating = "%0.1f" % p_rating
                 p_list += '[COLOR FFFF00FF][' + p_rating + '][/COLOR]'
         except:
             pass
-
-        if ((name == '电影') or (name == '动漫')):
-            p_lang = vlist[i]['lgName']
-            if (p_lang != None):
-                p_list += '[COLOR FF00FFFF][' + p_lang.encode('utf-8') + '][/COLOR]'
-        else:
+        
+        try: # get language + area information
+            p_lang = ''
+            if (name in MOVIE_LIST):
+                p_lang = vlist[i]['lgName'] + '-'
             p_area = vlist[i]['areaName']
-            if (p_area != None):
-                p_list += '[COLOR FF00FFFF][' + p_area.encode('utf-8') + '][/COLOR]'
+            p_list += '[COLOR FF00FFFF][' + (p_lang + p_area).encode('utf-8') + '][/COLOR]'
+        except:
+            pass
 
         p_sdx = vlist[i]['duration']
         if ((p_sdx != None) and (len(p_sdx) > 0) and (int(p_sdx) > 0)):
@@ -368,28 +394,13 @@ def progListMovie(name, url, cat, filtrs, page, listpage):
         u = sys.argv[0]+"?mode="+mode+"&name="+urllib.quote_plus(p_name)+"&url="+urllib.quote_plus(v_url)+"&thumb="+urllib.quote_plus(p_thumb)
         xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, isDir, totalItems)
         
-    # Fetch and build page selection menu
-    p_itemCount= content['data_count']
-    p_pageSize = 30
-    p_pageTotal = (p_itemCount + 29) / p_pageSize
-    p_pageMid = int(p_pageTotal / 2)
-    
-    p_pageNum = int(page)
-    if (p_pageNum <= p_pageMid):
-        p_pageEnd = min(8, p_pageTotal)
-        pages = range(0, p_pageEnd)
-        p_pageFromEnd = max((p_pageTotal - 2), (p_pageEnd + 1))
-    else:
-        pages = range(2)
-        p_pageFromEnd = max((p_pageTotal - 8), 2)
-    for x in range(p_pageFromEnd, p_pageTotal): pages.append(x) 
+    p_itemCount= content['album_count']
+    pages = getPages(p_itemCount, page)
 
-    for num in pages:
-        page = num + 1
-        if (page) != p_pageNum:
-            li = xbmcgui.ListItem("... 第" + str(page) + "页")
-            u = sys.argv[0]+"?mode=1"+"&name="+urllib.quote_plus(name)+"&url="+urllib.quote_plus(url)+"&cat="+urllib.quote_plus(cat)+"&filtrs="+urllib.quote_plus(filtrs)+"&page="+str(page)+"&listpage="+urllib.quote_plus(listpage)
-            xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)
+    for page in pages:
+        li = xbmcgui.ListItem("... 第" + str(page) + "页")
+        u = sys.argv[0]+"?mode=1"+"&name="+urllib.quote_plus(name)+"&url="+urllib.quote_plus(url)+"&cat="+urllib.quote_plus(cat)+"&filtrs="+urllib.quote_plus(filtrs)+"&page="+str(page)+"&listpage="+urllib.quote_plus(listpage)
+        xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)
     
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))    
@@ -433,6 +444,7 @@ def progListSeries(name, url, thumb):
             p_name = match1[0][1]
             sn = match1[0][2]
             p_list = sn + ': ' + p_name
+            
             match1 = re.compile('class="time">(.+?)</span>').findall(matchp[i])
             if match1:
                 p_list += ' [COLOR FFFFFF00][ ' + match1[0].strip() + ' ][/COLOR]'
@@ -475,7 +487,7 @@ def progListStar(name, url, cat, filtrs, page, listpage):
  
     # fetch and build the video series episode list
     content = simplejson.loads(link)
-    vlist = content['data_list']
+    vlist = content['star_list']
     totalItems = len(vlist)
     for i in range(0, totalItems):
         p_name = vlist[i]['name'].encode('utf-8')
@@ -483,7 +495,7 @@ def progListStar(name, url, cat, filtrs, page, listpage):
         v_url = 'http://so.letv.com/s?wd=%s' % p_name
         p_thumb = vlist[i]['postS1']
         p_list = str(i+1) + '. [COLOR FF00FF00]' + p_name + '[/COLOR] '
-
+           
         match = vlist[i]['professional']
         p_prof = re.compile('":"(.+?)"').findall(match)
         if ((p_prof != None) and len(p_prof)):
@@ -505,28 +517,13 @@ def progListStar(name, url, cat, filtrs, page, listpage):
         u = sys.argv[0]+"?mode=5"+"&name="+urllib.quote_plus(p_name)+"&url="+urllib.quote_plus(v_url)+"&thumb="+urllib.quote_plus(p_thumb)
         xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True, totalItems)
         
-    # Fetch and build page selection menu
-    p_itemCount= content['video_count']
-    p_pageSize = 30
-    p_pageTotal = (p_itemCount + 29) / p_pageSize
-    p_pageMid = int(p_pageTotal / 2)
-    
-    p_pageNum = int(page)
-    if (p_pageNum <= p_pageMid):
-        p_pageEnd = min(8, p_pageTotal)
-        pages = range(0, p_pageEnd)
-        p_pageFromEnd = max((p_pageTotal - 2), (p_pageEnd + 1))
-    else:
-        pages = range(2)
-        p_pageFromEnd = max((p_pageTotal - 8), 2)
-    for x in range(p_pageFromEnd, p_pageTotal): pages.append(x) 
+    p_itemCount= content['star_count']
+    pages = getPages(p_itemCount, page)
 
-    for num in pages:
-        page = num + 1
-        if (page) != p_pageNum:
-            li = xbmcgui.ListItem("... 第" + str(page) + "页")
-            u = sys.argv[0]+"?mode=4"+"&name="+urllib.quote_plus(name)+"&url="+urllib.quote_plus(url)+"&cat="+urllib.quote_plus(cat)+"&filtrs="+urllib.quote_plus(filtrs)+"&page="+str(page)+"&listpage="+urllib.quote_plus(listpage)
-            xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)
+    for page in pages:
+        li = xbmcgui.ListItem("... 第" + str(page) + "页")
+        u = sys.argv[0]+"?mode=4"+"&name="+urllib.quote_plus(name)+"&url="+urllib.quote_plus(url)+"&cat="+urllib.quote_plus(cat)+"&filtrs="+urllib.quote_plus(filtrs)+"&page="+str(page)+"&listpage="+urllib.quote_plus(listpage)
+        xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)
     
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))    
@@ -572,9 +569,8 @@ def progListStarVideo(name, url, page, thumb):
         p_name = p_list = str(i+1) + '. ' + p_title + ' '
         p_category = vlist[i]['categoryName']
         if ((p_category != None) and len(p_category)):
-            # p_cat = p_category.encode('utf-8')
-            # if(p_cat != '电影' and p_cat != '电视剧'): continue 
-            p_list += '[COLOR FF00FFFF][' + p_category.encode('utf-8') + '][/COLOR] '
+            p_subcategory = '-' + vlist[i]['subCategoryName']
+            p_list += '[COLOR FF00FFFF][' + (p_category + p_subcategory).encode('utf-8') + '][/COLOR] '
         
         try:
             p_rating = float(vlist[i]['rating'])
@@ -597,26 +593,12 @@ def progListStarVideo(name, url, page, thumb):
         
     # Fetch and build page selection menu
     p_itemCount= content['data_count']
-    p_pageSize = 30
-    p_pageTotal = (p_itemCount + 29) / p_pageSize
-    p_pageMid = int(p_pageTotal / 2)
-    
-    p_pageNum = int(page)
-    if (p_pageNum <= p_pageMid):
-        p_pageEnd = min(8, p_pageTotal)
-        pages = range(0, p_pageEnd)
-        p_pageFromEnd = max((p_pageTotal - 2), (p_pageEnd + 1))
-    else:
-        pages = range(2)
-        p_pageFromEnd = max((p_pageTotal - 8), 2)
-    for x in range(p_pageFromEnd, p_pageTotal): pages.append(x) 
+    pages = getPages(p_itemCount, page)
 
-    for num in pages:
-        page = num + 1
-        if (page) != p_pageNum:
-            li = xbmcgui.ListItem("... 第" + str(page) + "页")
-            u = sys.argv[0]+"?mode=5"+"&name="+urllib.quote_plus(name)+"&url="+urllib.quote_plus(url)+"&page="+str(page)+"&thumb="+urllib.quote_plus(thumb)
-            xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)
+    for page in pages:
+        li = xbmcgui.ListItem("... 第" + str(page) + "页")
+        u = sys.argv[0]+"?mode=5"+"&name="+urllib.quote_plus(name)+"&url="+urllib.quote_plus(url)+"&page="+str(page)+"&thumb="+urllib.quote_plus(thumb)
+        xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)
     
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))    
@@ -693,26 +675,12 @@ def progListUgc(name, url, cat, filtrs, page, listpage):
         
     # Fetch and build page selection menu
     p_itemCount= content['data_count']
-    p_pageSize = 30
-    p_pageTotal = (p_itemCount + 29) / p_pageSize
-    p_pageMid = int(p_pageTotal / 2)
-    
-    p_pageNum = int(page)
-    if (p_pageNum <= p_pageMid):
-        p_pageEnd = min(8, p_pageTotal)
-        pages = range(0, p_pageEnd)
-        p_pageFromEnd = max((p_pageTotal - 2), (p_pageEnd + 1))
-    else:
-        pages = range(2)
-        p_pageFromEnd = max((p_pageTotal - 8), 2)
-    for x in range(p_pageFromEnd, p_pageTotal): pages.append(x) 
+    pages = getPages(p_itemCount, page)
 
-    for num in pages:
-        page = num + 1
-        if (page) != p_pageNum:
-            li = xbmcgui.ListItem("... 第" + str(page) + "页")
-            u = sys.argv[0]+"?mode=8"+"&name="+urllib.quote_plus(name)+"&url="+urllib.quote_plus(url)+"&cat="+urllib.quote_plus(cat)+"&filtrs="+urllib.quote_plus(filtrs)+"&page="+str(page)+"&listpage="+urllib.quote_plus(listpage)
-            xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)
+    for page in pages:
+        li = xbmcgui.ListItem("... 第" + str(page) + "页")
+        u = sys.argv[0]+"?mode=8"+"&name="+urllib.quote_plus(name)+"&url="+urllib.quote_plus(url)+"&cat="+urllib.quote_plus(cat)+"&filtrs="+urllib.quote_plus(filtrs)+"&page="+str(page)+"&listpage="+urllib.quote_plus(listpage)
+        xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)
     
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))    
@@ -799,26 +767,12 @@ def letvSearchList(name, page):
         
     # Fetch and build page selection menu
     p_itemCount= content['video_count']
-    p_pageSize = 30
-    p_pageTotal = (p_itemCount + 29) / p_pageSize
-    p_pageMid = int(p_pageTotal / 2)
-    
-    p_pageNum = int(page)
-    if (p_pageNum <= p_pageMid):
-        p_pageEnd = min(8, p_pageTotal)
-        pages = range(0, p_pageEnd)
-        p_pageFromEnd = max((p_pageTotal - 2), (p_pageEnd + 1))
-    else:
-        pages = range(2)
-        p_pageFromEnd = max((p_pageTotal - 8), 2)
-    for x in range(p_pageFromEnd, p_pageTotal): pages.append(x) 
+    pages = getPages(p_itemCount, page)
 
-    for num in pages:
-        page = num + 1
-        if (page) != p_pageNum:
-            li = xbmcgui.ListItem("... 第" + str(page) + "页")
-            u = sys.argv[0]+"?mode=32"+"&name="+urllib.quote_plus(name)+"&page="+str(page)
-            xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)
+    for page in pages:
+        li = xbmcgui.ListItem("... 第" + str(page) + "页")
+        u = sys.argv[0]+"?mode=32"+"&name="+urllib.quote_plus(name)+"&page="+str(page)
+        xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)
     
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))    
