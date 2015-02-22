@@ -2,6 +2,8 @@
 
 This project is an repository for open source Addon scripts, plugins, and skins for XBMC Media Center. Specially for Chinese Language speaking people.
 
+Note: Chinese repository is also applicable to Kodi (new releases - formerly known as xbmc)
+
 * Forum Discuss in Chinese: [原动力论坛: XBMC媒体中心讨论版][1]
 * Forum Discuss in English: [XBMC Community Forum: Project xbmc-addons-chinese Release Thread][2]
 
@@ -79,6 +81,14 @@ PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStre
 
 * doubantv - metadata.doubantv.com - Download TV information from movie.douban.com
 
+## Plugins Manual Installation
+
+* Official releases of all the Chinese plugins can be found in the ./repo sub-directories.
+
+If for reasons that you need to manually install a specific plugin, you can download the required zip file from the corresponding ./repo sub-directory. Then follow the ** Install Repository ** steps described above to install the zip plugin. 
+
 [1]: http://bbs.htpc1.com/forum-225-1.html
 [2]: http://xbmc.org/forum/showthread.php?t=64250
 [3]: https://github.com/taxigps/xbmc-addons-chinese/raw/master/repo/repository.xbmc-addons-chinese/repository.xbmc-addons-chinese-1.2.0.zip
+
+
