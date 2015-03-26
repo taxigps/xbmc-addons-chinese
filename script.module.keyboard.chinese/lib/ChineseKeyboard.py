@@ -423,7 +423,7 @@ class Keyboard:
         with open(os.path.join(skinpath, 'addon.xml')) as xmlfile:
             data = xmlfile.read()
         xmlfile.close()
-        soup = BeautifulSoup(data)
+        soup = BeautifulSoup(data, 'strict')
         it = soup.find('res', attrs={"aspect":aspect})
         folder = it.get('folder')
 
@@ -436,7 +436,7 @@ class Keyboard:
         with open(os.path.join(skinpath, folder, 'DialogKeyboard.xml')) as xmlfile:
             data = xmlfile.read()
         xmlfile.close()
-        soup = BeautifulSoup(data)
+        soup = BeautifulSoup(data, 'strict')
         it = soup.find('control', attrs={"type":"label", "id":CTL_LABEL_EDIT})
         if not it:
             it = soup.find('control', attrs={"type":"edit", "id":CTL_EDIT_EDIT})
