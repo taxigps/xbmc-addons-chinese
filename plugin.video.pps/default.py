@@ -2,15 +2,19 @@
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon
 import urllib2, urllib, re, sys, os
 import zipfile
-import ChineseKeyboard
+
+try:
+    from ChineseKeyboard import Keyboard as Apps
+except:
+    from xbmc import Keyboard as Apps
 
 ########################################################################
 # PPS影音(PPS.tv)
-# Version 1.1.10 2014-02-16 (cmeng)
-# - Skip prompt user for single selectable item
-# - Provide second retrial and remove DeprecationWarning in read_xml
+# Version 1.1.11 2015-04-03 (cmeng)
+# - Include <requires/> in addon.xml to import ChineseKeyboard
+# - add exception when loading ChineseKeyboard
+# - fixed urlretrieve permission error
 
-# See changelog.txt for previous history
 ########################################################################
 
 # Plugin constants 
@@ -99,10 +103,11 @@ def read_xml(id,type=1):
     print 'xml_zip: ' + url
     
     try:
-        dfile=urllib.urlretrieve(url, 'tmpxml.zip')
+        # dfile=urllib.urlretrieve(url, 'tmpxml.zip')
+        dfile=urllib.urlretrieve(url)
         z = zipfile.ZipFile(dfile[0],'r')    
     except: # second trial
-        dfile=urllib.urlretrieve(url, 'tmpxml.zip')
+        dfile=urllib.urlretrieve(url)
         z = zipfile.ZipFile(dfile[0],'r')
         
     text = z.read(id+".xml")
@@ -184,7 +189,10 @@ def menu_sub(name,id,category):
 
         name = elem.attrib['name']
         p_id = elem.attrib['id']
-        cnt = elem.attrib['op']
+        try:
+            cnt = elem.attrib['op']
+        except:
+            cnt ="sc='22';on='1';vm=''" 
         
         try:
             p_url = elem.attrib['dj']
@@ -393,7 +401,7 @@ def updateFilter(category, subCatEn):
 # Routine to search PPS based on user input string
 ##################################################################################
 def Search(mname):
-    keyboard = ChineseKeyboard.Keyboard('','输入所查影片中文信息-拼音或简拼(拼音首字母)')
+    keyboard = Apps('','输入所查影片中文信息-拼音或简拼(拼音首字母)')
     xbmc.sleep(1500)
     keyboard.doModal()
     keyword=keyboard.getText()
@@ -465,7 +473,11 @@ def Search(mname):
             j+=1
             name = elem.attrib['name']
             id = elem.attrib['id']
-            cnt = elem.attrib['op']
+            
+            try:
+                cnt = elem.attrib['op']
+            except:
+                cnt ="sc='22';on='1';vm=''" 
         
             try: p_url = elem.attrib['image']
             except: p_url=''
@@ -506,7 +518,7 @@ def Search(mname):
 def Searchx(mname):
     if (mname == "PPS搜索"):
         #kb=xbmc.Keyboard('','输入所查影片中文信息-拼音或简拼(拼音首字母)',False)
-        keyboard = ChineseKeyboard.Keyboard('','输入所查影片中文信息-拼音或简拼(拼音首字母)')
+        keyboard = Apps('','输入所查影片中文信息-拼音或简拼(拼音首字母)')
         xbmc.sleep( 1500 )
         keyboard.doModal()
         keyword=keyboard.getText()
