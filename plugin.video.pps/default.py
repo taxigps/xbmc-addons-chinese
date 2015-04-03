@@ -10,10 +10,8 @@ except:
 
 ########################################################################
 # PPS影音(PPS.tv)
-# Version 1.1.11 2015-04-03 (cmeng)
-# - Include <requires/> in addon.xml to import ChineseKeyboard
-# - add exception when loading ChineseKeyboard
-# - fixed urlretrieve permission error
+# Version 1.1.12 2015-04-03 (cmeng)
+# - Add missing resources/lib/etree in repository
 
 ########################################################################
 
