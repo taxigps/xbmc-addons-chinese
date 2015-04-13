@@ -1,7 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, re, string, sys, os, gzip, StringIO
 
-# 5ivdo(5ivdo) by sand, 2014
+# 5ivdo(5ivdo) by sand, 2015
 
 # Plugin constants 
 __addonname__ = "5ivdo(5ivdo)"
@@ -387,7 +387,7 @@ def PlayVideo(pPARMs):
             imatch = re.compile('<match2str>(.+?)</match2str>').findall(ioptions)
             match2str = imatch[0]
             match=Getmatch2(url,matchstr,match2str)
-        if pmod.find('GROUPSELECT') > 0:
+        elif pmod.find('GROUPSELECT') > 0:
             imatch = re.compile('<groupstr>(.+?)</groupstr>').findall(ioptions)
             groupstr = imatch[0]
             imatch = re.compile('<groupid>(.+?)</groupid>').findall(ioptions)
