@@ -16,9 +16,8 @@ else:
 
 ########################################################################
 # PPStream 网络电视 by cmeng
-# Version 2.2.13 2014-11-20 (cmeng)
-# - Include <requires/> in addon.xml to import ChineseKeyboard
-# - add exception when loading ChineseKeyboard
+# Version 2.2.15 2015-04-18 (cmeng)
+# - fixed search listing for video (many site video players still not working)
  
 # See changelog.txt for previous history
 ########################################################################
@@ -40,7 +39,8 @@ USORT_DATE = [['t1','不限'],['t3','一周'],['t4','一月']]
 USORT_ORDER = [['o1','默认'],['o3','最多播放'],['o2','最新更新']]
 COLOR_LIST = ['[COLOR FFFF0000]','[COLOR FF00FF00]','[COLOR FFFFFF00]','[COLOR FF00FFFF]','[COLOR FFFF00FF]']
 # MPLAYER_LIST = [['10','PPS网络电视'],['99','SMG'],['43','优酷'],['44','土豆'],['45','奇艺'],['46','搜狐'],['47','新浪'],['48','乐视']]
-MPLAYER_LIST = [['10','pps'],['99','SMG'],['43','youku'],['44','todu'],['45','qiyi'],['46','sohu'],['47','sina'],['48','letv']]
+MPLAYER_LIST = [['10','pps'],['43','youku'],['44','tudou'],['45','iqiyi'],['45','iqiyi_new'],['46','sohu'],['47','sina'],['48','letv'],\
+                ['99','56'],['99','SMG'],['99','qq']]
 VIDEO_RES = [["标清",'sd'],["高清",'hd'],["普通",''],["未注","null"]] 
 RES_LIST = ['high', 'super']
 
@@ -807,13 +807,17 @@ def ppsSearchList(name, url, page):
     # Movie and Episode Listing for each found related title
     #############################################################
     n = 0
-    match_ms = re.compile('<div data-widget-searchlist-tvname(.+?)</div></div>').findall(link)
+    match_ms = re.compile('<div[\s]*data-widget-searchlist-tvname(.+?)</div></div>').findall(link)
     if len(match_ms):
         for k in range(0, len(match_ms)):
             match1 = re.compile('<img.+?title="(.+?)" src="(.+?)"').findall(match_ms[k])
             p_name = p_list = match1[0][0]
             p_thumb = match1[0][1]
-            
+
+            match1 = re.compile('<span class="title_s">(.*?)</span>').findall(match_ms[k])
+            if match1:
+               p_list += "-" + match1[0]
+
             match1 = re.compile('data-widget-searchlist-catageory="(.+?)"').findall(match_ms[k])
             p_category = match1[0]
             
@@ -878,20 +882,25 @@ def ppsSearchList(name, url, page):
 
             for i in range(0, len(match)):      
                 match1 = re.compile('<a data-searchpingback-elem="link".+?title="(.+?)".+?href="(.+?)" target="_blank">').findall(match[i])
-                p_name = p_list = match1[0][0]
+                p_name = p_list = match1[0][0].strip()
                 p_url = match1[0][1]
+                
+                match1 = re.compile('<span class="v_name">(.*?)</span>').findall(match[i])
+                if match1:
+                    p_v_name = match1[0]
+                    p_list = "[COLOR FF00FF00]["+p_v_name+"][/COLOR] " + p_list
 
                 match1 = re.compile('<span>(.+?)</span>').findall(match[i])      
                 if match1: p_list = '[COLOR FF00FF00]'+match1[0]+'[/COLOR] ' + p_name
 
-                match1 = re.compile('<span class="v_name">([:0-9]+)</span>').findall(match[i])      
+                match1 = re.compile('<p class="viedo_rb">.+?<span class="v_name">([:0-9]+)</span>').findall(match[i])      
                 if match1: p_list += ' [COLOR FFFF00FF]['+match1[0]+'][/COLOR] '
           
                 match1 = re.compile('<img.+?src="(.+?)">').findall(match[i])
                 p_thumb = match1[0]
         
                 n += 1
-                li = xbmcgui.ListItem(str(n)+". "+p_list, iconImage="", thumbnailImage=p_thumb)
+                li = xbmcgui.ListItem(str(n)+". " + p_list, iconImage="", thumbnailImage=p_thumb)
                 u = sys.argv[0]+"?mode=15&name="+urllib.quote_plus(p_name)+"&url="+urllib.quote_plus(p_url)+"&thumb="+urllib.quote_plus(p_thumb)
                 xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, False, totalItems)
 
