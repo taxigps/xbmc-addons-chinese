@@ -4,7 +4,7 @@
 BASE_URL = r'http://www.bilibili.com/'
 
 # B站接口地址（用于获取视频地址）
-INTERFACE_URL = r'http://interface.bilibili.com/playurl?cid={0}&sign=fd627105c78c7b877fee35f997a63eb0'
+INTERFACE_URL = r'http://interface.bilibili.com/playurl?cid={0}&sign=fd627105c78c7b877fee35f997a63eb0&quality=4'
 
 # B站评论页面地址
 COMMENT_URL = r'http://comment.bilibili.tv/{0}.xml'
