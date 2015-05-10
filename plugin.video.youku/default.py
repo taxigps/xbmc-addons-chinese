@@ -280,9 +280,9 @@ def progList(name,id,page,genre,area,year,order):
 def getMovie(name,id,thumb,res):
     if len(id)==21:
         link = GetHttpData('http://www.youku.com/show_page/id_' + id + '.html')
-        match = re.compile('<a class="btnShow btnplayposi".*?href="http://v.youku.com/v_show/id_(.+?)\.html"', re.DOTALL).search(link)
+        match = re.compile('<a class="btnShow btnplayposi".*?href="http://v.youku.com/v_show/id_(.+?)\.html[^"]*"', re.DOTALL).search(link)
         if not match:
-            match = re.compile('<div class="btnplay">.*?href="http://v.youku.com/v_show/id_(.+?)\.html"', re.DOTALL).search(link)
+            match = re.compile('<div class="btnplay">.*?href="http://v.youku.com/v_show/id_(.+?)\.html[^"]*"', re.DOTALL).search(link)
         if match:
             # 播放正片
             PlayVideo(name, match.group(1), thumb, res)
@@ -307,7 +307,7 @@ def seriesList(name,id,thumb,res):
     totalItems = len(match)
 
     for i in range(0,len(match)):
-        match1 = re.compile('<div class="link"><a .*?href="http://v.youku.com/v_show/id_(.+?)\.html"').search(match[i])
+        match1 = re.compile('<div class="link"><a .*?href="http://v.youku.com/v_show/id_(.+?)\.html[^"]*"').search(match[i])
         if match1:
             p_id = match1.group(1)
         else:
