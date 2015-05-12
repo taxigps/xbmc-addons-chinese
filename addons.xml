@@ -507,7 +507,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="service.subtitles.subhd"
        name="Sub HD"
-       version="1.0.0"
+       version="1.0.1"
        provider-name="taxigps">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
@@ -518,8 +518,8 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
   <extension point="xbmc.addon.metadata">
     <summary lang="en">Sub HD subtitle</summary>
     <summary lang="zh">Sub HD 字幕</summary>
-    <description lang="en">Search and download subtitles from www.subhd.com</description>
-    <description lang="zh">从 www.subhd.com 下载字幕</description>
+    <description lang="en">Search and download subtitles from subhd.com</description>
+    <description lang="zh">从 subhd.com 下载字幕</description>
   </extension>
 </addon>
 
