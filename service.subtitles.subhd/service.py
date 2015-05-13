@@ -60,9 +60,10 @@ def Search( item ):
 
     log( __name__ ,"Search for [%s] by name" % (os.path.basename( item['file_original_path'] ),))
     if item['mansearch']:
-        url = SUBHD_API % (item['mansearchstr'])
+        url = SUBHD_API % (urllib.quote(item['mansearchstr']))
     else:
-        url = SUBHD_API % (item['title'])
+        url = SUBHD_API % (urllib.quote(item['title']))
+    print url
     data = GetHttpData(url)
     try:
         soup = BeautifulSoup(data)
@@ -70,10 +71,11 @@ def Search( item ):
         return
     results = soup.find_all("div", class_="box")
     for it in results:
-        link = SUBHD_BASE + it.a.get('href').encode('utf-8')
-        version = it.find(text='字幕翻译'.decode('utf-8')).parent.get('title').encode('utf-8')
+        link = SUBHD_BASE + it.find("div", class_="d_title").a.get('href').encode('utf-8')
+        version = it.find(text=re.compile('(字幕翻译|听译版本)'.decode('utf-8'))).parent.get('title').encode('utf-8')
         if version:
-            version = version.split()[1]
+            if version.find('本字幕按 ') == 0:
+                version = version.split()[1]
         else:
             version = '未知版本'
         try:
