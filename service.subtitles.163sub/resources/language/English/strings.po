@@ -1,0 +1,16 @@
+msgid ""
+msgstr ""
+
+#English
+
+msgctxt "#32001"
+msgid "Number of results"
+msgstr ""
+
+msgctxt "#32002"
+msgid "First ten"
+msgstr ""
+
+msgctxt "#32003"
+msgid "All"
+msgstr ""
