@@ -63,7 +63,6 @@ def Search( item ):
         url = SUBHD_API % (urllib.quote(item['mansearchstr']))
     else:
         url = SUBHD_API % (urllib.quote(item['title']))
-    print url
     data = GetHttpData(url)
     try:
         soup = BeautifulSoup(data)
@@ -72,7 +71,8 @@ def Search( item ):
     results = soup.find_all("div", class_="box")
     for it in results:
         link = SUBHD_BASE + it.find("div", class_="d_title").a.get('href').encode('utf-8')
-        version = it.find(text=re.compile('(字幕翻译|听译版本)'.decode('utf-8'))).parent.get('title').encode('utf-8')
+        #version = it.find(text=re.compile('(字幕翻译|听译版本|机翻版本|官方译本)'.decode('utf-8'))).parent.get('title').encode('utf-8')
+        version = it.find_all("span", class_=re.compile("label"))[-1].get('title').encode('utf-8')
         if version:
             if version.find('本字幕按 ') == 0:
                 version = version.split()[1]
