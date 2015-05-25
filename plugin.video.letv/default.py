@@ -17,10 +17,8 @@ except ImportError:
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
-# Version 1.4.3 2015-02-21 (cmeng)
-# - add getPages() routine for common access
-# - fix problem in 明星 getPages call
-# - add subCategory information in MOVIE_LIST
+# Version 1.4.4 2015-05-26 (cmeng)
+# - switch back to flvcd for video link fetch.
 
 # See changelog.txt for previous history
 ########################################################################
@@ -847,7 +845,7 @@ def decrypt_url(url):
         return ''
 
 ##################################################################################
-def playVideoLetv(name,url,thumb):
+def playVideoLetvx(name,url,thumb):
     dialog = xbmcgui.Dialog()
     pDialog = xbmcgui.DialogProgress()
     pDialog.create('匹配视频', '请耐心等候! 尝试匹配视频文件 ...')
@@ -870,7 +868,7 @@ def playVideoLetv(name,url,thumb):
 # Continuous Player start playback from user selected video
 # User backspace to previous menu will not work - playlist = last selected
 ##################################################################################
-def playVideoUgc(name,url,thumb):
+def playVideoUgcx(name,url,thumb):
     videoplaycont = __addon__.getSetting('video_vplaycont')
 
     playlistA=xbmc.PlayList(0)
@@ -938,7 +936,7 @@ def playVideoUgc(name,url,thumb):
 ##################################################################################    
 # Routine to extra video link using flvcd - not use (url link fetech problem)
 ##################################################################################
-def playVideo(name,url,thumb):
+def playVideoLetv(name,url,thumb):
     videoRes = int(__addon__.getSetting('video_resolution'))
     vparamap = {0:'normal', 1:'high', 2:'super'}
     
@@ -1015,7 +1013,7 @@ def flvcd(urlData):
         return match        
 
 ##################################################################################
-def playVideoUgcX(name,url,thumb):
+def playVideoUgc(name,url,thumb):
     videoRes = int(__addon__.getSetting('video_resolution'))
     videoplaycont = __addon__.getSetting('video_vplaycont')
 
