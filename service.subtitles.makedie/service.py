@@ -10,7 +10,7 @@ import xbmcgui
 import xbmcplugin
 import unicodedata
 import chardet
-
+import shutil
 import hashlib
 from httplib import HTTPConnection, OK
 import struct
@@ -327,21 +327,11 @@ def getSubByTitle(title, langs):
             url = "plugin://%s/?action=download&id=%s" % (__scriptid__, '999999'+it["id"])
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
 
-def rmtree(path):
-    if isinstance(path, unicode):
-        path = path.encode('utf-8')
-    dirs, files = xbmcvfs.listdir(path)
-    for dir in dirs:
-        rmtree(os.path.join(path, dir))
-    for file in files:
-        xbmcvfs.delete(os.path.join(path, file))
-    xbmcvfs.rmdir(path)
-
 def Search(item):
-    if xbmcvfs.exists(__temp__):
-        rmtree(__temp__)
-    xbmc.sleep(50)
-    xbmcvfs.mkdirs(__temp__)
+    try: shutil.rmtree(__temp__)
+    except: pass
+    try: os.makedirs(__temp__)
+    except: pass
 
     if item['mansearch']:
         title = item['mansearchstr']
@@ -387,10 +377,10 @@ def CheckSubList(files):
     return list
 
 def DownloadID(id):
-    if xbmcvfs.exists(__temp__):
-        rmtree(__temp__)
-    xbmc.sleep(50)
-    xbmcvfs.mkdirs(__temp__)
+    try: shutil.rmtree(__temp__)
+    except: pass
+    try: os.makedirs(__temp__)
+    except: pass
 
     subtitle_list = []
     if id.startswith('999999'):
