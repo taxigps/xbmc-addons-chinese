@@ -23,7 +23,7 @@ addon_path = xbmc.translatePath(addon.getAddonInfo("path"))
 addon_handle = int(sys.argv[1])
 xbmcplugin.setContent(addon_handle, "movies")
 
-TIMEOUT_S = 1.0
+TIMEOUT_S = 2.0
 
 param = sys.argv[2]
 
@@ -39,22 +39,29 @@ def getQualityRange(quality):
 
 def main():
 	if param.startswith("?stream="):
-		def tryHLSStream(jsondata, streamName):
-			print("Trying stream {0}".format(streamName))
-			if jsondata["hls_url"].has_key(streamName):
-				url = jsondata["hls_url"][streamName]
-				
-				#Apply nasty hacks
-				url = url.replace("vtime.cntv.cloudcdn.net:8000", "vtime.cntv.cloudcdn.net")
-				
-				print("Trying URL {0}".format(url))
-				
-				if "dianpian" in url:
-					return None
-				else:
-					return url
-			else:
-				return None
+		def fixURL(tmpurl):
+			tmpurl = tmpurl.replace("vtime.cntv.cloudcdn.net:8000", "vtime.cntv.cloudcdn.net") #Global (HDS/FLV) - wrong port
+			tmpurl = tmpurl.replace("tv.fw.live.cntv.cn", "tvhd.fw.live.cntv.cn") #China - 403 Forbidden
+			return tmpurl
+		
+		def tryHLSStream(jsondata, subkey):
+			print("Trying stream {0}".format(subkey))
+			
+			if jsondata["hls_url"].has_key(subkey) and jsondata["hls_url"][subkey] != "":
+				try:
+					tmpurl = jsondata["hls_url"][subkey]
+					tmpurl = fixURL(tmpurl)
+					
+					req = urllib2.Request(tmpurl)
+					conn = urllib2.urlopen(req, timeout=TIMEOUT_S)
+					conn.read(8) #Try reading a few bytes
+					
+					return tmpurl
+				except Exception:
+					print("{0} failed.".format(subkey))
+					print(traceback.format_exc())
+			
+			return None
 		
 		def tryFLVStream(jsondata, streamName):
 			if jsondata["hds_url"].has_key(streamName):
@@ -74,51 +81,32 @@ def main():
 			if pDialog.iscanceled(): return
 			
 			url = None
-			hostname = None
 			jsondata = jsonimpl.loads(data)
 			
+			urlsTried = 0
+			urlsToTry = 5
+			
 			if jsondata.has_key("hls_url"):
-				if jsondata["hls_url"].has_key("hls3"):
-					try:
-						tmpurl = jsondata["hls_url"]["hls3"]
-						#Apply nasty hacks.
-						tmpurl = tmpurl.replace("vtime.cntv.cloudcdn.net:8000", "vtime.cntv.cloudcdn.net") #Global (HDS/FLV) - wrong port
-						tmpurl = tmpurl.replace("tv.fw.live.cntv.cn", "tvhd.fw.live.cntv.cn") #China - 403 Forbidden
-						
-						#Change quality.
-						tmpurl = tmpurl.replace("b=100-300", "b={0}".format(getQualityRange(addon.getSetting("quality"))))
-						
-						tmphostname = urlparse.urlparse(tmpurl).netloc
-						addrinfos = socket.getaddrinfo(tmphostname, 80)
-						
-						tries = 0
-						for addrinfo in addrinfos:
-							if addrinfo[1] == socket.SOCK_STREAM:
-								if tries >= 3: #Only try 3 IPs. More is futile, because broken-DNS channels don't work anyway.
-									break
-								tries = tries + 1
-								
-								address = addrinfo[4][0]
-								pDialog.update(33 + tries * 11, "{0} {1} (HLS)".format(addon.getLocalizedString(30011), address))
-								
-								try:
-									tmpurl = tmpurl.replace(tmphostname, address)
-									
-									req = urllib2.Request(tmpurl)
-									req.add_header("Host", tmphostname)
-									conn = urllib2.urlopen(req, timeout=TIMEOUT_S)
-									conn.read(8) #Try reading a few bytes
-									
-									#If we're still running, the connection was successful.
-									hostname = tmphostname
-									url = tmpurl
-									break
-								except Exception:
-									print("{0} failed.".format(address))
-									print(traceback.format_exc())
-					except Exception:
-						print("hls3 failed.")
-						print(traceback.format_exc())
+				if url == None:
+					urlsTried += 1
+					pDialog.update(urlsTried / urlsToTry * 100, "{0} {1} (HLS)".format(addon.getLocalizedString(30011), "hls1"))
+					url = tryHLSStream(jsondata, "hls1")
+				if url == None:
+					urlsTried += 1
+					pDialog.update(urlsTried / urlsToTry * 100, "{0} {1} (HLS)".format(addon.getLocalizedString(30011), "hls1"))
+					url = tryHLSStream(jsondata, "hls2")
+				if url == None:
+					urlsTried += 1
+					pDialog.update(urlsTried / urlsToTry * 100, "{0} {1} (HLS)".format(addon.getLocalizedString(30011), "hls1"))
+					url = tryHLSStream(jsondata, "hls3")
+				if url == None:
+					urlsTried += 1
+					pDialog.update(urlsTried / urlsToTry * 100, "{0} {1} (HLS)".format(addon.getLocalizedString(30011), "hls1"))
+					url = tryHLSStream(jsondata, "hls4")
+				if url == None:
+					urlsTried += 1
+					pDialog.update(urlsTried / urlsToTry * 100, "{0} {1} (HLS)".format(addon.getLocalizedString(30011), "hls1"))
+					url = tryHLSStream(jsondata, "hls5")
 			
 			if pDialog.iscanceled(): return
 			
@@ -135,7 +123,7 @@ def main():
 			auth = urlparse.parse_qs(urlparse.urlparse(url)[4])["AUTH"][0]
 			print("Got AUTH {0}".format(auth))
 			
-			url = url + "|" + urllib.urlencode( { "Cookie" : "AUTH=" + auth, "Host" : hostname } )
+			url = url + "|" + urllib.urlencode( { "Cookie" : "AUTH=" + auth } )
 			
 			print("Built URL {0}".format(url))
 			
