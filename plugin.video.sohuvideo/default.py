@@ -1,5 +1,6 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, urlparse, httplib, re, string, sys, os, gzip, StringIO
+from random import random
 import cookielib, datetime, time
 import ChineseKeyboard
 try:
@@ -298,14 +299,20 @@ def progList(name,id,page,cat,area,year,p5,p6,p11,order):
 
         for i in range(0,len(match)):
             match1 = re.compile('<a href="([^"]+)" title="([^"]+)" target="_blank"', re.DOTALL).search(match[i])
-            i_url = 1
-            i_name = 2
-            if not match1:
+            if match1:
+                p_name = match1.group(2)
+                p_url = match1.group(1)
+            else:
                 match1 = re.compile('<a title="([^"]+)" target="_blank" href="([^"]+)"', re.DOTALL).search(match[i])
-                i_url = 2
-                i_name = 1
-            p_name = match1.group(i_name)
-            p_url = match1.group(i_url)
+                if match1:
+                    p_name = match1.group(1)
+                    p_url = match1.group(2)
+                else:
+                    match1 = re.compile('<a .*?title="([^"]+)"', re.DOTALL).search(match[i])
+                    p_name = match1.group(1)
+                    match1 = re.compile('<a .*?href="([^"]+)"', re.DOTALL).search(match[i])
+                    p_url = match1.group(1)
+
             match1 = re.compile('<img .*?src="([^"]+)"', re.DOTALL).search(match[i])
             p_thumb = match1.group(1)
             p_rating = 0
@@ -656,6 +663,10 @@ def sohuSearchList(name, url, page):
  
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+def real_url(host,vid,tvid,new,clipURL,ck):
+    url = 'http://'+host+'/?prot=9&prod=flash&pt=1&file='+clipURL+'&new='+new +'&key='+ ck+'&vid='+str(vid)+'&uid='+str(int(time.time()*1000))+'&t='+str(random())
+    return simplejson.loads(getHttpData(url))['url'].encode('utf-8')
  
 ##################################################################################
 # Sohu Video Link Decode Algorithm & Player
@@ -712,36 +723,21 @@ def PlayVideo(name,url,thumb):
             rate = level + 1
     if match.group(int(rate))<>str(p_vid):
         link = getHttpData('http://hot.vrs.sohu.com/vrs_flash.action?vid='+match.group(int(rate)))
-    match = re.compile('"tvName":"(.+?)"').findall(link)
-    if not match:
-       res = ratelist[3-int(rate)][0]
-       dialog = xbmcgui.Dialog()
-       ok = dialog.ok(__addonname__,'您当前选择的视频: ['+ res +'] 暂不能播放，请选择其它视频')       
-       return
-    name = match[0]
 
-    match = re.compile('"clipsURL"\:\["(.+?)"\]').findall(link)
-    paths = match[0].split('","')
-    match = re.compile('"su"\:\["(.+?)"\]').findall(link)
-    if not match:
-       res = ratelist[3-int(rate)][0]
-       dialog = xbmcgui.Dialog()
-       ok = dialog.ok(__addonname__,'您当前选择的视频: ['+ res +'] 暂不能播放，请选择其它视频')       
-       return
-    newpaths = match[0].split('","')
-    
+    hqvid = match.group(int(rate))
+    info = simplejson.loads(link)
+    host = info['allot']
+    prot = info['prot']
+    tvid = info['tvid']
     urls = []
-    for i in range(0,len(paths)):
-        p_url = 'http://data.vod.itc.cn/?prot=2&file='+paths[i].replace('http://data.vod.itc.cn','')+'&new='+newpaths[i]
-        link = getHttpData(p_url)
-        
-        # http://newflv.sohu.ccgslb.net/|623|116.14.234.161|Googu7gm-8WjRTd5ZfBVPIfrtRtLE5Cn|1|0
-        key=link.split('|')[3]
-        if site == 0:
-            url = link.split('|')[0].rstrip("/")+newpaths[i]+'?key='+key
-        else:
-            url = 'http://new.sohuv.dnion.com'+newpaths[i]+'?key='+key
-        urls.append(url)
+    data = info['data']
+    name = data['tvName'].encode('utf-8')
+    size = sum(data['clipsBytes'])
+    assert len(data['clipsURL']) == len(data['clipsBytes']) == len(data['su'])
+    for new,clip,ck, in zip(data['su'], data['clipsURL'], data['ck']):
+        clipURL = urlparse.urlparse(clip).path
+        urls.append(real_url(host,hqvid,tvid,new,clipURL,ck))
+
     stackurl = 'stack://' + ' , '.join(urls)
     listitem = xbmcgui.ListItem(name,thumbnailImage=thumb)
     listitem.setInfo(type="Video",infoLabels={"Title":name})
