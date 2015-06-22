@@ -43,6 +43,7 @@ For proper Chinese text display on xbmc, do the following steps:
 * PPS影音(PPS.tv) - plugin.video.pps - Video from PPS for client side playback
 * PPS网络电视(PPStream) - plugin.video.ppstream - PPS online tv and movies
 * PPTV视频 - plugin.video.pptv - Online videos from www.pptv.com
+* 奇艺视频(QIYI) - plugin.video.qiyi - Online videos from www.iqiyi.com
 * 搜狐视频(SoHu) - plugin.video.sohuvideo - Online video from [tv.sohu.com](http://tv.sohu.com/)
 * 音悦台MV(YinYueTai) - plugin.video.yinyuetai - MV from www.yinyuetai.com
 * 优酷视频(YouKu) - plugin.video.youku - Online tv and movies from www.youku.com
