@@ -146,7 +146,8 @@ def progList(name,id,page,cat,area,year,order,paytype):
         c5 = cat
     else:
         c2 = cat
-    url = 'http://list.iqiyi.com/www/' + id + '/' + c1 + '-' + c2 + '-' + c3 + '-' + c4 + '-------' + paytype + '-' + year + '--' + order + '-1-' + page + '-iqiyi--.html'
+    url = 'http://list.iqiyi.com/www/' + id + '/' + c1 + '-' + c2 + '-' + c3 + '-' + c4 + '-------' +\
+                           paytype + '-' + year + '--' + order + '-' + page + '-1-iqiyi--.html'
     currpage = int(page)
     link = GetHttpData(url)
     match1 = re.compile('data-key="([0-9]+)"').findall(link)
