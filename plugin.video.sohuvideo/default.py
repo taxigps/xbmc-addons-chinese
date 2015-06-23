@@ -3,10 +3,7 @@ import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, urlparse, httplib,
 from random import random
 import cookielib, datetime, time
 import ChineseKeyboard
-try:
-    import simplejson
-except ImportError:
-    import json as simplejson
+import simplejson
        
 # Plugin constants 
 __addonname__ = "搜狐视频(SoHu)"
@@ -407,13 +404,25 @@ def seriesList(name, id,url,thumb):
             totalItems = len(match)
             for item in match:
                 p_name = item['videoName'].encode('utf-8')
-                p_time = item['videoPublishTime']
-                p_order = item['playOrder'].encode('utf-8')
                 p_url = item['videoUrl'].encode('utf-8')
                 p_thumb = item['videoBigPic'].encode('utf-8')
-                p_date = datetime.date.fromtimestamp(float(p_time)/1000).strftime('%d.%m.%Y')
+                p_plot = item['videoDesc'].encode('utf-8')
+                p_rating = item['videoScore']
+                if isinstance(item['videoVoters'], int):
+                    p_votes = item['videoVoters']
+                else:
+                    p_votes = int(item['videoVoters'])
+                if isinstance(item['playOrder'], int):
+                    p_order = item['playOrder']
+                else:
+                    p_order = int(item['playOrder'])
+                if item.has_key('videoPublishTime'):
+                    p_time = item['videoPublishTime']
+                    p_date = datetime.date.fromtimestamp(float(p_time)/1000).strftime('%d.%m.%Y')
+                else:
+                    p_date = ''
                 li = xbmcgui.ListItem(p_name, iconImage = '', thumbnailImage = p_thumb)
-                li.setInfo(type="Video",infoLabels={"Title":p_name, "date":p_date, "episode":int(p_order)})
+                li.setInfo(type="Video",infoLabels={"Title":p_name, "date":p_date, "episode":p_order, "plot":p_plot, "rating":p_rating, "votes":p_votes})
                 u = sys.argv[0] + "?mode=3&name=" + urllib.quote_plus(p_name) + "&url=" + urllib.quote_plus(p_url)+ "&thumb=" + urllib.quote_plus(p_thumb)
                 xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, False, totalItems)
         else:

@@ -1,9 +1,10 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="plugin.video.sohuvideo"
     name="搜狐视频(SoHu)"
-    version="2.4.5"
+    version="2.4.6"
     provider-name="Taxigps">
     <requires>
+        <import addon="script.module.simplejson" version="3.3.0"/>
         <import addon="script.module.keyboard.chinese" version="1.0.0"/>
     </requires>
     <extension
