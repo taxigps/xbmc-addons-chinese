@@ -60,9 +60,14 @@ def Search( item ):
 
     log( __name__ ,"Search for [%s] by name" % (os.path.basename( item['file_original_path'] ),))
     if item['mansearch']:
-        url = SUBHD_API % (urllib.quote(item['mansearchstr']))
+        search_string = item['mansearchstr']
+    elif len(item['tvshow']) > 0:
+        search_string = "%s S%.2dE%.2d" % (item['tvshow'],
+                                           int(item['season']),
+                                           int(item['episode']),)
     else:
-        url = SUBHD_API % (urllib.quote(item['title']))
+        search_string = item['title']
+    url = SUBHD_API % (urllib.quote(search_string))
     data = GetHttpData(url)
     try:
         soup = BeautifulSoup(data)
