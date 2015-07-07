@@ -41,6 +41,8 @@ def Search( item ):
     log( __name__ ,"Search for [%s] by name" % (os.path.basename( item['file_original_path'] ),))
     if item['mansearch']:
         url = ZIMUKU_API % (item['mansearchstr'])
+    elif len(item['tvshow']) > 0:
+        url = ZIMUKU_API % (item['tvshow'])
     else:
         url = ZIMUKU_API % (item['title'])
     try:
