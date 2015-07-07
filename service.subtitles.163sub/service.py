@@ -38,11 +38,16 @@ def normalizeString(str):
 def Search( item ):
     subtitles_list = []
 
-    log( __name__ ,"Search for [%s] by name" % (os.path.basename( item['file_original_path'] ),))
     if item['mansearch']:
-        search_str = urllib.quote(item['mansearchstr'])
+        search_str = item['mansearchstr']
+    elif len(item['tvshow']) > 0:
+        search_str = "%s S%.2dE%.2d" % (item['tvshow'],
+                                           int(item['season']),
+                                           int(item['episode']),)
     else:
-        search_str = urllib.quote(item['title'])
+        search_str = item['title']
+    log( __name__ ,"Search for [%s] with [%s]" % (os.path.basename( item['file_original_path'] ),search_str.decode('utf-8')))
+    search_str = urllib.quote(search_str)
     lastid = ''
     results = []
     try:
