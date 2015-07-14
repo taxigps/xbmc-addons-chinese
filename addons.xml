@@ -2,7 +2,7 @@
 <addons>
 <addon id="metadata.doubantv.com"
        name="doubantv"
-       version="1.0.0"
+       version="1.1.0"
        provider-name="janplus">
   <requires>
     <import addon="xbmc.metadata" version="1.0"/>

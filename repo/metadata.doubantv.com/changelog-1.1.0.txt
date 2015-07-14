@@ -1,0 +1,7 @@
+[B]1.1.0[/B]
+- Change the url of getting raw photos
+[B]1.0.0[/B]
+- Add episode info
+[B]0.0.1[/B]
+- Initial version
+- Only can get the tv info
