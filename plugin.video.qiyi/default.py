@@ -6,15 +6,6 @@ from math import floor
 import hashlib
 import simplejson
 
-############################################################
-# 奇艺视频(QIYI) by taxigps, 2012
-############################################################
-# Version 2.1.2 2014-03-01 (cmeng)
-# - Change video link access method
-#     to avoid playback error due to copyright
-
-# See changelog.txt for previous history
-############################################################
 # Plugin constants 
 __addonname__ = "奇艺视频(QIYI)"
 __addonid__   = "plugin.video.qiyi"
@@ -375,7 +366,7 @@ def getVrsEncodeCode(vlink):
 
 def mix(tvid):
     enc = []
-    enc.append('754f3a28fee047ad9b654420056b400b')
+    enc.append('341c0055ad1d4e798c2b784d9dbed29f')
     tm = str(randint(2000,4000))
     src = 'hsalf'
     enc.append(str(tm))
