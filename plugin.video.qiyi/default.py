@@ -366,9 +366,9 @@ def getVrsEncodeCode(vlink):
 
 def mix(tvid):
     enc = []
-    enc.append('8e29ab5666d041c3a1ea76e06dabdffb')
+    enc.append('3cba91f1453145438ac5e4f5983bc086')
     tm = str(randint(2000,4000))
-    src = 'hsalf'
+    src = 'eknas'
     enc.append(str(tm))
     enc.append(tvid)
     sc = hashlib.md5("".join(enc)).hexdigest()
@@ -384,7 +384,7 @@ def getVMS(tvid,vid,uid):
     vmsreq='http://cache.video.qiyi.com/vms?key=fvip&src=1702633101b340d8917a69cf8a4b8c7' +\
                 "&tvId="+tvid+"&vid="+vid+"&vinfo=1&tm="+tm+\
                 "&enc="+sc+\
-                "&qyid="+uid+"&tn="+str(random()) +"&um=0" +\
+                "&qyid="+uid+"&tn="+str(random()) +"&um=1" +\
                 "&authkey="+hashlib.md5(''+str(tm)+tvid).hexdigest()
     return simplejson.loads(GetHttpData(vmsreq))
 
