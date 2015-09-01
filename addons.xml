@@ -167,6 +167,26 @@
     </extension>
 </addon>
 
+<addon
+    id="plugin.video.asia-tv"
+    version="1.0.0"
+    name="亚洲电视"
+    provider-name="米老康"
+    >
+  <extension point="xbmc.python.pluginsource"
+	     library="addondev1.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>TV channels from asia-tv.in</summary>
+    <summary lang="zh">亚洲电视 来自http://fms.cntv.lxdns.com</summary>
+    <description>亚洲电视 来自http://fms.cntv.lxdns.com</description>
+    <description lang="zh">亚洲电视 来自http://fms.cntv.lxdns.com</description>
+    <platform>all</platform>
+    <email>sun_kang@hotmail.com</email>
+  </extension>
+</addon>
+
 <addon id="plugin.video.bilibili" name="哔哩哔哩(bilibili)" version="0.2.5" provider-name="Syndim">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>

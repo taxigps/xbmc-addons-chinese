@@ -1,0 +1,36 @@
+﻿
+channel1.flv 内蒙古
+channel2.flv 内蒙古
+channel6.flv 滨海一套
+channel10.flv 邢台生活
+channel11.flv 邢台公共
+channel12.flv 邢台综合
+channel33.flv 新疆卫视
+channel34.flv 内蒙古
+channel38.flv 兵团卫视
+channel39.flv 滨海二套
+channel50.flv 新科动漫
+channel56.flv 新疆二套
+channel57.flv 新疆三套
+channel58.flv 新疆五套
+channel59.flv 新疆八套
+channel60.flv 新疆九套
+channel77.flv 厦门卫视
+channel78.flv 厦门四套
+channel79.flv 厦门一套
+channel80.flv 厦门二套
+channel81.flv 厦门三套
+channel85.flv 未知频道
+channel86.flv 垄上频道
+channel87.flv 成都一套
+channel88.flv 成都五套
+channel178.flv 未知频道
+channel179.flv 新科动漫
+channel598.flv 康巴卫视
+channel599.flv 新疆卫视
+channel605.flv 青海都市
+channel606.flv 青海生活
+channel607.flv 青海卫视
+channel608.flv 安多卫视
+channel614.flv 中学生
+
