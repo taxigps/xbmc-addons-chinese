@@ -2,6 +2,11 @@ import sys, os, time
 import urllib, urlparse
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon
 
+def cn_time_s():  # return CST (China Standard Time) in seconds
+    lc_time=time.localtime()
+    gm_time_s=time.mktime(time.gmtime())
+    return gm_time_s + (8-lc_time.tm_isdst)*60*60 # CST = GMT + 8h, tm_isdst = {1,0,-1}
+
 addon = xbmcaddon.Addon()
 title=addon.getAddonInfo('name')
 thumbnail=addon.getAddonInfo('icon')
@@ -87,8 +92,9 @@ def cntvplay (ch):
     global media_stopped
         
     while(not media_stopped):
-        hr = (time.strftime("%Y-%m-%d-%H",time.localtime(time.time()-600)))
-        seg = '%03d' % (int((time.strftime("%M",time.localtime(time.time()-600))))/5+1)
+        cur=cn_time_s()
+        hr = (time.strftime("%Y-%m-%d-%H",time.localtime(cur-600)))
+        seg = '%03d' % (int((time.strftime("%M",time.localtime(cur-600))))/5+1)
         url = b_url + hr + "-" + seg + '.mp4?wsiphost=local' 
         li = xbmcgui.ListItem(label=title, iconImage=thumbnail, thumbnailImage=thumbnail, path=url)
         li.setInfo(type=mediaType, infoLabels={ "Title": title })

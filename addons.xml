@@ -232,8 +232,8 @@
 </addon>
 
 <addon id="plugin.video.cntv-replay"
-       name="CCTV Replay 央视重播"
-       version="1.0.0"
+       name="央视重播 CCTV Replay"
+       version="1.0.2"
        provider-name="米老康">
   <requires>
    <import addon="xbmc.python" version="2.1.0"/>
@@ -242,8 +242,8 @@
         <provides>video</provides>
   </extension>
   <extension point="xbmc.addon.metadata">
-    <summary lang="en">CCTV Replay 央视重播</summary>
-    <description lang="en">CCTV Replay 央视重播 比直播晚十到二十分钟</description>
+    <summary lang="en">央视重播 CCTV Replay</summary>
+    <description lang="en">央视重播 CCTV Replay 比直播晚十到二十分钟</description>
     <platform>all</platform>
 	<language>en</language>
 	<email>sun_kang@hotmail.com</email>
