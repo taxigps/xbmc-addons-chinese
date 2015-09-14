@@ -169,7 +169,7 @@
 
 <addon
     id="plugin.video.asia-tv"
-    version="1.0.0"
+    version="2.0.1"
     name="亚洲电视"
     provider-name="米老康"
     >
@@ -179,9 +179,9 @@
   </extension>
   <extension point="xbmc.addon.metadata">
     <summary>TV channels from asia-tv.in</summary>
-    <summary lang="zh">亚洲电视 来自http://fms.cntv.lxdns.com</summary>
-    <description>亚洲电视 来自http://fms.cntv.lxdns.com</description>
-    <description lang="zh">亚洲电视 来自http://fms.cntv.lxdns.com</description>
+    <summary lang="zh">亚洲电视</summary>
+    <description>亚洲电视</description>
+    <description lang="zh">亚洲电视</description>
     <platform>all</platform>
     <email>sun_kang@hotmail.com</email>
   </extension>
@@ -233,7 +233,7 @@
 
 <addon id="plugin.video.cntv-replay"
        name="央视重播 CCTV Replay"
-       version="1.0.2"
+       version="1.0.4"
        provider-name="米老康">
   <requires>
    <import addon="xbmc.python" version="2.1.0"/>
