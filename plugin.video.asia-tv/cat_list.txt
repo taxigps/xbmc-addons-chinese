@@ -1,0 +1,17 @@
+
+# category Symbol
+Y 央视 C
+Y 高清 H
+Y 卫视 S
+Y 省市 L
+Y 港台 G
+Y 民族 F
+Y 体育 T
+N 美国 U
+Y 英文 E
+Y 外语 W
+Y 电影 M
+Y 汽车 Q
+Y 其它 O
+Y 全部 Y
+N 成人 X
