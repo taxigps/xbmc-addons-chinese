@@ -4,6 +4,7 @@
 	图表来自lugin-cntv-real，在此鸣谢作者。sun_kang@hotmail.com
 1.0.2	2015-09-09
 	修复时间区问题。北京时间回放大约比直播晚10到十五分钟。
+1.0.3	Added CCTV5plus
   
 
 	
