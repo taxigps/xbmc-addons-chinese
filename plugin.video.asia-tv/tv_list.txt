@@ -15,7 +15,6 @@ EO Li http://lihattv.wha.la/jhos/litv/-/playlist.m3u8
 FO KBS http://lihattv.wha.la/jhos/kbs/-/playlist.m3u8
 EO Outdoor http://lihattv.wha.la/jhos/outdoor/-/playlist.m3u8
 YFO TelevisionChampion http://27.100.64.99:1935/liveedge/live_2_0_0.stream/playlist.m3u8
-
 # from ktv
 YFG TVB-1 http://ktv002.cdnak.ds.kylintv.net/nlds/kylin/tvbj1/as/live/tvbj1_4.m3u8
 Y 美国中文电视 http://ktv008.cdnak.ds.kylintv.net/nlds/kylin/snvn/as/live/snvn_4.m3u8

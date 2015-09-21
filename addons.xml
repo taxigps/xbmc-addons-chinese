@@ -178,7 +178,7 @@
     <provides>video</provides>
   </extension>
   <extension point="xbmc.addon.metadata">
-    <summary>TV channels from asia-tv.in</summary>
+    <summary>TV Channels in Asian Laguages</summary>
     <summary lang="zh">亚洲电视</summary>
     <description>亚洲电视</description>
     <description lang="zh">亚洲电视</description>

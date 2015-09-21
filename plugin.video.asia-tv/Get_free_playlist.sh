@@ -2,6 +2,7 @@
 #   the url for different channels varies with the channel number
 #   But not all channels are valid. This scans for 4s from 1 to 1000
 #   If a channel is valid, it will start download, if not it will time-out
+
 wget http://www.tvonlinestreams.com
 mv -f index.html free_playlist_0.txt
 for i in {1..555}; do 
