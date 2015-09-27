@@ -1,10 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, re, string, sys, os, gzip, StringIO, math
 import base64, time
-try:
-    import simplejson
-except ImportError:
-    import json as simplejson
+import simplejson
 
 # Plugin constants 
 __addon__     = xbmcaddon.Addon()
@@ -78,6 +75,10 @@ class youkuDecoder:
 
     f_code_1 = 'becaf9be'
     f_code_2 = 'bf7e5f01'
+
+    def _calc_ep(self, sid, fileId, token):
+        ep = self.trans_e(self.f_code_2, '%s_%s_%s' % (sid, fileId, token))
+        return base64.b64encode(ep)
 
     def _calc_ep2(self, vid, ep):
         e_code = self.trans_e(self.f_code_1, base64.b64decode(ep))
@@ -423,11 +424,12 @@ def PlayVideo(name,id,thumb,res):
     url = 'http://v.youku.com/player/getPlayList/VideoIDS/%s/ctype/12/ev/1' % (id)
     link = GetHttpData(url)
     json_response = simplejson.loads(link)
+    movdat = json_response['data'][0]
 
     vid = id
     lang_select = int(__addon__.getSetting('lang_select')) # 默认|每次选择|自动首选
-    if lang_select != 0 and json_response['data'][0].has_key('dvd') and 'audiolang' in json_response['data'][0]['dvd']:
-        langlist = json_response['data'][0]['dvd']['audiolang']
+    if lang_select != 0 and movdat.has_key('dvd') and 'audiolang' in movdat['dvd']:
+        langlist = movdat['dvd']['audiolang']
         if lang_select == 1:
             list = [x['lang'] for x in langlist]
             sel = xbmcgui.Dialog().select('选择语言', list)
@@ -446,32 +448,44 @@ def PlayVideo(name,id,thumb,res):
         url = 'http://v.youku.com/player/getPlayList/VideoIDS/%s/ctype/12/ev/1' % (vid)
         link = GetHttpData(url)
         json_response = simplejson.loads(link)
+        movdat = json_response['data'][0]
 
-    typeid, typename = selResolution(json_response['data'][0]['streamtypes'])
+    typeid, typename = selResolution(movdat['streamtypes'])
     if typeid:
-        video_id = json_response['data'][0]['videoid']
-        oip = json_response['data'][0]['ip']
-        ep = json_response['data'][0]['ep']
+        video_id = movdat['videoid']
+        oip = movdat['ip']
+        ep = movdat['ep']
         ep, token, sid = youkuDecoder()._calc_ep2(video_id, ep)
-        query = urllib.urlencode(dict(
-            vid=video_id, ts=int(time.time()), keyframe=1, type=typeid,
-            ep=ep, oip=oip, ctype=12, ev=1, token=token, sid=sid,
-        ))
-        movurl = 'http://pl.youku.com/playlist/m3u8?%s' % (query)
+        play_method = int(__addon__.getSetting('play_method'))
+        if play_method != 0: # m3u8方式
+            query = urllib.urlencode(dict(
+                vid=video_id, ts=int(time.time()), keyframe=1, type=typeid,
+                ep=ep, oip=oip, ctype=12, ev=1, token=token, sid=sid,
+            ))
+            movurl = 'http://pl.youku.com/playlist/m3u8?%s' % (query)
 
-        #seed = json_response['data'][0]['seed']
-        #fileId = json_response['data'][0]['streamfileids'][typeid].encode('utf-8')
-        #fileId = youkuDecoder().getFileId(fileId,seed)
-        #if typeid == 'mp4':
-        #    type = 'mp4'
-        #else:
-        #    type = 'flv'
-        #urls = []
-        #for i in range(len(json_response['data'][0]['segs'][typeid])): 
-        #    no = '%02X' % i
-        #    k = json_response['data'][0]['segs'][typeid][i]['k'].encode('utf-8')
-        #    urls.append('http://f.youku.com/player/getFlvPath/sid/00_00/st/%s/fileid/%s%s%s?K=%s' % (type, fileId[:8], no, fileId[10:], k))
-        #stackurl = 'stack://' + ' , '.join(urls)
+        else: # 默认播放方式
+            total = len(movdat['segs'][typeid])
+            fileId = youkuDecoder().getFileId(movdat['streamfileids'][typeid].encode('utf-8'), movdat['seed'])
+            if typeid == 'mp4':
+                type = 'mp4'
+            else:
+                type = 'flv'
+            urls = []
+            for seg in movdat['segs'][typeid]:
+                no = '%02X' % int(seg['no'])
+                segfileId = fileId[0:8]+no+fileId[10:]
+                ep = youkuDecoder()._calc_ep(sid, segfileId, token)
+                k = seg['k'].encode('utf-8')
+                ts = str(seg['seconds'])
+                query = urllib.urlencode(dict(
+                    K=k, hd=1, myp=0, ts=ts, ypp=0, ctype=12, ev=1, token=token, oip=oip, ep=ep,
+                ))
+                urls.append('http://k.youku.com/player/getFlvPath/sid/%s_00/st/%s/fileid/%s?%s' \
+                     % (sid, type, segfileId, query))
+            movurl = 'stack://' + ' , '.join(urls)
+
+
         name = '%s[%s]' % (name, typename)
         listitem=xbmcgui.ListItem(name,thumbnailImage=thumb)
         listitem.setInfo(type="Video",infoLabels={"Title":name})
