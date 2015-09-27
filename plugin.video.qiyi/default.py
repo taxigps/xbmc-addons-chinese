@@ -324,11 +324,13 @@ def seriesList(name,id,thumb,page):
 def selResolution(items):
     ratelist = []
     for i in range(0,len(items)):
-        if items[i] == 96: ratelist.append([5, '极速', i])    # 清晰度设置值, 清晰度, match索引
-        if items[i] == 1: ratelist.append([4, '流畅', i])
-        if items[i] == 2: ratelist.append([3, '标清', i])
-        if items[i] == 4: ratelist.append([2, '720P', i])
-        if items[i] == 5: ratelist.append([1, '1080P', i])
+        if items[i] == 96: ratelist.append([7, '极速', i])    # 清晰度设置值, 清晰度, match索引
+        if items[i] == 1: ratelist.append([6, '流畅', i])
+        if items[i] == 2: ratelist.append([5, '标清', i])
+        if items[i] == 3: ratelist.append([4, '超清', i])
+        if items[i] == 4: ratelist.append([3, '720P', i])
+        if items[i] == 5: ratelist.append([2, '1080P', i])
+        if items[i] == 10: ratelist.append([1, '4K', i])
     ratelist.sort()
     if len(ratelist) > 1:
         resolution = int(__addon__.getSetting('resolution'))
@@ -365,13 +367,10 @@ def getVrsEncodeCode(vlink):
     return loc2[::-1]
 
 def mix(tvid):
-    enc = []
-    enc.append('3cba91f1453145438ac5e4f5983bc086')
+    salt = 'a6f2a01ab9ad4510be0449fab528b82c'
     tm = str(randint(2000,4000))
     src = 'eknas'
-    enc.append(str(tm))
-    enc.append(tvid)
-    sc = hashlib.md5("".join(enc)).hexdigest()
+    sc = hashlib.md5(salt + tm + tvid).hexdigest()
     return tm,sc,src
 
 def getVMS(tvid,vid,uid):
@@ -385,7 +384,7 @@ def getVMS(tvid,vid,uid):
                 "&tvId="+tvid+"&vid="+vid+"&vinfo=1&tm="+tm+\
                 "&enc="+sc+\
                 "&qyid="+uid+"&tn="+str(random()) +"&um=1" +\
-                "&authkey="+hashlib.md5(''+str(tm)+tvid).hexdigest()
+                "&authkey="+hashlib.md5(hashlib.md5(b'').hexdigest()+str(tm)+tvid).hexdigest()
     return simplejson.loads(GetHttpData(vmsreq))
 
 def getDispathKey(rid):
