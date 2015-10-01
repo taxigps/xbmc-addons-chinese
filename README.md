@@ -35,8 +35,10 @@ For proper Chinese text display on xbmc, do the following steps:
 ## Video Add-ons
 
 * 5ivdo(5ivdo) - plugin.video.5ivdo - Online video from www.5ivdo.com
+* 亚洲电视 - plugin.video.asia-tv - Live TV channels, include Mainland China, Hong Kong and Taiwan
 * 哔哩哔哩(bilibili) - plugin.video.bilibili - Online video from www.bilibili.com
 * CNTV Live 中国网络电视台直播 - plugin.video.cntv-live - TV live channels from www.cntv.cn
+* 央视重播 CCTV Replay - plugin.video.cntv-replay - An other addon for TV live channels from www.cntv.cn
 * 风行视频(Funshion) - plugin.video.funshion - Online videos from www.funshion.com
 * 酷6云中剧场(Ku6) - plugin.video.ku6 - Online video from www.juchang.com
 * 乐视网(LeTV) - plugin.video.letv - Online video from www.letv.com.cn
