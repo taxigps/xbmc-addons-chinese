@@ -1,5 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, re, string, sys, os, gzip, StringIO
+import dr
 
 # 5ivdo(5ivdo) by sand, 2015
 
@@ -163,7 +164,17 @@ def showdata(purl):
             xbmcplugin.addDirectoryItem(int(sys.argv[1]),u,li,False)
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-
+def checkdr():
+#    dialog = xbmcgui.Dialog()
+#    ok = dialog.ok(__addonname__, 'check dr...')
+    req = urllib2.Request('http://www.5ivdo.net/dr.py')
+    req.add_header('User-Agent', UserAgent)
+    response = urllib2.urlopen(req)
+    httpdata = response.read()
+    response.close()
+    file_object = open(__addon__.getAddonInfo('path')+"/"+"dr.py", 'w') 
+    file_object.write(httpdata)
+    file_object.close( )
 
 def rootList():
     irootfile = None
@@ -173,8 +184,12 @@ def rootList():
     for iname, ivalue in match:
         if iname == 'rootfile':
             irootfile = ivalue
+        if iname == 'drversion':
+            if dr.version() <> ivalue:
+                checkdr()
     showmenu(irootfile,'500')
- 
+
+    
 
 
 def urlExists(url):
@@ -359,6 +374,22 @@ def genparamdata(pmenustr=None):
 
     return iret
     
+def playDR(pname,purl,pthumb):
+    itype,iurl=dr.work(purl)
+    DP.update(80)
+    if itype in '|M3U8|SINGLE' :
+        playlist=xbmc.PlayList(1)  
+        playlist.clear() 
+        listitem = xbmcgui.ListItem(pname,thumbnailImage=pthumb)
+        listitem.setInfo(type="Video",infoLabels={"Title":pname})
+        playlist.add(iurl, listitem)
+        xbmc.Player().play(playlist)
+    elif itype in '|MULTI|' :
+        stackurl = 'stack://' + ' , '.join(iurl)      
+        listitem = xbmcgui.ListItem(pname) 
+        listitem.setInfo(type="Video",infoLabels={"Title":pname})
+        xbmc.Player().play(stackurl, listitem)
+
 
 
 def PlayVideo(pPARMs):
@@ -374,7 +405,9 @@ def PlayVideo(pPARMs):
     DP.create('5iVDO 提示','节目准备中 : ',pPARMs['name'] + ' ...')
     DP.update(10)
 
-    if pmod.find('RAW') >0:
+    if url[0:2] == 'DR':
+        playDR(name,url,thumb)
+    elif pmod.find('RAW') >0:
         playRAW(name,url)
     elif pmod.find('SOHU') >0: 
         if pmod.find('LIVE') >0:
