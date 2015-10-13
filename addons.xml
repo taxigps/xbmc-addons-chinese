@@ -486,6 +486,21 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
   </extension>
 </addon>
 
+<addon id="plugin.video.youkutv" name="YouKu TV" version="1.6.0" provider-name="catro">
+  <requires>
+    <import addon="script.common.plugin.cache" version="0.9.1"/>
+  </requires>
+  <extension point="xbmc.python.script" library="addon.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <platform>all</platform>
+    <language></language>
+    <summary>优酷TV</summary>
+    <description>优酷视频是中国最大的视频分享网站</description>
+  </extension>
+</addon>
+
 <addon id="repository.xbmc-addons-chinese" name="Chinese Add-ons" version="1.2.0" provider-name="Taxigps">
     <extension point="xbmc.addon.repository" name="Chinese Add-ons">
         <info compressed="true">https://github.com/taxigps/xbmc-addons-chinese/raw/master/addons.xml</info>

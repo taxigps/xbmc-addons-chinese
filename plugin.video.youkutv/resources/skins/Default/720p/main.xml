@@ -1,0 +1,630 @@
+<window type="window">
+    <defaultcontrol>510</defaultcontrol>
+    <coordinates>
+        <system>1</system>
+        <posx>0</posx>
+        <posy>0</posy>
+    </coordinates>
+    <allowoverlay>no</allowoverlay>
+    <controls>
+        <control type="image">
+            <description>background</description>
+            <posx>0</posx>
+            <posy>0</posy>
+            <width>1280</width>
+            <height>720</height>
+            <texture>bg.png</texture>
+        </control>
+        <control type="image">
+            <description>logo</description>
+            <posx>20</posx>
+            <posy>20</posy>
+            <width>180</width>
+            <height>40</height>
+            <texture>icon_topbar_logo.png</texture>
+        </control>
+        <control type="label">
+            <description>time</description>
+            <posx>1250</posx>
+            <posy>20</posy>
+            <width>200</width>
+            <height>50</height>
+            <align>right</align>
+            <aligny>center</aligny>
+            <font>font16</font>
+            <textcolor>ff6b8299</textcolor>
+            <label>$INFO[System.Time]</label>
+        </control>
+        <control type="panel" id="510">
+            <description>navigation</description>
+            <posx>80</posx>
+            <posy>80</posy>
+            <width>1000</width>
+            <height>88</height>
+            <viewtype>list</viewtype>
+            <ondown>511</ondown>
+            <onleft>-</onleft>
+            <onright>512</onright>
+            <itemlayout width="120" height="88">
+                <control type="label">
+                    <posx>35</posx>
+                    <posy>0</posy>
+                    <width>100</width>
+                    <height>88</height>   
+                    <font>font30</font>
+                    <textcolor>blue</textcolor>
+                    <selectedcolor>white</selectedcolor>
+                    <align>left</align>
+                    <aligny>center</aligny>
+                    <info>ListItem.Label</info>
+                </control>
+            </itemlayout>
+            <focusedlayout width="120" height="88">
+                <control type="image">
+                    <posx>0</posx>
+                    <posy>0</posy>
+                    <width>120</width>
+                    <height>88</height>        
+                    <texture>nav_focused_2.png</texture>
+                </control>    
+                <control type="label">
+                    <posx>35</posx>
+                    <posy>0</posy>
+                    <width>100</width>
+                    <height>88</height>   
+                    <font>font30</font>
+                    <textcolor>white</textcolor>
+                    <selectedcolor>white</selectedcolor>
+                    <align>left</align>
+                    <aligny>center</aligny>
+                    <info>ListItem.Label</info>
+                </control>
+            </focusedlayout>
+        </control>
+        <control type="button" id="512">
+            <posx>1090</posx>
+            <posy>80</posy>
+            <width>120</width>
+            <height>88</height>   
+            <font>font30</font>
+            <textcolor>blue</textcolor>
+            <align>center</align>
+            <aligny>center</aligny>
+            <onleft>510</onleft>
+            <ondown>511</ondown>
+            <texturefocus>nav_focused_2.png</texturefocus>
+            <texturenofocus />
+            <label>设置</label>
+        </control>
+        <control type="group" id="511">
+            <posx>86</posx>
+            <posy>171</posy>
+            <control type="group" id="520">
+                <description>Content of home</description>
+                <posx>0</posx>
+                <posy>0</posy>
+                <visible>true</visible>
+                <control type="panel" id="521">
+                    <description>m1</description>
+                    <posx>0</posx>
+                    <posy>0</posy>
+                    <width>168</width>
+                    <height>444</height>
+                    <viewtype>list</viewtype>
+                    <orientation>vertical</orientation>
+                    <onright>522</onright>
+                    <onup>510</onup>
+                    <ondown>-</ondown>
+                    <itemlayout width="160" height="147">
+                        <control type="image">
+                            <posx>4</posx>
+                            <posy>4</posy>
+                            <width>160</width>
+                            <height>142</height>        
+                            <info>ListItem.Icon</info>
+                            <aspectratio>stretch</aspectratio>
+                        </control>    
+                        <control type="label">
+                            <posx>0</posx>
+                            <posy>100</posy>
+                            <width>156</width>
+                            <height>60</height>   
+                            <font>font16</font>
+                            <textcolor>white</textcolor>
+                            <shadowcolor>80000000</shadowcolor>
+                            <align>right</align>
+                            <aligny>center</aligny>
+                            <info>ListItem.Label</info>
+                        </control>
+                    </itemlayout>
+                    <focusedlayout width="160" height="146">
+                        <control type="image">
+                            <posx>4</posx>
+                            <posy>4</posy>
+                            <width>160</width>
+                            <height>142</height>        
+                            <info>ListItem.Icon</info>
+                            <aspectratio>stretch</aspectratio>
+                        </control>    
+                        <control type="label">
+                            <posx>0</posx>
+                            <posy>100</posy>
+                            <width>156</width>
+                            <height>60</height>   
+                            <font>font16</font>
+                            <textcolor>white</textcolor>
+                            <shadowcolor>80000000</shadowcolor>
+                            <align>right</align>
+                            <aligny>center</aligny>
+                            <info>ListItem.Label</info>
+                        </control>  
+                        <control type="image">
+                            <posx>0</posx>
+                            <posy>0</posy>
+                            <width>168</width>
+                            <height>150</height>        
+                            <texture>border-small.png</texture>
+                            <aspectratio>stretch</aspectratio>
+                        </control>    
+                    </focusedlayout>
+                </control>
+                <control type="panel" id="522">
+                    <description>m2</description>
+                    <posx>165</posx>
+                    <posy>0</posy>
+                    <width>288</width>
+                    <height>444</height>
+                    <viewtype>list</viewtype>
+                    <onleft>521</onleft>
+                    <onright>523</onright>
+                    <onup>510</onup>
+                    <itemlayout width="280" height="436">
+                        <control type="image">
+                            <posx>4</posx>
+                            <posy>4</posy>
+                            <width>280</width>
+                            <height>436</height>        
+                            <info>ListItem.Icon</info>
+                            <aspectratio>stretch</aspectratio>
+                        </control>    
+                        <control type="label">
+                            <posx>0</posx>
+                            <posy>396</posy>
+                            <width>276</width>
+                            <height>60</height>   
+                            <font>font16</font>
+                            <textcolor>white</textcolor>
+                            <shadowcolor>80000000</shadowcolor>
+                            <align>right</align>
+                            <aligny>center</aligny>
+                            <info>ListItem.Label</info>
+                        </control>
+                    </itemlayout>
+                    <focusedlayout width="280" height="444">
+                        <control type="image">
+                            <posx>4</posx>
+                            <posy>4</posy>
+                            <width>280</width>
+                            <height>436</height>        
+                            <info>ListItem.Icon</info>
+                            <aspectratio>stretch</aspectratio>
+                        </control>    
+                        <control type="label">
+                            <posx>0</posx>
+                            <posy>396</posy>
+                            <width>276</width>
+                            <height>60</height>   
+                            <font>font16</font>
+                            <textcolor>white</textcolor>
+                            <shadowcolor>80000000</shadowcolor>
+                            <align>right</align>
+                            <aligny>center</aligny>
+                            <info>ListItem.Label</info>
+                        </control>
+                        <control type="image">
+                            <posx>0</posx>
+                            <posy>0</posy>
+                            <width>288</width>
+                            <height>444</height>        
+                            <texture>border-large.png</texture>
+                            <aspectratio>stretch</aspectratio>
+                        </control>    
+                    </focusedlayout>
+                </control>
+                <control type="group" id="523">
+                    <description>m3</description>
+                    <posx>450</posx>
+                    <posy>0</posy>
+                    <width>328</width>
+                    <height>444</height>                
+                    <control type="panel" id="524">
+                        <description>m3-top</description>
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>328</width>
+                        <height>188</height>
+                        <viewtype>list</viewtype>
+                        <onleft>522</onleft>
+                        <onright>526</onright>
+                        <onup>510</onup>
+                        <ondown>525</ondown>
+                        <itemlayout width="320" height="180">
+                            <control type="image">
+                                <posx>4</posx>
+                                <posy>4</posy>
+                                <width>320</width>
+                                <height>180</height>        
+                                <info>ListItem.Icon</info>
+                                <aspectratio>stretch</aspectratio>
+                            </control>    
+                            <control type="label">
+                                <posx>0</posx>
+                                <posy>140</posy>
+                                <width>316</width>
+                                <height>60</height>   
+                                <font>font16</font>
+                                <textcolor>white</textcolor>
+                                <shadowcolor>80000000</shadowcolor>
+                                <align>right</align>
+                                <aligny>center</aligny>
+                                <info>ListItem.Label</info>
+                            </control>
+                        </itemlayout>
+                        <focusedlayout width="328" height="188">
+                            <control type="image">
+                                <posx>4</posx>
+                                <posy>4</posy>
+                                <width>320</width>
+                                <height>180</height>        
+                                <info>ListItem.Icon</info>
+                                <aspectratio>stretch</aspectratio>
+                            </control>    
+                            <control type="label">
+                                <posx>0</posx>
+                                <posy>140</posy>
+                                <width>316</width>
+                                <height>60</height>   
+                                <font>font16</font>
+                                <textcolor>white</textcolor>
+                                <shadowcolor>80000000</shadowcolor>
+                                <align>right</align>
+                                <aligny>center</aligny>
+                                <info>ListItem.Label</info>
+                            </control>
+                            <control type="image">
+                                <posx>0</posx>
+                                <posy>0</posy>
+                                <width>328</width>
+                                <height>188</height>        
+                                <texture>border-medium1.png</texture>
+                                <aspectratio>stretch</aspectratio>
+                            </control>    
+                        </focusedlayout>
+                    </control>             
+                    <control type="panel" id="525">
+                        <description>m3-bottom</description>
+                        <posx>0</posx>
+                        <posy>185</posy>
+                        <width>328</width>
+                        <height>258</height>
+                        <viewtype>list</viewtype>
+                        <orientation>horizontal</orientation>
+                        <onleft>522</onleft>
+                        <onright>528</onright>
+                        <onup>524</onup>
+                        <itemlayout width="162" height="250">
+                            <control type="image">
+                                <posx>4</posx>
+                                <posy>4</posy>
+                                <width>158</width>
+                                <height>250</height>        
+                                <info>ListItem.Icon</info>
+                                <aspectratio>stretch</aspectratio>
+                            </control>    
+                            <control type="label">
+                                <posx>0</posx>
+                                <posy>210</posy>
+                                <width>154</width>
+                                <height>60</height>   
+                                <font>font16</font>
+                                <textcolor>white</textcolor>
+                                <shadowcolor>80000000</shadowcolor>
+                                <align>right</align>
+                                <aligny>center</aligny>
+                                <info>ListItem.Label</info>
+                            </control>
+                        </itemlayout>
+                        <focusedlayout width="162" height="250">
+                            <control type="image">
+                                <posx>4</posx>
+                                <posy>4</posy>
+                                <width>158</width>
+                                <height>250</height>        
+                                <info>ListItem.Icon</info>
+                                <aspectratio>stretch</aspectratio>
+                            </control>    
+                            <control type="label">
+                                <posx>0</posx>
+                                <posy>210</posy>
+                                <width>154</width>
+                                <height>60</height>   
+                                <font>font16</font>
+                                <textcolor>white</textcolor>
+                                <shadowcolor>80000000</shadowcolor>
+                                <align>right</align>
+                                <aligny>center</aligny>
+                                <info>ListItem.Label</info>
+                            </control>
+                            <control type="image">
+                                <posx>0</posx>
+                                <posy>0</posy>
+                                <width>166</width>
+                                <height>258</height>        
+                                <texture>border-medium2.png</texture>
+                                <aspectratio>stretch</aspectratio>
+                            </control>    
+                        </focusedlayout>
+                    </control>
+                </control>
+                <control type="group" id="526">
+                    <description>m4</description>
+                    <posx>775</posx>
+                    <posy>0</posy>
+                    <width>328</width>
+                    <height>444</height>                
+                    <control type="panel" id="527">
+                        <description>m4-top</description>
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>328</width>
+                        <height>188</height>
+                        <viewtype>list</viewtype>
+                        <onleft>524</onleft>
+                        <onright>529</onright>
+                        <onup>510</onup>
+                        <ondown>528</ondown>
+                        <itemlayout width="320" height="180">
+                            <control type="image">
+                                <posx>4</posx>
+                                <posy>4</posy>
+                                <width>320</width>
+                                <height>180</height>        
+                                <info>ListItem.Icon</info>
+                                <aspectratio>stretch</aspectratio>
+                            </control>    
+                            <control type="label">
+                                <posx>0</posx>
+                                <posy>140</posy>
+                                <width>316</width>
+                                <height>60</height>   
+                                <font>font16</font>
+                                <textcolor>white</textcolor>
+                                <shadowcolor>80000000</shadowcolor>
+                                <align>right</align>
+                                <aligny>center</aligny>
+                                <info>ListItem.Label</info>
+                            </control>
+                        </itemlayout>
+                        <focusedlayout width="328" height="188">
+                            <control type="image">
+                                <posx>4</posx>
+                                <posy>4</posy>
+                                <width>320</width>
+                                <height>180</height>        
+                                <info>ListItem.Icon</info>
+                                <aspectratio>stretch</aspectratio>
+                            </control>    
+                            <control type="label">
+                                <posx>0</posx>
+                                <posy>140</posy>
+                                <width>316</width>
+                                <height>60</height>   
+                                <font>font16</font>
+                                <textcolor>white</textcolor>
+                                <shadowcolor>80000000</shadowcolor>
+                                <align>right</align>
+                                <aligny>center</aligny>
+                                <info>ListItem.Label</info>
+                            </control>
+                            <control type="image">
+                                <posx>0</posx>
+                                <posy>0</posy>
+                                <width>328</width>
+                                <height>188</height>        
+                                <texture>border-medium1.png</texture>
+                                <aspectratio>stretch</aspectratio>
+                            </control>    
+                        </focusedlayout>
+                    </control>             
+                    <control type="panel" id="528">
+                        <description>m4-bottom</description>
+                        <posx>0</posx>
+                        <posy>185</posy>
+                        <width>328</width>
+                        <height>258</height>
+                        <viewtype>list</viewtype>
+                        <orientation>horizontal</orientation>
+                        <onleft>525</onleft>
+                        <onright>529</onright>
+                        <onup>527</onup>
+                        <itemlayout width="162" height="250">
+                            <control type="image">
+                                <posx>4</posx>
+                                <posy>4</posy>
+                                <width>158</width>
+                                <height>250</height>        
+                                <info>ListItem.Icon</info>
+                                <aspectratio>stretch</aspectratio>
+                            </control>    
+                            <control type="label">
+                                <posx>0</posx>
+                                <posy>210</posy>
+                                <width>154</width>
+                                <height>60</height>   
+                                <font>font16</font>
+                                <textcolor>white</textcolor>
+                                <shadowcolor>80000000</shadowcolor>
+                                <align>right</align>
+                                <aligny>center</aligny>
+                                <info>ListItem.Label</info>
+                            </control>
+                        </itemlayout>
+                        <focusedlayout width="162" height="250">
+                            <control type="image">
+                                <posx>4</posx>
+                                <posy>4</posy>
+                                <width>158</width>
+                                <height>250</height>        
+                                <info>ListItem.Icon</info>
+                                <aspectratio>stretch</aspectratio>
+                            </control>    
+                            <control type="label">
+                                <posx>0</posx>
+                                <posy>210</posy>
+                                <width>154</width>
+                                <height>60</height>   
+                                <font>font16</font>
+                                <textcolor>white</textcolor>
+                                <shadowcolor>80000000</shadowcolor>
+                                <align>right</align>
+                                <aligny>center</aligny>
+                                <info>ListItem.Label</info>
+                            </control>
+                            <control type="image">
+                                <posx>0</posx>
+                                <posy>0</posy>
+                                <width>166</width>
+                                <height>258</height>        
+                                <texture>border-medium2.png</texture>
+                                <aspectratio>stretch</aspectratio>
+                            </control>    
+                        </focusedlayout>
+                    </control>
+                </control>
+            </control>
+            <control type="panel" id="560">
+                <description>Channel</description>
+                <posx>0</posx>
+                <posy>0</posy>
+                <width>1200</width>
+                <height>600</height>
+                <viewtype>list</viewtype>
+                <orientation>vertical</orientation>
+                <onup>510</onup>
+                <itemlayout width="219" height="219">
+                    <control type="image">
+                        <posx>4</posx>
+                        <posy>4</posy>
+                        <width>214</width>
+                        <height>214</height>        
+                        <info>ListItem.Icon</info>
+                        <aspectratio>stretch</aspectratio>
+                    </control>    
+                    <control type="label">
+                        <posx>-5</posx>
+                        <posy>170</posy>
+                        <width>220</width>
+                        <height>60</height>   
+                        <font>font16</font>
+                        <textcolor>white</textcolor>
+                        <shadowcolor>80000000</shadowcolor>
+                        <align>right</align>
+                        <aligny>center</aligny>
+                        <info>ListItem.Label</info>
+                    </control>
+                </itemlayout>
+                <focusedlayout width="222" height="222">
+                    <control type="image">
+                        <posx>4</posx>
+                        <posy>4</posy>
+                        <width>214</width>
+                        <height>214</height>        
+                        <info>ListItem.Icon</info>
+                        <aspectratio>stretch</aspectratio>
+                    </control>    
+                    <control type="label">
+                        <posx>-5</posx>
+                        <posy>170</posy>
+                        <width>220</width>
+                        <height>60</height>   
+                        <font>font16</font>
+                        <textcolor>white</textcolor>
+                        <shadowcolor>80000000</shadowcolor>
+                        <align>right</align>
+                        <aligny>center</aligny>
+                        <info>ListItem.Label</info>
+                    </control>
+                    <control type="image">
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>222</width>
+                        <height>222</height>        
+                        <texture>border-channel.png</texture>
+                        <aspectratio>stretch</aspectratio>
+                    </control>    
+                </focusedlayout>
+            </control>
+            <control type="panel" id="580">
+                <description>Top</description>
+                <posx>0</posx>
+                <posy>0</posy>
+                <width>1200</width>
+                <height>600</height>
+                <viewtype>list</viewtype>
+                <onup>510</onup>
+                <itemlayout width="368" height="488">
+                    <control type="image">
+                        <posx>4</posx>
+                        <posy>4</posy>
+                        <width>340</width>
+                        <height>460</height>        
+                        <info>ListItem.Icon</info>
+                        <aspectratio>stretch</aspectratio>
+                    </control>    
+                    <control type="label">
+                        <posx>0</posx>
+                        <posy>400</posy>
+                        <width>340</width>
+                        <height>60</height>   
+                        <font>font16</font>
+                        <textcolor>white</textcolor>
+                        <shadowcolor>80000000</shadowcolor>
+                        <align>right</align>
+                        <aligny>center</aligny>
+                        <info>ListItem.Label</info>
+                    </control>
+                </itemlayout>
+                <focusedlayout width="348" height="468">
+                    <control type="image">
+                        <posx>4</posx>
+                        <posy>4</posy>
+                        <width>340</width>
+                        <height>460</height>        
+                        <info>ListItem.Icon</info>
+                        <aspectratio>stretch</aspectratio>
+                    </control>    
+                    <control type="label">
+                        <posx>0</posx>
+                        <posy>400</posy>
+                        <width>340</width>
+                        <height>60</height>   
+                        <font>font16</font>
+                        <textcolor>white</textcolor>
+                        <shadowcolor>80000000</shadowcolor>
+                        <align>right</align>
+                        <aligny>center</aligny>
+                        <info>ListItem.Label</info>
+                    </control>
+                    <control type="image">
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>348</width>
+                        <height>468</height>        
+                        <texture>border-top.png</texture>
+                        <aspectratio>stretch</aspectratio>
+                    </control>    
+                </focusedlayout>
+            </control>
+        </control>
+    </controls>
+</window>
