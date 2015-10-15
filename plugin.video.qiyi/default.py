@@ -443,12 +443,39 @@ def PlayVideo(name,id,thumb):
         baseurl=info["data"]["vp"]["du"].split("/")
         baseurl.insert(-1,key)
         url="/".join(baseurl)+vlink+'?su='+gen_uid+'&qyid='+uuid4().hex+'&client=&z=&bt=&ct=&tn='+str(randint(10000,20000))
-        urls.append(simplejson.loads(GetHttpData(url))["l"])
+        urls.append(url)
 
-    stackurl = 'stack://' + ' , '.join(urls)
+    playlist =xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+    playlist.clear()
+
+    download(playlist, urls, name, 0)
+
+    """stackurl = 'stack://' + ' , '.join(urls)
     listitem = xbmcgui.ListItem(name,thumbnailImage=thumb)
     listitem.setInfo(type="Video",infoLabels={"Title":name})
-    xbmc.Player().play(stackurl, listitem)
+    xbmc.Player().play(stackurl, listitem)"""
+
+def download(playlist, urls, name, idx):
+    if idx >= len(urls):
+        return
+    url = simplejson.loads(GetHttpData(urls[idx]))["l"]
+    if idx == 0:
+        #直接播放第一段
+        playlist.add(url)
+        xbmc.Player().play(playlist)
+    else:
+        req = urllib2.Request(url)
+        req.add_header('User-Agent', 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)')
+        response = urllib2.urlopen(req)
+        httpdata = response.read()
+        response.close()
+        filename = "/tmp/" + name + "_" + str(idx)
+        with open(filename, 'wb+') as f:
+            f.write(httpdata)
+
+        playlist.add(filename)
+
+    download(playlist, urls, name, idx+1)
 
 def performChanges(name,id,listpage,cat,area,year,order,paytype):
     change = False
