@@ -15,6 +15,64 @@ CHANNEL_LIST = [['电影','1'], ['电视剧','2'], ['纪录片','3'], ['动漫',
 ORDER_LIST = [['4','更新时间'], ['11','热门']]
 PAYTYPE_LIST = [['','全部影片'], ['0','免费影片'], ['1','会员免费'], ['2','付费点播']]
 
+class QYPlayer(xbmc.Player):
+    def __init__(self):
+        xbmc.Player.__init__(self)
+
+    def play(self, name, thumb, baseurl, vlinks, gen_uid):
+        self.is_active = True
+        self.name = name
+        self.thumb = thumb
+        self.baseurl = baseurl
+        self.vlinks = vlinks
+        self.gen_uid = gen_uid
+        self.curpos = 0
+        self.geturl()
+        self.playrun()
+
+    def geturl(self):
+        if self.curpos < len(self.vlinks):
+            vlink = self.vlinks[self.curpos]["l"]
+            if not vlink.startswith("/"):
+                #vlink is encode
+                vlink=getVrsEncodeCode(vlink)
+            key=getDispathKey(vlink.split("/")[-1].split(".")[0])
+            baseurl=self.baseurl.split("/")
+            baseurl.insert(-1,key)
+            url="/".join(baseurl)+vlink+'?su='+self.gen_uid+'&qyid='+uuid4().hex+'&client=&z=&bt=&ct=&tn='+str(randint(10000,20000))
+            self.videourl=simplejson.loads(GetHttpData(url))["l"]
+            self.curpos = self.curpos + 1
+        else:
+            self.videourl = None
+
+    def playrun(self):
+        title = self.name + " - 第"+str(self.curpos)+"/"+str(len(self.vlinks)) + "节"
+        listitem = xbmcgui.ListItem(title,thumbnailImage=self.thumb)
+        listitem.setInfo(type="Video",infoLabels={"Title":title})
+        xbmc.Player.play(self, self.videourl, listitem)
+        self.geturl()
+
+    def onPlayBackStarted(self):
+        xbmc.Player.onPlayBackStarted(self)
+
+    def onPlayBackSeek(self, time, seekOffset):
+        xbmc.Player.onPlayBackSeek(self, time, seekOffset)
+
+    def onPlayBackSeekChapter(self, chapter):
+        xbmc.Player.onPlayBackSeek(self, chapter)
+
+    def onPlayBackEnded(self):
+        if self.videourl:
+            self.playrun()
+        else:
+            self.is_active = False
+            xbmc.Player.onPlayBackEnded(self)
+
+    def onPlayBackStopped(self):
+        self.is_active = False
+
+qyplayer = QYPlayer()
+
 def GetHttpData(url):
     print "getHttpData: " + url
     req = urllib2.Request(url)
@@ -431,24 +489,30 @@ def PlayVideo(name,id,thumb):
         if tmp.endswith('mp4'):
              video_links = vs[sel]["flvs"]
 
-    urls = []
-    size = 0
-    for i in video_links:
-        vlink = i["l"]
-        if not vlink.startswith("/"):
-            #vlink is encode
-            vlink=getVrsEncodeCode(vlink)
-        key=getDispathKey(vlink.split("/")[-1].split(".")[0])
-        size+=i["b"]
-        baseurl=info["data"]["vp"]["du"].split("/")
-        baseurl.insert(-1,key)
-        url="/".join(baseurl)+vlink+'?su='+gen_uid+'&qyid='+uuid4().hex+'&client=&z=&bt=&ct=&tn='+str(randint(10000,20000))
-        urls.append(simplejson.loads(GetHttpData(url))["l"])
+    # New method to avoid url expired
+    qyplayer.play(name, thumb, info["data"]["vp"]["du"], video_links, gen_uid)
+    while qyplayer.is_active:
+        xbmc.sleep(100)
 
-    stackurl = 'stack://' + ' , '.join(urls)
-    listitem = xbmcgui.ListItem(name,thumbnailImage=thumb)
-    listitem.setInfo(type="Video",infoLabels={"Title":name})
-    xbmc.Player().play(stackurl, listitem)
+    # Old method
+    #urls = []
+    #size = 0
+    #for i in video_links:
+    #    vlink = i["l"]
+    #    if not vlink.startswith("/"):
+    #        #vlink is encode
+    #        vlink=getVrsEncodeCode(vlink)
+    #    key=getDispathKey(vlink.split("/")[-1].split(".")[0])
+    #    size+=i["b"]
+    #    baseurl=info["data"]["vp"]["du"].split("/")
+    #    baseurl.insert(-1,key)
+    #    url="/".join(baseurl)+vlink+'?su='+gen_uid+'&qyid='+uuid4().hex+'&client=&z=&bt=&ct=&tn='+str(randint(10000,20000))
+    #    urls.append(simplejson.loads(GetHttpData(url))["l"])
+
+    #stackurl = 'stack://' + ' , '.join(urls)
+    #listitem = xbmcgui.ListItem(name,thumbnailImage=thumb)
+    #listitem.setInfo(type="Video",infoLabels={"Title":name})
+    #xbmc.Player().play(stackurl, listitem)
 
 def performChanges(name,id,listpage,cat,area,year,order,paytype):
     change = False
