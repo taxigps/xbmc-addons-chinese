@@ -425,7 +425,7 @@ def getVrsEncodeCode(vlink):
     return loc2[::-1]
 
 def mix(tvid):
-    salt = '97596c0abee04ab49ba25564161ad225'
+    salt = '2c76de15dcb44bd28ff0927d50d31620'
     tm = str(randint(2000,4000))
     src = 'eknas'
     sc = hashlib.md5(salt + tm + tvid).hexdigest()
@@ -476,6 +476,10 @@ def PlayVideo(name,id,thumb):
  
     gen_uid = uuid4().hex
     info = getVMS(tvId, videoId, gen_uid)
+    if info["code"] != "A000000":
+        dialog = xbmcgui.Dialog()
+        ok = dialog.ok(__addonname__, '密钥过期，需升级插件')
+        return
     
     vs = info["data"]["vp"]["tkl"][0]["vs"]
     #print [(x['bid'],x['scrsz']) for x in vs]
