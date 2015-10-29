@@ -1,10 +1,13 @@
 
 # category Symbol
-Y 央视 C
-Y 高清 H
-Y 卫视 S
-Y 省市 L
-Y 港台 G
+N lihattv.wha.la w
+N tring-amd-live.tring.tv t
+Y 央视(CCTV) C
+Y 高清(HD) H
+Y 卫视(Satelites) S
+Y 省市(Provincial&Municiples) L
+Y 港台(HK&Taiwan) G
+N PLTV p
 Y 民族 F
 Y 体育 T
 N 美国 U
@@ -15,5 +18,8 @@ Y 汽车 Q
 Y 其它 O
 Y 全部 Y
 N 成人 X
+Y 视频源网：kylin k
+Y 视频源网：lxdns c
+Y 视频源网：ctlcdn a
 
 
