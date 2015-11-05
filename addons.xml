@@ -233,7 +233,7 @@
 
 <addon id="plugin.video.cntv-replay"
        name="央视重播 CCTV Replay"
-       version="1.0.4"
+       version="1.0.5"
        provider-name="米老康">
   <requires>
    <import addon="xbmc.python" version="2.1.0"/>

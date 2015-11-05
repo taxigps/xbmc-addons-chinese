@@ -86,7 +86,8 @@ class XBMCMonitor( xbmc.Monitor ):
 
 
 def cntvplay (ch):
-    b_url='http://8.37.234.13/v.cctv.com/live_back/nettv_' + ch +'/' + ch +'-'
+    b_url='http://v.cctv.com/live_back/nettv_' + ch +'/' + ch +'-'
+    # b_url='http://8.37.234.13/v.cctv.com/live_back/nettv_' + ch +'/' + ch +'-'
     player = XBMCPlayer()
     monitor = XBMCMonitor()
     global media_stopped
