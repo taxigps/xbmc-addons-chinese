@@ -26,9 +26,7 @@ def GetSongs(channel_id):
                     'artist':song['artist'], 
                     'url':song['url'].replace('\\',''), 
                     'duration': song['length'], 
-                    'rating': song['rating_avg'],
                     'title':song['title']}
-        if song['public_time'].isdigit(): SongInfo['year'] = int(song['public_time'])
         ListSongInfo.append(SongInfo.copy())
     return ListSongInfo
 
