@@ -56,11 +56,7 @@ class BaiduFmPlayer(xbmc.Player):
 			self.playing = True
 	
 	def loadChannelList(self):
-		html = urllib.urlopen("http://fm.baidu.com").read()
-		start = html.find("{", html.find("rawChannelList"))
-		end = html.find(";", start)
-		json = html[start:end].strip()
-		#print json
+		json = urllib.urlopen("http://fm.baidu.com/dev/api/?tn=channellist").read()
 		data = simplejson.loads(json)
 		self.onChannelListLoaded(data["channel_list"])
 
