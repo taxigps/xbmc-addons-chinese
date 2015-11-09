@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <addon id="plugin.audio.baidufm"
 	name="百度随心听"
-	version="0.0.4"
+	version="0.0.5"
 	provider-name="zhangyuanwei">
 	<extension
 		point="xbmc.python.pluginsource"
