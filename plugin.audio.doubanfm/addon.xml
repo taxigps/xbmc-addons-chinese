@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="plugin.audio.doubanfm"
     name="豆瓣FM(DoubanFM)"
-    version="1.0.0"
+    version="1.0.1"
     provider-name="Tom.J,Osfans">
     <extension
         point="xbmc.python.pluginsource"
