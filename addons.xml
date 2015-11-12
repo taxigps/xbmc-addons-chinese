@@ -169,8 +169,8 @@
 
 <addon
     id="plugin.video.asia-tv"
-    version="2.0.4"
-    name="亚洲电视"
+    version="2.0.5"
+    name="亚洲电视(Asia TVs)"
     provider-name="米老康"
     >
   <extension point="xbmc.python.pluginsource"
@@ -179,9 +179,9 @@
   </extension>
   <extension point="xbmc.addon.metadata">
     <summary>TV Channels in Asian Laguages</summary>
-    <summary lang="zh">亚洲电视</summary>
+    <summary lang="zh">亚洲电视(Asia TVs)</summary>
     <description>亚洲电视</description>
-    <description lang="zh">亚洲电视</description>
+    <description lang="zh">亚洲电视(Asia TVs)</description>
     <platform>all</platform>
     <email>sun_kang@hotmail.com</email>
   </extension>
