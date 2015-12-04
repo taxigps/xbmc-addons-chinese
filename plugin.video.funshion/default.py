@@ -3,16 +3,14 @@ import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, re, string, sys, o
 import math, os.path, httplib, time
 from random import randrange
 import cookielib
-try:
-    import simplejson
-except ImportError:
-    import json as simplejson
+import simplejson
 
 ########################################################################
 # 风行视频(Funshion)"
 ########################################################################
-# v1.1.0 2015.02.15 (cmeng)
-# - Update video list fetching for new categories and per new site
+# v1.1.1 2015.12.04 (taxigps)
+# - Update video list fetching for site change
+# - Add requires of simplejson
 
 # Plugin constants
 __addon__     = xbmcaddon.Addon()
@@ -297,14 +295,15 @@ def seriesList(name,id,thumb):
         ok = xbmcgui.Dialog().ok(__addonname__, '本片暂不支持网页播放')
         return
 
-    items = json_response['data']['fsps']['mult']
+    items = json_response['data']['videos']
+    name = json_response['data']['name'].encode('utf-8')
     totalItems = len(items)
     for item in items:
-        p_name = item['full'].encode('utf-8')
+        p_name = '%s %s' % (name, item['name'].encode('utf-8'))
         # p_number = str(item['number'])
-        p_id2 = item['hashid']
+        p_id2 = item['streams'][-1]['hashid']
 
-        p_thumb = item['imagepath'].encode('utf-8')
+        p_thumb = item['pic'].encode('utf-8')
         if not p_thumb:
             p_thumb = thumb
 
