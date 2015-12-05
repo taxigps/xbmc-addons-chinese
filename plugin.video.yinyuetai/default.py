@@ -14,8 +14,12 @@ except ImportError:
 ##########################################################################
 # 音悦台MV
 ##########################################################################
-# Version 1.7.5 2014-06-15 (cmeng)
-# Replace embedded unicode with ascii in get_vurl
+# Version 1.7.8 2015-12-06 (cmeng)
+# Update UI's fetch per site new changes
+# - 音悦台 - 音悦V榜
+# - 音悦台 - 全部MV
+# - 音悦台 - 全部悦单
+# - 音悦台 - 歌手
 ##########################################################################
 
 __addonname__ = "音悦台MV"
@@ -58,7 +62,7 @@ def getHttpData(url):
         ptype = re.split(':', proxy)
         if len(ptype)<3:
             # full path requires by Python 2.4
-            proxy = type + '://' + proxy 
+            proxy = type + '://' + proxy
         else: type = ptype[0]
         httpProxy = {type: proxy}
     else:
@@ -169,7 +173,7 @@ def fetchID(dlist, idx):
 
 ##################################################################################
 # Routine to fetch and build video filter list
-# tuple to list conversion and strip spaces    
+# tuple to list conversion and strip spaces
 # - 按类型  (Categories)
 # - 按地区 (Countries/Areas)
 # - 按年份 (Year)
@@ -221,17 +225,18 @@ def getTimeList(area):
     yearlist.append(year-1)
 
     timelist=[]
+	# p_url = 'http://vchart.yinyuetai.com/vchart/video-rank-week-date?area='+area+'&year='+str(x)
+    p_url = 'http://vchart.yinyuetai.com/vchart/ajax/vchart?area=' + area
+    link=getHttpData(p_url)
     for x in yearlist: # get 2 years worth of data only
-        p_url = 'http://vchart.yinyuetai.com/vchart/video-rank-week-date?area='+area+'&year='+str(x)
-        link=getHttpData(p_url)
-
-        xlist = re.compile('{"year":.+?,"dateCode":(.+?),"periods":"(.+?)","beginDateText":"(.+?)","endDateText":"(.+?)"}').findall(link)
+        ylist = re.compile('<ul class="hide" name="'+str(x)+'">(.+?)</ul>').findall(link)
+        xlist = re.compile('<a href="/vchart/v\?area='+area+'&date=(.+?)"><span>(.+?)</span>(.+?)</a>').findall(ylist[0])
+        
         if len(xlist) == 0: continue
-        for datecode, period, begindate, enddate in xlist:
-            xstr = period+'期('+begindate+'-'+enddate+')'
-            #xstr = period+'('+begindate+'-'+enddate+')'
+        for datecode, series, period in xlist:
+            xstr = series + ' ' + period
             timelist.append([datecode,xstr,str(x)])
-    #print 'datelist', datelist
+    timelist.sort(reverse=True)
     return timelist
 
 ##################################################################################
@@ -259,13 +264,13 @@ def MainMenu(ctl):
         addDir(name,url,mode,pic,isDir,j)
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
-    
+
 ##################################################################################
 # http://www.yinyuetai.com/vchart/include/trends-list?page=1&area=ML&trendUrl=/vchart/trends?page=1&area=ML
 # http://www.yinyuetai.com/vchart/ajax/trends-list?page=2&area=ML&currentUrl=%2Fvchart%2Ftrends%3Farea%3DML%23!page%3D2
 # http://www.yinyuetai.com/vchart/ajax/trends-list?page=2&area=ML&currentUrl=/vchart/trends?area=ML#!page=2
 ##################################################################################
-def listVChart(name,area,date,timelist):   
+def listVChart(name,area,date,timelist):
     # fetch user specified parameters
     if area is None: area = '内地篇'
     fltrArea  = fetchID(VCHART_LIST, area)
@@ -276,12 +281,13 @@ def listVChart(name,area,date,timelist):
     fltrDate  = fetchID(timelist, date)
     year = fltrDate[:4]
     
-    # Fetch & build video titles list for user selection, highlight user selected filter  
+    # Fetch & build video titles list for user selection, highlight user selected filter
     li = xbmcgui.ListItem('[COLOR FF00FFFF]'+name+'[/COLOR]【[COLOR FFFF0000]'+area+'[/COLOR]/[COLOR FF00FF00]'+year+'[/COLOR]/[COLOR FF5555FF]'+date+'[/COLOR]】（按此选择）')
     u = sys.argv[0] + "?mode=11&name="+urllib.quote_plus(name)+"&area="+area+"&date="+date
     xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)
     
-    url = 'http://vchart.yinyuetai.com/vchart/ajax/vchart?date='+fltrDate+'&area='+fltrArea+'&currentUrl=/vchart/v/area='+fltrArea+'%26date='+fltrDate  
+    # url = 'http://vchart.yinyuetai.com/vchart/ajax/vchart?date='+fltrDate+'&area='+fltrArea+'&currentUrl=/vchart/v/area='+fltrArea+'%26date='+fltrDate  
+    url = 'http://vchart.yinyuetai.com/vchart/v?area='+fltrArea+'&date='+fltrDate
     link = getHttpData(url)
     if link == None: return
 
@@ -292,7 +298,7 @@ def listVChart(name,area,date,timelist):
         playlist.clear()
         j=0
         for item in matchli:
-            matchp=re.compile('<a href="(.+?)" target="_blank"><img src="(.+?)" alt="(.+?)"/>').findall(item)
+            matchp=re.compile('<a href="(.+?)" target="_blank".+?img src="(.+?)" alt="(.+?)"/>').findall(item)
             p_url = matchp[0][0]              
             p_thumb = matchp[0][1]
             p_thumb += '|Referer=http://www.yinyuetai.com'
@@ -301,10 +307,10 @@ def listVChart(name,area,date,timelist):
             artist=re.compile('<a href=".+?/fanclub.+?target="_blank">(.+?)</a>').findall(item)
             p_artist = artist[0]
                 
-            matchp=re.compile('<div class="number" name="data_info">(.+?)</div>').findall(item)
+            matchp=re.compile('<span class="desc-score">(.+?)</span>').findall(item)
             p_score = matchp[0].strip()
 
-            matchp=re.compile('<li>发布时间：(.+?)</li>').findall(item)
+            matchp=re.compile('<p class="c9">发布时间：(.+?)</p>').findall(item)
             p_date = matchp[0]
 
             j+=1
@@ -325,8 +331,8 @@ def listVChart(name,area,date,timelist):
 def performChangeVChart(name,area,date,timelist):
     change = False
     dialog = xbmcgui.Dialog()
-    list = [x[1] for x in VCHART_LIST]        
-    sel = dialog.select('悦单', list)
+    list = [x[1] for x in VCHART_LIST]
+    sel = dialog.select('艺人地区', list)
     if sel != -1:
         area = VCHART_LIST[sel][1]
         change = True
@@ -336,7 +342,7 @@ def performChangeVChart(name,area,date,timelist):
     year  = fetchID(timelist, date)[:4]
     for x in timelist:
         if x[2] not in list: list.append(x[2])
-    if len(list) > 2:
+    if len(list) > 1:
         sel = dialog.select('年份', list)
         if sel != -1:
             year = list[sel]
@@ -345,7 +351,7 @@ def performChangeVChart(name,area,date,timelist):
         year = list[0]
 
     list=[]
-    list = [x[1] for x in timelist if x[2] == year]        
+    list = [x[1] for x in timelist if x[2] == year]
     sel = dialog.select(year+' 期份', list)
     if sel != -1:
         date = list[sel]
@@ -359,20 +365,20 @@ def performChangeVChart(name,area,date,timelist):
 def performChangeVChartx(name,area,page):
     change = False
     dialog = xbmcgui.Dialog()
-    list = [x[1] for x in VCHART_LIST]        
+    list = [x[1] for x in VCHART_LIST]
     sel = dialog.select('悦单', list)
     if sel != -1:
         area = VCHART_LIST[sel][1]
         change = True
 
-    list = [x[1] for x in PAGE_LIST]        
+    list = [x[1] for x in PAGE_LIST]
     sel = dialog.select('排名', list)
     if sel != -1:
         page = PAGE_LIST[sel][1]
         change = True
  
     if change: listVChart(name,area,page)
-    
+        
 ##################################################################################
 # http://www.yinyuetai.com/index-ml
 ##################################################################################
@@ -380,11 +386,11 @@ def listFocusMV(name,p_url,cat):
     # fetch user specified parameters
     if cat == None: cat = '全部'
     fltrCat  = fetchID(FCS_LIST, cat)
-    # url = 'http://www.yinyuetai.com/ajax/zhengliuxing?area=' + fltrCat    
-    # url = 'http://www.yinyuetai.com/ajax/shoubo?area=' + fltrCat    
+    # url = 'http://www.yinyuetai.com/ajax/zhengliuxing?area=' + fltrCat
+    # url = 'http://www.yinyuetai.com/ajax/shoubo?area=' + fltrCat
     url = p_url + fltrCat    
 
-    # Fetch & build video titles list for user selection, highlight user selected filter  
+    # Fetch & build video titles list for user selection, highlight user selected filter
     li = xbmcgui.ListItem('[COLOR FF00FFFF]'+name+'[/COLOR]【[COLOR FF00FF00]'+cat+'[/COLOR]】（按此选择）')
     u = sys.argv[0] + "?mode=12&name="+urllib.quote_plus(name)+"&url="+urllib.quote_plus(p_url)+"&cat="+cat
     xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)
@@ -429,7 +435,7 @@ def listFocusMV(name,p_url,cat):
 def performChangeFocus(name,url,cat):
     change = False
     dialog = xbmcgui.Dialog()
-    list = [x[1] for x in FCS_LIST]        
+    list = [x[1] for x in FCS_LIST]
     sel = dialog.select(name, list)
     if sel != -1:
         cat = FCS_LIST[sel][1]
@@ -457,9 +463,9 @@ def listAllMV(name,url,area,artist,version,tag, genre,fname,order,page,listpage)
     if listpage is None:
         link=getHttpData(url)
         if link == None: return
-        match = re.compile('<div class="allCategory" id="allCategory">(.+?)<div id="mvlist" class="mv_list_vertical">').findall(link)
+        match = re.compile('<div class="main_bg clearfix" id="fixStartPos">(.+?)<div id="mvlist" class="mv_list_vertical">').findall(link)
         listpage = match[0]
-    arealist,artistlist,versionlist,taglist,genrelist = getListMV(listpage)   
+    arealist,artistlist,versionlist,taglist,genrelist = getListMV(listpage)
     
     # fetch user specified parameters
     if area == None:
@@ -493,7 +499,7 @@ def listAllMV(name,url,area,artist,version,tag, genre,fname,order,page,listpage)
     
     li = xbmcgui.ListItem('[COLOR FF00FFFF]'+name+'[/COLOR]（第'+str(page)+'页）【[COLOR FFFF0000]'+area+'[/COLOR]/[COLOR FF00FF00]'+artist+'[/COLOR]/[COLOR FF5555FF]'+version+'[/COLOR]/[COLOR FFFFFF00]'+tag+'[/COLOR]/[COLOR FFFF55FF]'+genre+'[/COLOR]/[COLOR FFFF5555]姓:'+fname+'[/COLOR]】（按此选择）')
     u = sys.argv[0]+"?mode=13&name="+urllib.quote_plus(name)+"&url="+urllib.quote_plus(url)+"&area="+area+"&artist="+artist+"&area="+area+"&version="+version+"&tag="+urllib.quote(tag)+"&genre="+genre+"&fname="+urllib.quote(fname)+"&order="+"&page="+str(page)+"&listpage="+urllib.quote_plus(listpage)
-    xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)    
+    xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)
     
     link=getHttpData(url)
     if link == None: return
@@ -538,7 +544,7 @@ def listAllMV(name,url,area,artist,version,tag, genre,fname,order,page,listpage)
             # Fetch and build page selection menu
         matchp=re.compile('<div class="page-nav"(.+?)</div>').findall(link)
         if len(matchp):   
-            matchp1=re.compile('<a href=".+?>([0-9]+)</a>', re.DOTALL).findall(matchp[0])    
+            matchp1=re.compile('<a href=".+?>([0-9]+)</a>', re.DOTALL).findall(matchp[0])
             plist=[str(page)]
             for num in matchp1:
                if num not in plist:
@@ -614,10 +620,10 @@ def performChangesAllMV(name,url,area,artist,version,tag, genre,fname,order,page
 ##################################################################################
 def listRecommendMV(name, page):
     if page == None: page ='1'
-    p_url = "http://mv.yinyuetai.com/ajax/recommend-list?page="    
+    p_url = "http://mv.yinyuetai.com/ajax/recommend-list?page="
     url = p_url + page    
 
-    # Fetch & build video titles list for user selection, highlight user selected filter  
+    # Fetch & build video titles list for user selection, highlight user selected filter
     li = xbmcgui.ListItem('[COLOR FF00FFFF]'+name+'[/COLOR]【[COLOR FF00FF00]Page: '+page+'[/COLOR]】')
     u = sys.argv[0] + "?mode=4&name="+urllib.quote_plus(name)+"&page="+page
     xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)
@@ -672,13 +678,13 @@ def listRecommendMV(name, page):
 def performChangesMV(name,area,page):
     change = False
     dialog = xbmcgui.Dialog()
-    list = [x[1] for x in MVR_LIST]        
+    list = [x[1] for x in MVR_LIST]
     sel = dialog.select('地区', list)
     if sel != -1:
         area = MVR_LIST[sel][1]
         change = True
 
-    list = [x[1] for x in MVR_DATE]        
+    list = [x[1] for x in MVR_DATE]
     sel = dialog.select('日期', list)
     if sel != -1:
         page = MVR_DATE[sel][1]
@@ -705,15 +711,15 @@ def listFavouriteMV(name,cat,order,page):
         url = 'http://pl.yinyuetai.com/playlist_'+fltrCat+'?page='+str(page)
         li = xbmcgui.ListItem('[COLOR FF00FFFF]'+name+'[/COLOR]（第'+str(page)+'页）【[COLOR FF00FF00]'+cat+'[/COLOR]】（按此选择）')
   
-    # Fetch & build video titles list for user selection, highlight user selected filter  
+    # Fetch & build video titles list for user selection, highlight user selected filter
     u = sys.argv[0] + "?mode=15&name="+urllib.quote_plus(name)+"&cat="+cat+"&order="+order+"&page="+str(page)
     xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)
     
     link=getHttpData(url)
     if link == None: return
 
-    matchs=re.compile('<div id="main">(.+?)</ul>').findall(link)
-    matchli=re.compile('<div class="thumb_box">(.+?)</li>').findall(matchs[0])
+    matchs=re.compile('<ul class="clearfix">(.+?)</ul>').findall(link)
+    matchli=re.compile('<li>(.+?)</li>').findall(matchs[0])
 
     if len(matchli):        
         totalItems=len(matchli)
@@ -721,7 +727,7 @@ def listFavouriteMV(name,cat,order,page):
         playlist.clear()
         j=0
         for item in matchli:
-            match=re.compile('<a href="(.+?)" target="_blank" title="(.+?)">[\s]*<img src="(.+?)"').findall(item)
+            match=re.compile('<a href="(.+?)" title="(.+?)" target="_blank">[\s]*<img src="(.+?)"').findall(item)
             #p_url = 'http://www.yinyuetai.com' + match[0][0]
             p_url = match[0][0]
             p_name = match[0][1]
@@ -744,9 +750,9 @@ def listFavouriteMV(name,cat,order,page):
             playlist.add(p_url, li)
     
         # Fetch and build page selection menu
-        matchp=re.compile('<div class="page-nav">(.+?)</div>').findall(link)   
+        matchp=re.compile('<div class="page-nav">(.+?)</div>').findall(link)
         if len(matchp):   
-            matchp1=re.compile('<a href=".+?>([0-9]+)</a>', re.DOTALL).findall(matchp[0])    
+            matchp1=re.compile('<a href=".+?>([0-9]+)</a>', re.DOTALL).findall(matchp[0])
             plist=[str(page)]
             for num in matchp1:
                 if num not in plist:
@@ -764,14 +770,14 @@ def listFavouriteMV(name,cat,order,page):
 def performChangeFavourite(name,cat,order,page):
     change = False
     dialog = xbmcgui.Dialog()
-    list = [x[1] for x in MVF_LIST]        
+    list = [x[1] for x in MVF_LIST]
     sel = dialog.select('悦单', list)
     if sel != -1:
         cat = MVF_LIST[sel][1]
         change = True
 
     if re.search('热门',cat):
-        list = [x[1] for x in MVO_LIST]        
+        list = [x[1] for x in MVO_LIST]
         sel = dialog.select('排序方式', list)
         if sel != -1:
            order = MVO_LIST[sel][1]
@@ -793,7 +799,7 @@ def listArtist(name,area,geshou,fname,page):
     if fname == None: fname = '全部'
     if page is None: page = 1
     
-    # Fetch & build video titles list for user selection, highlight user selected filter  
+    # Fetch & build video titles list for user selection, highlight user selected filter
     url = 'http://www.yinyuetai.com/fanAll?area='+fltrArea+'&property='+fltrGeshou
     if fname <> '全部':
         url += '&enName='+fname 
@@ -801,31 +807,27 @@ def listArtist(name,area,geshou,fname,page):
 
     li = xbmcgui.ListItem('[COLOR FF00FFFF]'+__addonname__+'[/COLOR]（第'+str(page)+'页）【[COLOR FFFF0000]'+area+'[/COLOR]/[COLOR FF00FF00]'+geshou+'[/COLOR]/[COLOR FFFF5555]姓:'+fname+'[/COLOR]】（按此选择）')
     u = sys.argv[0]+"?mode=16&name="+urllib.quote_plus(name)+"&area="+urllib.quote_plus(area)+"&geshou="+urllib.quote_plus(geshou)+"&fname="+fname+"&page="+str(page)
-    xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)    
+    xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True)
     
     link=getHttpData(url)
     if link == None: return
     
-    match=re.compile('<span class="groupcover"(.+?)</li>').findall(link)
+    match=re.compile('<li class="fan-li">(.+?)</li>').findall(link)
     if len(match):        
         totalItems = len(match)
         for i in range(0, len(match)):
-            match1 = re.compile('fanid=.+?<a href="(.+?)"').findall(match[i])
-            p_url1 = match1[0]
-            artistid = p_url1.split('/')[2]
-            p_url = 'http://www.yinyuetai.com/fanclub/mv-all/'+artistid+'/toNew'
+            match1 = re.compile('<div class="fan-avatar"><a href="(.+?)"').findall(match[i])
+            p_url = match1[0]
         
-            match1 = re.compile('<img.+?src="(.+?)"/>').findall(match[i])
+            match1 = re.compile('<img.+?src="(.+?)">').findall(match[i])
             if match1: 
                 p_thumb = match1[0]
                 p_thumb += '|Referer=http://www.yinyuetai.com'
             else: p_thumb =''          
 
-            match1 = re.compile('<div class="info">.+?<a href="(.+?)"').findall(match[i])
-            p_url2 = match1[0]
-
-            match1 = re.compile('class="song" title="(.+?)">').findall(match[i])
-            p_name = match1[0]
+            match1 = re.compile('<div class="fan-info">.+?<a href="(.+?)" target="_blank">(.+?)</a>').findall(match[i])
+            p_url2 = match1[0][0]
+            p_name = match1[0][1]
                
             p_list = str(i+1)+'. '+p_name
             p_name += ' [[COLOR FFFF5555]'+area+'[/COLOR]/[COLOR FF5555FF]'+geshou+'[/COLOR]]'
@@ -835,9 +837,9 @@ def listArtist(name,area,geshou,fname,page):
             li.setInfo(type = "Video", infoLabels = {"Title":p_name})
             xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True, totalItems)
    
-        matchp=re.compile('<div class="page-nav">(.+?)</div>').findall(link)   
+        matchp=re.compile('<div class="page-nav">(.+?)</div>').findall(link)
         if len(matchp):   
-            matchp1=re.compile('<a href=".+?>([0-9]+)</a>', re.DOTALL).findall(matchp[0])    
+            matchp1=re.compile('<a href=".+?>([0-9]+)</a>', re.DOTALL).findall(matchp[0])
             plist=[str(page)]
             for num in matchp1:
                 if num not in plist:
@@ -868,7 +870,7 @@ def listArtistMV(name,url,thumb,page):
     vlist=re.compile('<div class="mv_list"><ul>(.+?)</ul></div>').findall(link)
     match=re.compile('<div class="thumb"><a target="_blank" title="(.+?)" href="(.+?)"><img.+?src="(.+?)"').findall(vlist[0])    
 
-    if len(match):        
+    if len(match):
         totalItems=len(match)
         playlist=xbmc.PlayList(0) # use Music playlist for temporary storage
         playlist.clear()
@@ -876,8 +878,7 @@ def listArtistMV(name,url,thumb,page):
 
         artist=re.compile('<h1>(.+?)</h1>').findall(link)
         p_artist = artist[0]
-        for p_name,p_url,p_thumb in match:
-            p_url = 'http://www.yinyuetai.com' + p_url              
+        for p_name, p_url, p_thumb in match:
             j+=1
             p_list = str(j)+'. '+p_name+' ['+p_artist +']'
             
@@ -891,9 +892,9 @@ def listArtistMV(name,url,thumb,page):
             playlist.add(p_url, li)
     
         # Fetch and build page selection menu
-        matchp=re.compile('<div class="page-nav">(.+?)</div>').findall(link)   
+        matchp=re.compile('<div class="page-nav">(.+?)</div>').findall(link)
         if len(matchp):   
-            matchp1=re.compile('<a href=".+?>([0-9]+)</a>', re.DOTALL).findall(matchp[0])    
+            matchp1=re.compile('<a href=".+?>([0-9]+)</a>', re.DOTALL).findall(matchp[0])
             plist=[str(page)]
             for num in matchp1:
                 if num not in plist:
@@ -911,20 +912,20 @@ def listArtistMV(name,url,thumb,page):
 def performChangeGs(name,area,geshou,fname,page):
     change = False
     dialog = xbmcgui.Dialog()
-    list = [x[1] for x in AREA_LIST]        
+    list = [x[1] for x in AREA_LIST]
     sel = dialog.select('地区', list)
     if sel != -1:
         area = AREA_LIST[sel][1]
         change = True
 
-    list = [x[1] for x in GS_LIST]        
+    list = [x[1] for x in GS_LIST]
     sel = dialog.select('歌手', list)
     if sel != -1:
        geshou = GS_LIST[sel][1]
        change = True
 
     list = [chr(i) for i in xrange(ord('A'),ord('Z')+1)]
-    list.insert(0,'全部')      
+    list.insert(0,'全部')
     sel = dialog.select('姓', list)
     if sel != -1:
        fname = list[sel]
@@ -990,7 +991,7 @@ def playVideo(name,url,thumb):
 
         # li = xbmcgui.ListItem(p_list)
         li = p_item # pass all li items including the embedded thumb image
-        li.setInfo(type = "Video", infoLabels = {"Title":p_list})   
+        li.setInfo(type = "Video", infoLabels = {"Title":p_list})
 
         if (pDialog.iscanceled()):
             pDialog.close() 
@@ -998,12 +999,12 @@ def playVideo(name,url,thumb):
             err_cnt = 0
             return
 
-        pDialog.update(errcnt*100/ERR_MAX + 100/ERR_MAX/TRIAL)        
+        pDialog.update(errcnt*100/ERR_MAX + 100/ERR_MAX/TRIAL)
         if re.search('http://www.yinyuetai.com/', p_url) or re.search('http://v.yinyuetai.com/video/', p_url):
             v_url = get_flv_url(p_url)
             if len == None:
                 errcnt += 1 # increment consequetive unsuccessful access
-                print "error cnt: " + str(errcnt)
+                # print "error cnt: " + str(errcnt)
                 continue
             playlistA.remove(p_url) # remove old url
             playlistA.add(v_url, li, x)  # keep a copy of v_url in Audio Playlist
