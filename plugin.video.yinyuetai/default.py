@@ -5,21 +5,13 @@ import datetime
 import gzip, StringIO
 import cookielib
 import base64
-
-try:
-    import simplejson
-except ImportError:
-    import json as simplejson
+import simplejson
 
 ##########################################################################
 # 音悦台MV
 ##########################################################################
-# Version 1.7.8 2015-12-06 (cmeng)
-# Update UI's fetch per site new changes
-# - 音悦台 - 音悦V榜
-# - 音悦台 - 全部MV
-# - 音悦台 - 全部悦单
-# - 音悦台 - 歌手
+# Version 1.7.9 2015-12-07 (cmeng)
+# - Add requires of simplejson
 ##########################################################################
 
 __addonname__ = "音悦台MV"
