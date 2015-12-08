@@ -14,8 +14,8 @@ except:
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
-# Version 1.4.5 2015-12-07 (cmeng)
-# - Implement new video link decode algorithm
+# Version 1.4.6 2015-12-08 (cmeng)
+# - Re-enable ugc continuous playback feature
 
 # See changelog.txt for previous history
 ########################################################################
@@ -882,8 +882,7 @@ def playVideoLetv(name, url, thumb):
 	vLen = len(v_urls)
 	if len(v_urls):
 		for i, v_url in enumerate(v_urls):
-			# print "Video URLxx: " + str(i) + ": " + v_url
-			li = xbmcgui.ListItem(str(i) + ": " + name, thumbnailImage=__addonicon__)
+			li = xbmcgui.ListItem(name + " part-" + str(i+1), thumbnailImage=__addonicon__)
 			li.setInfo(type="Video", infoLabels={"Title":name})
 			playlist.add(v_url, li)
 		xbmc.Player().play(playlist)
@@ -895,7 +894,7 @@ def playVideoLetv(name, url, thumb):
 # Continuous Player start playback from user selected video
 # User backspace to previous menu will not work - playlist = last selected
 ##################################################################################
-def playVideoUgcx(name, url, thumb):
+def playVideoUgc(name, url, thumb):
     videoplaycont = __addon__.getSetting('video_vplaycont')
 
     playlistA = xbmc.PlayList(0)
@@ -923,10 +922,11 @@ def playVideoUgcx(name, url, thumb):
         p_item = playlistA.__getitem__(x)
         p_url = p_item.getfilename(x)
         p_list = p_item.getdescription(x)
+        p_name = p_list.split('.')[1]
 
         # li = xbmcgui.ListItem(p_list)
-        li = p_item  # pass all li items including the embedded thumb image
-        li.setInfo(type="Video", infoLabels={"Title":p_list})  
+        # li = p_item  # pass all li items including the embedded thumb image
+        # li.setInfo(type="Video", infoLabels={"Title":p_list})  
         
         if re.search('http://www.letv.com/', p_url):  # fresh video item link fetch
             for i in range(5):  # Retry specified trials before giving up (seen 9 trials max)
@@ -936,24 +936,30 @@ def playVideoUgcx(name, url, thumb):
                     return
                 pDialog.update(errcnt * 100 / ERR_MAX + 100 / ERR_MAX / 5 * i)
                 try:  # stop xbmc from throwing error to prematurely terminate video search
-                    v_url = decrypt_url(p_url)
-                    if len(v_url):
+                    v_urls = decrypt_url(p_url)
+                    if len(v_urls):
                         break
                     else:
-                        print "letv video link: " + p_url
+                        print "letv video link error: " + p_url
                 except:
                     pass
 
-            if not len(v_url):
+            if not len(v_urls):
                 errcnt += 1  # increment consequetive unsuccessful access
                 continue
             err_cnt = 0  # reset error count
-            playlistA.remove(p_url)  # remove old url
-            playlistA.add(v_url, li, x)  # keep a copy of v_url in Audio Playlist
+            # Disable below as it is not one to one replacement in new video links
+            # playlistA.remove(p_url)  # remove old url
+            # playlistA.add(v_urls[0], li, x)  # keep a copy of v_url in Audio Playlist
         else:
-            v_url = p_url
+            v_urls = p_url
             
-        playlist.add(v_url, li, k)
+        for i, v_url in enumerate(v_urls):
+			# li = p_item  # pass all li items including the embedded thumb image
+			li = xbmcgui.ListItem(str(x+1) + ". Part-" + str(i+1) + ": " + p_name, thumbnailImage=__addonicon__)
+			li.setInfo(type="Video", infoLabels={"Title":p_list})	
+			playlist.add(v_url, li)
+			
         k += 1
         if k == 1:
             pDialog.close() 
@@ -1000,7 +1006,7 @@ def playVideoLetvx(name, url, thumb):
         playlist = xbmc.PlayList(1)
         playlist.clear()
         for i in range(0, len(match)):
-            print "video link: " + match[i]
+            # print "video link: " + match[i]
             listitem = xbmcgui.ListItem(name, thumbnailImage=__addonicon__)
             listitem.setInfo(type="Video", infoLabels={"Title":name + " 第" + str(i + 1) + "/" + str(len(match)) + " 节"})
             playlist.add(match[i], listitem)
@@ -1040,7 +1046,7 @@ def flvcd(urlData):
         return match        
 
 ##################################################################################
-def playVideoUgc(name, url, thumb):
+def playVideoUgcx(name, url, thumb):
     videoRes = int(__addon__.getSetting('video_resolution'))
     videoplaycont = __addon__.getSetting('video_vplaycont')
 
@@ -1096,7 +1102,7 @@ def playVideoUgc(name, url, thumb):
                         v_url = v_url[0]
                         break
                     else:
-                        print "flvcd link: " + f_url
+                        print "flvcd link error: " + f_url
                 except:
                     pass
 
@@ -1206,8 +1212,7 @@ elif mode == 10:
 elif mode == 12:
     playVideoLetv(name, url, thumb)
 elif mode == 20:
-	playVideoLetv(name, url, thumb)
-    # playVideoUgc(name, url, thumb)
+    playVideoUgc(name, url, thumb)
 
 elif mode == 31:
     searchLetv()
