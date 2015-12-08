@@ -2,7 +2,7 @@
 # default.py
 
 import xbmcgui, xbmcaddon, xbmc
-import json, sys, urllib, urllib2, gzip, StringIO, re, os, time, threading, socket, base64, math
+import json, sys, urllib, urllib2, gzip, StringIO, re, os, time, threading, socket, base64, math, cookielib
 try:
    import StorageServer
 except:
@@ -39,16 +39,21 @@ ChannelData={'97': {'icon': 'channel_tv_icon.png', 'title': '电视剧'},
 mainData = [{'title': '搜索', 'image': 'yk_search.jpg', 'mtype': 'search'},  
             {'title': '观看记录', 'image': 'yk_history.jpg', 'mtype': 'history'}, 
             {'title': '收藏', 'image': 'yk_favor.jpg', 'mtype': 'favor'}]
-settings_data = {'resolution':[u'超清', u'高清', u'标清'], 
-                 'resolution_type':['hd2', 'mp4', 'flv'], 
-                 'language':['默认', '国语', '粤语', '英语'], 
-                 'language_type':[0, 1, 2, 6], 
+settings_data = {'resolution':[u'1080P', u'超清', u'高清', u'标清', u'标清(3GP)'], 
+                 'resolution_type':[['hd3','mp4hd3'], ['hd2','mp4hd2'], ['mp4','mp4hd'], ['flv','flvhd'], ['3gphd']], 
+                 'language':[u'默认', u'国语', u'粤语', u'英语'], 
                  'play':['分段', '堆叠', 'M3U8'],
                  'play_type':['list', 'stack', 'm3u8']}
 settings={'resolution':0, 'language':0, 'play':0}
-resolution_map = {'flv': 'flv',
-                  'mp4': 'mp4',
-                  'hd2': 'flv'}
+resolution_map = {'3gphd':  '3gp',
+                  'flv':    'flv',
+                  'flvhd':  'flv',
+                  'mp4':    'mp4',
+                  'mp4hd':  'mp4',
+                  'hd2':    'flv',
+                  'mp4hd2': 'flv',
+                  'hd3':    'flv',
+                  'mp4hd3': 'flv'}
 
 
 ACTION_MOVE_LEFT      = 1
@@ -353,9 +358,11 @@ class FilterWindow(BaseWindowDialog):
         
     def onInit(self):
         self.showBusy()
-
-        BaseWindowDialog.onInit(self)
-        self.init()
+        try:
+            BaseWindowDialog.onInit(self)
+            self.init()
+        except:
+            pass
 
         self.hideBusy()
 
@@ -527,9 +534,12 @@ class MainWindow(BaseWindow):
 
         self.showBusy()
 
-        self.initNavigation()
-        self.initMain()
-        self.initChannelTop()
+        try:
+            self.initNavigation()
+            self.initMain()
+            self.initChannelTop()
+        except:
+            pass
 
         self.hideBusy()
 
@@ -695,8 +705,11 @@ class TopWindow(BaseWindow):
 
         self.showBusy()
 
-        self.initSubChannel()
-        self.initContent()
+        try:
+            self.initSubChannel()
+            self.initContent()
+        except:
+            pass
 
         self.hideBusy()
 
@@ -741,23 +754,26 @@ class TopWindow(BaseWindow):
     def updateContent(self):
         self.showBusy()
 
-        url = HOST + 'tv/top/shows?' + IDS + '&top_id=' + self.sdata
-        for k in self.urlArgs:
-            url = url + '&' + k + '=' + urllib.quote_plus(self.urlArgs[k])
+        try:
+            url = HOST + 'tv/top/shows?' + IDS + '&top_id=' + self.sdata
+            for k in self.urlArgs:
+                url = url + '&' + k + '=' + urllib.quote_plus(self.urlArgs[k])
 
-        data = GetHttpData(url)
-        data = json.loads(data)
-        if data.has_key('status') == False:
-            self.hideBusy()
-            return
-        if data['status'] != 'success':
-            self.hideBusy()
-            return
+            data = GetHttpData(url)
+            data = json.loads(data)
+            if data.has_key('status') == False:
+                self.hideBusy()
+                return
+            if data['status'] != 'success':
+                self.hideBusy()
+                return
 
-        for item in data['results']:
-            listitem = xbmcgui.ListItem(label=item['showname'], thumbnailImage=item['show_vthumburl_hd'])
-            setProperties(listitem, item)
-            self.getControl(1520).addItem(listitem)
+            for item in data['results']:
+                listitem = xbmcgui.ListItem(label=item['showname'], thumbnailImage=item['show_vthumburl_hd'])
+                setProperties(listitem, item)
+                self.getControl(1520).addItem(listitem)
+        except:
+            pass
 
         self.hideBusy()
 
@@ -803,8 +819,11 @@ class ChannelWindow(BaseWindow):
 
         self.showBusy()
 
-        self.initSubChannel()
-        self.initContent()
+        try:
+            self.initSubChannel()
+            self.initContent()
+        except:
+            pass
 
         self.hideBusy()
 
@@ -857,23 +876,26 @@ class ChannelWindow(BaseWindow):
     def updateContent(self):
         self.showBusy()
 
-        url = HOST + 'layout/smarttv/item_list?' + IDS + '&cid=' + self.sdata
-        for k in self.urlArgs:
-            url = url + '&' + k + '=' + urllib.quote_plus(self.urlArgs[k])
+        try:
+            url = HOST + 'layout/smarttv/item_list?' + IDS + '&cid=' + self.sdata
+            for k in self.urlArgs:
+                url = url + '&' + k + '=' + urllib.quote_plus(self.urlArgs[k])
 
-        data = GetHttpData(url)
-        data = json.loads(data)
-        if data.has_key('status') == False:
-            self.hideBusy()
-            return
-        if data['status'] != 'success':
-            self.hideBusy()
-            return
+            data = GetHttpData(url)
+            data = json.loads(data)
+            if data.has_key('status') == False:
+                self.hideBusy()
+                return
+            if data['status'] != 'success':
+                self.hideBusy()
+                return
 
-        for item in data['results']:
-            listitem = xbmcgui.ListItem(label=item['showname'], label2=item['stripe_bottom'], thumbnailImage=item['show_vthumburl_hd'])
-            setProperties(listitem, item)
-            self.getControl(620).addItem(listitem)
+            for item in data['results']:
+                listitem = xbmcgui.ListItem(label=item['showname'], label2=item['stripe_bottom'], thumbnailImage=item['show_vthumburl_hd'])
+                setProperties(listitem, item)
+                self.getControl(620).addItem(listitem)
+        except:
+            pass
 
         self.hideBusy()
 
@@ -948,9 +970,12 @@ class OtherWindow(BaseWindow):
 
         self.showBusy()
 
-        self.initType()
-        self.initSubChannel()
-        self.initContent()
+        try:
+            self.initType()
+            self.initSubChannel()
+            self.initContent()
+        except:
+            pass
 
         self.hideBusy()
 
@@ -1011,26 +1036,29 @@ class OtherWindow(BaseWindow):
     def updateContent(self):
         self.showBusy()
 
-        url = HOST + 'layout/smarttv/item_list?' + IDS
-        for k in self.urlArgs:
-            url = url + '&' + k + '=' + urllib.quote_plus(self.urlArgs[k])
+        try:
+            url = HOST + 'layout/smarttv/item_list?' + IDS
+            for k in self.urlArgs:
+                url = url + '&' + k + '=' + urllib.quote_plus(self.urlArgs[k])
 
-        data = GetHttpData(url)
-        data = json.loads(data)
-        if data.has_key('status') == False:
-            self.hideBusy()
-            return
-        if data['status'] != 'success':
-            self.hideBusy()
-            return
+            data = GetHttpData(url)
+            data = json.loads(data)
+            if data.has_key('status') == False:
+                self.hideBusy()
+                return
+            if data['status'] != 'success':
+                self.hideBusy()
+                return
 
-        for item in data['results']:
-            if item.has_key('show_thumburl_hd'):
-                listitem = xbmcgui.ListItem(label=item['showname'], label2=item['duration'], thumbnailImage=item['show_thumburl_hd'])
-            else:
-                listitem = xbmcgui.ListItem(label=item['showname'], label2=item['duration'], thumbnailImage=item['show_thumburl'])
-            setProperties(listitem, item)
-            self.getControl(920).addItem(listitem)
+            for item in data['results']:
+                if item.has_key('show_thumburl_hd'):
+                    listitem = xbmcgui.ListItem(label=item['showname'], label2=item['duration'], thumbnailImage=item['show_thumburl_hd'])
+                else:
+                    listitem = xbmcgui.ListItem(label=item['showname'], label2=item['duration'], thumbnailImage=item['show_thumburl'])
+                setProperties(listitem, item)
+                self.getControl(920).addItem(listitem)
+        except:
+            pass
 
         self.hideBusy()
 
@@ -1104,10 +1132,13 @@ class ResultWindow(BaseWindow):
 
         self.showBusy()
 
-        self.initType()
-        self.initFilter()
-        self.initContent()
-        self.initShow()
+        try:
+            self.initType()
+            self.initFilter()
+            self.initContent()
+            self.initShow()
+        except:
+            pass
 
         self.hideBusy()
 
@@ -1209,26 +1240,29 @@ class ResultWindow(BaseWindow):
     def updateContent(self):
         self.showBusy()
 
-        url = HOST + 'openapi-wireless/videos/search/' + urllib.quote_plus(self.sdata) + '?' + IDS
-        for k in self.urlArgs:
-            url = url + '&' + k + '=' + urllib.quote_plus(self.urlArgs[k])
+        try:
+            url = HOST + 'openapi-wireless/videos/search/' + urllib.quote_plus(self.sdata) + '?' + IDS
+            for k in self.urlArgs:
+                url = url + '&' + k + '=' + urllib.quote_plus(self.urlArgs[k])
 
-        data = GetHttpData(url)
-        data = json.loads(data)
-        if data.has_key('status') == False:
-            self.hideBusy()
-            return
-        if data['status'] != 'success':
-            self.hideBusy()
-            return
+            data = GetHttpData(url)
+            data = json.loads(data)
+            if data.has_key('status') == False:
+                self.hideBusy()
+                return
+            if data['status'] != 'success':
+                self.hideBusy()
+                return
 
-        for item in data['results']:
-            if item.has_key('img_hd'):
-                listitem = xbmcgui.ListItem(label=item['title'], label2=item['duration'], thumbnailImage=item['img_hd'])
-            else:
-                listitem = xbmcgui.ListItem(label=item['title'], label2=item['duration'], thumbnailImage=item['img'])
-            setProperties(listitem, item)
-            self.getControl(1322).addItem(listitem)
+            for item in data['results']:
+                if item.has_key('img_hd'):
+                    listitem = xbmcgui.ListItem(label=item['title'], label2=item['duration'], thumbnailImage=item['img_hd'])
+                else:
+                    listitem = xbmcgui.ListItem(label=item['title'], label2=item['duration'], thumbnailImage=item['img'])
+                setProperties(listitem, item)
+                self.getControl(1322).addItem(listitem)
+        except:
+            pass
 
         self.hideBusy()
 
@@ -1362,24 +1396,27 @@ class SearchWindow(BaseWindow):
     def updateContent(self):
         self.showBusy()
 
-        if len(self.keywords) == 0:
-            data = GetHttpData(HOST + 'openapi-wireless/keywords/recommend?' + IDS)
-            title_key = 'title'
-        else:
-            data = GetHttpData(HOST + 'openapi-wireless/keywords/suggest?' + IDS + '&keywords=' + urllib.quote_plus(self.keywords))
-            title_key = 'keyword'
+        try:
+            if len(self.keywords) == 0:
+                data = GetHttpData(HOST + 'openapi-wireless/keywords/recommend?' + IDS)
+                title_key = 'title'
+            else:
+                data = GetHttpData(HOST + 'openapi-wireless/keywords/suggest?' + IDS + '&keywords=' + urllib.quote_plus(self.keywords))
+                title_key = 'keyword'
 
-        data = json.loads(data)
-        if data.has_key('status') == False:
-            self.hideBusy()
-            return
-        if data['status'] != 'success':
-            self.hideBusy()
-            return
+            data = json.loads(data)
+            if data.has_key('status') == False:
+                self.hideBusy()
+                return
+            if data['status'] != 'success':
+                self.hideBusy()
+                return
 
-        for item in data['results']:
-            listitem = xbmcgui.ListItem(label=item[title_key])
-            self.getControl(1220).addItem(listitem)
+            for item in data['results']:
+                listitem = xbmcgui.ListItem(label=item[title_key])
+                self.getControl(1220).addItem(listitem)
+        except:
+            pass
 
         self.hideBusy()
 
@@ -1592,68 +1629,71 @@ class DetailWindow(BaseWindow):
 
         self.showBusy()
 
-        data = GetHttpData(HOST + 'layout/smarttv/play/detail?' + IDS + '&id=' + self.sdata)
-        data = json.loads(data)
-        if data.has_key('status') == False:
-            self.hideBusy()
-            return
-        if data['status'] != 'success':
-            self.hideBusy()
-            return            
-        
-        data = data['detail']
-        self.pdata = data
-        self.getControl(701).setImage(data['img'])
-        setLabel(self.getControl(702), data, 'title', '', '', '', '')
-        setLabel(self.getControl(703), data, 'reputation', '0.0', '', u'分', '')
-        setLabel(self.getControl(704), data, 'showdate', u'未知', u'上映：', '', '')
-        setLabel(self.getControl(705), data, 'stripe_bottom', u'未知', u'集数：', '', '')
-        setLabel(self.getControl(706), data, 'area', u'未知', u'地区：', '', '/')
-        setLabel(self.getControl(707), data, 'genre', u'未知', u'类型：', '', '/')
-        setLabel(self.getControl(708), data, 'director', u'未知', u'导演：', '', '/')
-        setLabel(self.getControl(709), data, 'performer', u'未知', u'演员：', '', '/')
-        self.getControl(710).setLabel('简介：')
-        setLabel(self.getControl(711), data, 'desc', '', '', '', '')
-        xbmcgui.Window(xbmcgui.getCurrentWindowId()).setProperty('detail_pay', str(data.get('paid', 0)))
-
-        self.getControl(721).setLabel('选集')
-        added = True
         try:
-            ret = eval(cache.get('favor'))
-        except:
-            ret = None
-        if ret != None:
-            if ret.has_key(self.sdata):
-                added = False
-        if added:
-            self.getControl(722).setLabel('收藏')
-        else:
-            self.getControl(722).setLabel('已收藏')
-        self.getControl(723).setLabel(getNumber(data, 'total_vv'))
-        self.getControl(724).setLabel(getNumber(data, 'total_fav'))
+            data = GetHttpData(HOST + 'layout/smarttv/play/detail?' + IDS + '&id=' + self.sdata)
+            data = json.loads(data)
+            if data.has_key('status') == False:
+                self.hideBusy()
+                return
+            if data['status'] != 'success':
+                self.hideBusy()
+                return            
+            
+            data = data['detail']
+            self.pdata = data
+            self.getControl(701).setImage(data['img'])
+            setLabel(self.getControl(702), data, 'title', '', '', '', '')
+            setLabel(self.getControl(703), data, 'reputation', '0.0', '', u'分', '')
+            setLabel(self.getControl(704), data, 'showdate', u'未知', u'上映：', '', '')
+            setLabel(self.getControl(705), data, 'stripe_bottom', u'未知', u'集数：', '', '')
+            setLabel(self.getControl(706), data, 'area', u'未知', u'地区：', '', '/')
+            setLabel(self.getControl(707), data, 'genre', u'未知', u'类型：', '', '/')
+            setLabel(self.getControl(708), data, 'director', u'未知', u'导演：', '', '/')
+            setLabel(self.getControl(709), data, 'performer', u'未知', u'演员：', '', '/')
+            self.getControl(710).setLabel('简介：')
+            setLabel(self.getControl(711), data, 'desc', '', '', '', '')
+            xbmcgui.Window(xbmcgui.getCurrentWindowId()).setProperty('detail_pay', str(data.get('paid', 0)))
 
-        try:
-            if data['episode_total'] == '1':
-                #self.getControl(721).setVisible(False)
-                self.getControl(721).setEnabled(False)
+            self.getControl(721).setLabel('选集')
+            added = True
+            try:
+                ret = eval(cache.get('favor'))
+            except:
+                ret = None
+            if ret != None:
+                if ret.has_key(self.sdata):
+                    added = False
+            if added:
+                self.getControl(722).setLabel('收藏')
+            else:
+                self.getControl(722).setLabel('已收藏')
+            self.getControl(723).setLabel(getNumber(data, 'total_vv'))
+            self.getControl(724).setLabel(getNumber(data, 'total_fav'))
+
+            try:
+                if data['episode_total'] == '1':
+                    #self.getControl(721).setVisible(False)
+                    self.getControl(721).setEnabled(False)
+            except:
+                pass
+
+            self.getControl(740).reset()
+
+            data = GetHttpData(HOST + 'common/shows/relate?' + IDS + '&id=' + self.sdata)
+            data = json.loads(data)
+            if data.has_key('status') == False:
+                self.hideBusy()
+                return
+            if data['status'] != 'success':
+                self.hideBusy()
+                return            
+
+            for item in data['results']:
+                listitem = xbmcgui.ListItem(label=item['showname'], thumbnailImage=item['show_vthumburl'])
+                setProperties(listitem, item)
+                self.getControl(740).addItem(listitem)
         except:
             pass
-
-        self.getControl(740).reset()
-
-        data = GetHttpData(HOST + 'common/shows/relate?' + IDS + '&id=' + self.sdata)
-        data = json.loads(data)
-        if data.has_key('status') == False:
-            self.hideBusy()
-            return
-        if data['status'] != 'success':
-            self.hideBusy()
-            return            
-
-        for item in data['results']:
-            listitem = xbmcgui.ListItem(label=item['showname'], thumbnailImage=item['show_vthumburl'])
-            setProperties(listitem, item)
-            self.getControl(740).addItem(listitem)
 
         self.hideBusy()
 
@@ -1707,9 +1747,12 @@ class SelectWindow(BaseWindow):
     def onInit(self):
         BaseWindow.onInit( self )
 
-        xbmc.executebuiltin("ActivateWindow(busydialog)")
-        self.init()
-        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+        self.showBusy()
+        try:
+            self.init()
+        except:
+            pass
+        self.hideBusy()
         
     def init(self):
         if self.inited:
@@ -1951,105 +1994,93 @@ def play(vid, playContinue=False):
     playid = vid
     xbmc.executebuiltin("ActivateWindow(busydialog)")
     try:
-        moviesurl="http://v.youku.com/player/getPlayList/VideoIDS/{0}/ctype/12/ev/1".format(vid)
+        moviesurl='http://play.youku.com/play/get.json?vid=%s&ct=12' % vid
         result = GetHttpData(moviesurl)
         movinfo = json.loads(result.replace('\r\n',''))
-        movdat = movinfo['data'][0]
-        streamfids = movdat['streamfileids']
+        movdat = movinfo['data']
     except:
         xbmc.executebuiltin( "Dialog.Close(busydialog)" )
         xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
         return
 
     #Set language
-    if settings['language'] != 0 and movdat.has_key('dvd') and 'audiolang' in movdat['dvd']:
+    if movdat.has_key('dvd') and 'audiolang' in movdat['dvd']:
         for item in movdat['dvd']['audiolang']:
-            if item['language'] == settings_data[settings['language']]:
+            if item['lang'] == settings_data['language'][settings['language']]:
                 if item['vid'] != vid:
                     playid = item['vid']
     if playid != vid:
         try:
-            moviesurl="http://v.youku.com/player/getPlayList/VideoIDS/{0}/ctype/12/ev/1".format(playid)
+            moviesurl='http://play.youku.com/play/get.json?vid=%s&ct=12' % playid
             result = GetHttpData(moviesurl)
             movinfo = json.loads(result.replace('\r\n',''))
-            movdat = movinfo['data'][0]
-            streamfids = movdat['streamfileids']
+            movdat = movinfo['data']
         except:
             xbmc.executebuiltin( "Dialog.Close(busydialog)" )
             xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
             return
 
     #Select resolution.
+    stream = {}
     resolution = ''
     for i in range(settings['resolution'], len(settings_data['resolution'])):
-        if settings_data['resolution_type'][i] in streamfids.keys():
-            resolution = settings_data['resolution_type'][i]
+        for t in settings_data['resolution_type'][i]:
+            for s in movdat['stream']:
+                if t == s['stream_type']:
+                    stream = s
+                    resolution = settings_data['resolution_type'][i][0]
+                    break
+            if stream.has_key('stream_type'):
+                break
+        if stream.has_key('stream_type'):
             break
-    if resolution == '':
+
+    if not stream.has_key('stream_type'):
         xbmc.executebuiltin( "Dialog.Close(busydialog)" )
         xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
         return
 
 
     #Calculate the URLs
-    oip = movdat['ip']
-    ep = movdat['ep']
+    oip = movdat['security']['ip']
+    ep = movdat['security']['encrypt_string']
     ep, token, sid = youkuDecoder()._calc_ep2(playid, ep)
+    
+    query = urllib.urlencode(dict(
+        vid=playid, ts=int(time.time()), keyframe=1, type=resolution,
+        ep=ep, oip=oip, ctype=12, ev=1, token=token, sid=sid,
+    ))
+    url = 'http://pl.youku.com/playlist/m3u8?%s' % (query)
+    try:
+        result = GetHttpData(url)
+        f = open(m3u8_file, 'wb')
+        f.write(result)
+        f.close()
+    except:
+        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
+        return
+    playlist = xbmc.PlayList(1)
+    playlist.clear()
 
-    if settings_data['play_type'][settings['play']] != 'm3u8':
-        total = len(movdat['segs'][resolution])
-        urls = []
-        for seg in movdat['segs'][resolution]:
-            no = hex(int(seg['no']))[2:].replace('L', '').upper()
-            if (len(no)==1): no='0'+no
-            fileId = youkuDecoder().getFileId(streamfids[resolution], movdat['seed'])
-            fileId = fileId[0:8]+no+fileId[10:]
-            ep = youkuDecoder()._calc_ep(sid, fileId, token)
-            urls.append('http://k.youku.com/player/getFlvPath/sid/' + \
-                        str(sid) + '_00/st/' + str(resolution_map[resolution]) + '/fileid/' + str(fileId) + \
-                        '?K=' + str(seg['k']) + '&hd=1&myp=0&ts=' + str(seg['seconds']) + \
-                        '&ypp=0&ctype=12&ev=1&token=' + str(token) + '&oip=' + \
-                        str(oip) + '&ep=' + str(ep))
-
-        playlist = xbmc.PlayList(1)
-        playlist.clear()
-
-        if settings_data['play_type'][settings['play']] == 'list':
-            for i in range(total):
-                title =movdat['title'] + u" - 第"+str(i+1)+"/"+str(total) + u"节"
-                listitem=xbmcgui.ListItem(title)
-                listitem.setInfo(type="Video",infoLabels={"Title":title})
-                playlist.add(urls[i], listitem)
-        else:
-            playurl = 'stack://'
-            for i in range(total):
-                playurl += urls[i]
-                if i < total - 1:
-                    playurl += ' , '
-            listitem=xbmcgui.ListItem(movdat['title'])
-            listitem.setInfo(type="Video", infoLabels={"Title":movdat['title']})
-            playlist.add(playurl, listitem)
+    urls = re.findall(r'(http://[^?]+)\?ts_start=0', result)
+    if settings_data['play_type'][settings['play']] == 'list':
+        for i in range(len(urls)):
+            title =movdat['video']['title'] + u" - 第"+str(i+1)+"/"+str(len(urls)) + u"节"
+            listitem=xbmcgui.ListItem(title)
+            listitem.setInfo(type="Video",infoLabels={"Title":title})
+            playlist.add(urls[i], listitem)
+    elif settings_data['play_type'][settings['play']] == 'stack':
+        playurl = 'stack://' + ' , '.join(urls)
+        listitem=xbmcgui.ListItem(movdat['video']['title'])
+        listitem.setInfo(type="Video", infoLabels={"Title":movdat['video']['title']})
+        playlist.add(playurl, listitem)
     else:
-        #m3u8
-        query = urllib.urlencode(dict(
-            vid=playid, ts=int(time.time()), keyframe=1, type=resolution,
-            ep=ep, oip=oip, ctype=12, ev=1, token=token, sid=sid,
-        ))
-        url = 'http://pl.youku.com/playlist/m3u8?%s' % (query)
-        try:
-            result = GetHttpData(url)
-            f = open(m3u8_file, 'wb')
-            f.write(result)
-            f.close()
-        except:
-            xbmc.executebuiltin( "Dialog.Close(busydialog)" )
-            xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
-            return
-        playlist = xbmc.PlayList(1)
-        playlist.clear()
-        listitem=xbmcgui.ListItem(movdat['title'])
-        listitem.setInfo(type="Video", infoLabels={"Title":movdat['title']})
+        listitem=xbmcgui.ListItem(movdat['video']['title'])
+        listitem.setInfo(type="Video", infoLabels={"Title":movdat['video']['title']})
         playlist.add(m3u8_file, listitem)
+
+
 
     xbmc.executebuiltin( "Dialog.Close(busydialog)" )
     try:
@@ -2061,9 +2092,9 @@ def play(vid, playContinue=False):
         history = ret[vid] 
     else:
         history = {}
-    history['title'] = movdat['title']
+    history['title'] = movdat['video']['title']
     history['vid'] = vid
-    history['logo'] = movdat['logo']
+    history['logo'] = movdat['video']['logo']
     offset = 0
     startpos = 0
     try:
@@ -2216,4 +2247,7 @@ try:
         openWindow('mysettings')
 except:
     if __name__ == '__main__':
+        cj = cookielib.CookieJar()
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+        urllib2.install_opener(opener)
         openWindow('main')

@@ -493,7 +493,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
   </extension>
 </addon>
 
-<addon id="plugin.video.youkutv" name="YouKu TV" version="1.6.0" provider-name="catro">
+<addon id="plugin.video.youkutv" name="YouKu TV" version="1.6.2" provider-name="catro">
   <requires>
     <import addon="script.common.plugin.cache" version="0.9.1"/>
   </requires>
