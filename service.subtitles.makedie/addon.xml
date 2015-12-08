@@ -20,9 +20,9 @@
     <description lang="zh_TW">從射手網(偽)（sub.makedie.me）下載字幕，修改自taxigps的射手網插件</description>
     <platform>all</platform>
     <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
-    <!--<forum>http://forum.xbmc.org/showthread.php?tid=199644</forum>-->
+    <forum>http://forum.kodi.tv/showthread.php?tid=199644</forum>
     <website></website>
     <email></email>
-    <source>https://github.com/fffonion/service.subtitles.makedie</source>
+    <source>https://github.com/taxigps/xbmc-addons-chinese/tree/master/service.subtitles.makedie</source>
   </extension>
 </addon>

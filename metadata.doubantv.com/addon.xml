@@ -16,5 +16,10 @@
     <description lang="en">Download TV information from movie.douban.com</description>
     <description lang="zh">从豆瓣网获取电视剧资料。豆瓣所有的内容，分类，筛选，排序都由用户产生和决定。豆瓣帮助你通过你喜爱的东西找到志同道合者，然后通过他们找到更多的好东西。</description>
     <platform>all</platform>
+    <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+    <forum>http://forum.kodi.tv/showthread.php?tid=64250</forum>
+    <website></website>
+    <email></email>
+    <source>https://github.com/taxigps/xbmc-addons-chinese/tree/master/metadata.doubantv.com</source>
   </extension>
 </addon>

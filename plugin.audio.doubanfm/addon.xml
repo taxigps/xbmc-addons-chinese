@@ -13,5 +13,10 @@
         <summary lang="zh">豆瓣FM插件</summary>
         <description lang="zh">豆瓣FM是一款你专属的个性化收听工具。你只需要非常简单的操作就能听到为你量身推荐的歌曲。它还拥有不同音乐爱好者创建的主题兆赫，让你在享受自我口味歌曲的同时，也能发现更多样的未知音乐。 </description>
         <platform>all</platform>
+        <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+        <forum>http://forum.kodi.tv/showthread.php?tid=64250</forum>
+        <website></website>
+        <email></email>
+        <source>https://github.com/taxigps/xbmc-addons-chinese/tree/master/plugin.audio.doubanfm</source>
     </extension>
 </addon>
