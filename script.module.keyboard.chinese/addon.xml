@@ -13,7 +13,8 @@
         <summary lang="zh">中文键盘</summary>
         <description lang="en">Visual keyboard to input Chinese</description>
         <description lang="zh">支持中文输入的虚拟键盘</description>
-        <license>GPL</license>
+        <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+        <forum>http://forum.kodi.tv/showthread.php?tid=98194</forum>
         <source>https://github.com/taxigps/script.module.keyboard.chinese/</source>
         <platform>all</platform>
     </extension>
