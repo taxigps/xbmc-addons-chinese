@@ -17,6 +17,11 @@
     <description lang="en">Download TV information from movie.douban.com</description>
     <description lang="zh">从豆瓣网获取电视剧资料。豆瓣所有的内容，分类，筛选，排序都由用户产生和决定。豆瓣帮助你通过你喜爱的东西找到志同道合者，然后通过他们找到更多的好东西。</description>
     <platform>all</platform>
+    <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+    <forum>http://forum.kodi.tv/showthread.php?tid=64250</forum>
+    <website></website>
+    <email></email>
+    <source>https://github.com/taxigps/xbmc-addons-chinese/tree/master/metadata.doubantv.com</source>
   </extension>
 </addon>
 
@@ -38,6 +43,11 @@
         <summary lang="zh">一听音乐插件</summary>
         <description>一听音乐网（www.1ting.com）是中国最大的在线音乐网站，集正版音乐、原创歌曲平台、网络电台为一体，拥有丰富的正版音乐库、原创歌曲展示平台（可乐频道）和精彩纷呈的电台节目（一听音乐台）。</description>
         <platform>all</platform>
+        <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+        <forum>http://forum.kodi.tv/showthread.php?tid=64250</forum>
+        <website></website>
+        <email></email>
+        <source>https://github.com/taxigps/xbmc-addons-chinese/tree/master/plugin.audio.1ting</source>
     </extension>
 </addon>
 
@@ -91,6 +101,11 @@
         <summary lang="zh">豆瓣FM插件</summary>
         <description lang="zh">豆瓣FM是一款你专属的个性化收听工具。你只需要非常简单的操作就能听到为你量身推荐的歌曲。它还拥有不同音乐爱好者创建的主题兆赫，让你在享受自我口味歌曲的同时，也能发现更多样的未知音乐。 </description>
         <platform>all</platform>
+        <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+        <forum>http://forum.kodi.tv/showthread.php?tid=64250</forum>
+        <website></website>
+        <email></email>
+        <source>https://github.com/taxigps/xbmc-addons-chinese/tree/master/plugin.audio.doubanfm</source>
     </extension>
 </addon>
 
@@ -493,7 +508,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
   </extension>
 </addon>
 
-<addon id="plugin.video.youkutv" name="YouKu TV" version="1.6.2" provider-name="catro">
+<addon id="plugin.video.youkutv" name="YouKu TV" version="1.6.3" provider-name="catro">
   <requires>
     <import addon="script.common.plugin.cache" version="0.9.1"/>
   </requires>
@@ -539,7 +554,8 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
         <summary lang="zh">中文键盘</summary>
         <description lang="en">Visual keyboard to input Chinese</description>
         <description lang="zh">支持中文输入的虚拟键盘</description>
-        <license>GPL</license>
+        <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+        <forum>http://forum.kodi.tv/showthread.php?tid=98194</forum>
         <source>https://github.com/taxigps/script.module.keyboard.chinese/</source>
         <platform>all</platform>
     </extension>
@@ -603,10 +619,10 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
     <description lang="zh_TW">從射手網(偽)（sub.makedie.me）下載字幕，修改自taxigps的射手網插件</description>
     <platform>all</platform>
     <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
-    <!--<forum>http://forum.xbmc.org/showthread.php?tid=199644</forum>-->
+    <forum>http://forum.kodi.tv/showthread.php?tid=199644</forum>
     <website></website>
     <email></email>
-    <source>https://github.com/fffonion/service.subtitles.makedie</source>
+    <source>https://github.com/taxigps/xbmc-addons-chinese/tree/master/service.subtitles.makedie</source>
   </extension>
 </addon>
 

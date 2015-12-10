@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.youkutv" name="YouKu TV" version="1.6.2" provider-name="catro">
+<addon id="plugin.video.youkutv" name="YouKu TV" version="1.6.3" provider-name="catro">
   <requires>
     <import addon="script.common.plugin.cache" version="0.9.1"/>
   </requires>

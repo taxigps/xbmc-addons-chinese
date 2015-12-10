@@ -2023,17 +2023,22 @@ def play(vid, playContinue=False):
     #Select resolution.
     stream = {}
     resolution = ''
-    for i in range(settings['resolution'], len(settings_data['resolution'])):
-        for t in settings_data['resolution_type'][i]:
-            for s in movdat['stream']:
-                if t == s['stream_type']:
-                    stream = s
-                    resolution = settings_data['resolution_type'][i][0]
+    try:
+        for i in range(settings['resolution'], len(settings_data['resolution'])):
+            for t in settings_data['resolution_type'][i]:
+                for s in movdat['stream']:
+                    if t == s['stream_type']:
+                        stream = s
+                        resolution = settings_data['resolution_type'][i][0]
+                        break
+                if stream.has_key('stream_type'):
                     break
             if stream.has_key('stream_type'):
                 break
-        if stream.has_key('stream_type'):
-            break
+    except:
+        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
+        return
 
     if not stream.has_key('stream_type'):
         xbmc.executebuiltin( "Dialog.Close(busydialog)" )
@@ -2173,6 +2178,8 @@ def GetHttpData(url):
                        format('AppleWebKit/537.36 (KHTML, like Gecko) ',
                               'Chrome/28.0.1500.71 Safari/537.36'))
         req.add_header('Accept-encoding', 'gzip')
+        if (url.find('play.youku.com') != -1):
+            req.add_header('referer', 'http://static.youku.com')
         response = urllib2.urlopen(req)
         httpdata = response.read()
         if response.headers.get('content-encoding', None) == 'gzip':
