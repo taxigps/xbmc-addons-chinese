@@ -4,18 +4,20 @@ import math, os.path, httplib, time, random
 import cookielib
 import base64
 import simplejson
+import threading
 
 try:
     from ChineseKeyboard import Keyboard as Apps
 except:
     from xbmc import Keyboard as Apps
 
-
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
-# Version 1.4.6 2015-12-08 (cmeng)
-# - Re-enable ugc continuous playback feature
+# Version 1.5.0 2015-12-10 (cmeng)
+# - Concatenate fragmented video files for smooth play-back
+# - Limit ugc continuous play-back file size to 300 MBytes
+# - Purge all vfile-x.ts files on video play-back stop
 
 # See changelog.txt for previous history
 ########################################################################
@@ -28,6 +30,9 @@ __addonicon__ = os.path.join(__addon__.getAddonInfo('path'), 'icon.png')
 __settings__ = xbmcaddon.Addon(id=__addonid__)
 __profile__ = xbmc.translatePath(__settings__.getAddonInfo('profile'))
 cookieFile = __profile__ + 'cookies.letv'
+
+### Total ugc files download/cache maximum size in MBytes
+maxFileSize = 300 * 1024 * 1024
 
 # # UserAgent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
 UserAgent = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
@@ -50,7 +55,7 @@ FLVCD_DIY_URL = 'http://www.flvcd.com/diy/diy00'
 # - unicode with 'replace' option to avoid exception on some url
 # - translate to utf8
 ##################################################################################
-def getHttpData(url):
+def getHttpData(url, binary=False):
     print "getHttpData: " + url
     # setup proxy support
     proxy = __addon__.getSetting('http_proxy')
@@ -97,12 +102,14 @@ def getHttpData(url):
                 #     print('%s --> %s'%(cookie.name,cookie.value))
                 break
 
-    httpdata = re.sub('\r|\n|\t', '', httpdata)
-    match = re.compile('<meta.+?charset=["]*(.+?)"').findall(httpdata)
-    if len(match):
-        charset = match[0].lower()
-        if (charset != 'utf-8') and (charset != 'utf8'):
-            httpdata = unicode(httpdata, charset, 'replace').encode('utf-8')
+    if (not binary):
+        httpdata = re.sub('\r|\n|\t', '', httpdata)
+        match = re.compile('<meta.+?charset=["]*(.+?)"').findall(httpdata)
+        if len(match):
+            charset = match[0].lower()
+            if (charset != 'utf-8') and (charset != 'utf8'):
+                httpdata = unicode(httpdata, charset, 'replace').encode('utf-8')
+                
     return httpdata
 
 ##################################################################################
@@ -867,28 +874,48 @@ def decrypt_url(url):
     #    return ''
 
 ##################################################################################
-def playVideoLetv(name, url, thumb):
-	dialog = xbmcgui.Dialog()
-	pDialog = xbmcgui.DialogProgress()
-	pDialog.create('匹配视频', '请耐心等候! 尝试匹配视频文件 ...')
-    
-	v_urls = decrypt_url(url)
-	# print "Video URL: ", v_urls
-    
-	pDialog.close() 
-	playlist = xbmc.PlayList(1)
-	playlist.clear()
+def delTsFile():
+    for k in range(100):
+        tsfile = __profile__ + 'vfile-' + str(k) + '.ts'
+        if os.path.isfile(tsfile):
+            os.remove(tsfile)
 
-	vLen = len(v_urls)
-	if len(v_urls):
-		for i, v_url in enumerate(v_urls):
-			li = xbmcgui.ListItem(name + " part-" + str(i+1), thumbnailImage=__addonicon__)
-			li.setInfo(type="Video", infoLabels={"Title":name})
-			playlist.add(v_url, li)
-		xbmc.Player().play(playlist)
-	else:
+## -------------------------------
+def playVideoLetv(name, url, thumb):
+    dialog = xbmcgui.Dialog()
+    pDialog = xbmcgui.DialogProgress()
+    pDialog.create('匹配视频', '请耐心等候! 尝试匹配视频文件 ...')
+    
+    xplayer = xbmc.Player()
+    v_urls = decrypt_url(url)
+    # print "Video URL: ", v_urls
+    
+    pDialog.close() 
+    playlist = xbmc.PlayList(1)
+    playlist.clear()
+
+    vLen = len(v_urls)
+    if len(v_urls):
+        li = xbmcgui.ListItem(name, thumbnailImage=thumb)
+        li.setInfo(type="Video", infoLabels={"Title":name})
+
+        tsfile = __profile__ + 'vfile-0.ts'
+        fs = open(tsfile, 'wb')
+    	for i, v_url in enumerate(v_urls):
+            bfile = getHttpData(v_url, True)
+            fs.write(bfile)
+            if (i == 3):
+                xplayer.play(tsfile, li)
+
+            # Abort video loading if user stop playback or playback failed
+            if ((i > 5) and (not xplayer.isPlayingVideo())):
+                # print "### Video Playback stopped!!!"
+                fs.close()
+                delTsFile()
+                break    
+    else:
         # if '解析失败' in link:
-		dialog.ok(__addonname__, '无法播放：未匹配到视频文件，请选择其它视频')
+    	dialog.ok(__addonname__, '无法播放：未匹配到视频文件，请选择其它视频')
    
 ##################################################################################
 # Continuous Player start playback from user selected video
@@ -900,16 +927,18 @@ def playVideoUgc(name, url, thumb):
     playlistA = xbmc.PlayList(0)
     playlist = xbmc.PlayList(1)
     playlist.clear()
+    xplayer = xbmc.Player(1)
 
     v_pos = int(name.split('.')[0]) - 1
     psize = playlistA.size()
     ERR_MAX = 10
     errcnt = 0
     k = 0
+    flength = 0
     
     pDialog = xbmcgui.DialogProgress()
     ret = pDialog.create('匹配视频', '请耐心等候! 尝试匹配视频文件 ...')
-    
+
     for x in range(psize):
         # abort if ERR_MAX or more access failures and no video playback
         if (errcnt >= ERR_MAX and k == 0):
@@ -922,7 +951,6 @@ def playVideoUgc(name, url, thumb):
         p_item = playlistA.__getitem__(x)
         p_url = p_item.getfilename(x)
         p_list = p_item.getdescription(x)
-        p_name = p_list.split('.')[1]
 
         # li = xbmcgui.ListItem(p_list)
         # li = p_item  # pass all li items including the embedded thumb image
@@ -953,19 +981,35 @@ def playVideoUgc(name, url, thumb):
             # playlistA.add(v_urls[0], li, x)  # keep a copy of v_url in Audio Playlist
         else:
             v_urls = p_url
-            
-        for i, v_url in enumerate(v_urls):
-			# li = p_item  # pass all li items including the embedded thumb image
-			li = xbmcgui.ListItem(str(x+1) + ". Part-" + str(i+1) + ": " + p_name, thumbnailImage=__addonicon__)
-			li.setInfo(type="Video", infoLabels={"Title":p_list})	
-			playlist.add(v_url, li)
-			
-        k += 1
-        if k == 1:
-            pDialog.close() 
-            xbmc.Player(1).play(playlist)
-        if videoplaycont == 'false': break
         
+        tsfile = __profile__ + 'vfile-' + str(k) + '.ts'
+        fs = open(tsfile, 'wb')
+        
+        # li = xbmcgui.ListItem(p_list, thumbnailImage=__addonicon__)
+        li = p_item  # pass all li items including the embedded thumb image
+        li.setInfo(type="Video", infoLabels={"Title":p_list})    
+        
+        for i, v_url in enumerate(v_urls):
+            bfile = getHttpData(v_url, True)
+            fs.write(bfile)
+            if (i == 3):
+                playlist.add(tsfile, li)
+                if (k == 0):
+                    pDialog.close()
+                    xplayer.play(playlist)
+        fs.close()
+
+        k += 1
+        # Abort video loading if user stop playback or playback failed
+        if (not xplayer.isPlayingVideo()):
+            # print "### Video Playback stopped!!!"
+            delTsFile()
+            break
+            
+        flength += os.path.getsize(tsfile)
+        if ((videoplaycont == 'false') or (flength > maxFileSize)): 
+            break
+
 ##################################################################################    
 # Routine to extra video link using flvcd - not use (url link fetech problem)
 ##################################################################################
