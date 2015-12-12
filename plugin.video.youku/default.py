@@ -1,11 +1,12 @@
 ﻿# -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, re, string, sys, os, gzip, StringIO, math
-import base64, time
+import base64, time, cookielib
 import simplejson
 
 # Plugin constants 
 __addon__     = xbmcaddon.Addon()
 __addonname__ = __addon__.getAddonInfo('name')
+__profile__   = xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode("utf-8")
 
 UserAgent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
 ORDER_LIST = [['7','今日增加播放'], ['6','本周增加播放'], ['1','历史最多播放'], ['3','上映时间'], ['9','近期上映'], ['10','近期更新'], ['5','最多评论'], ['11','用户好评']]
@@ -90,10 +91,12 @@ def log(txt):
     message = '%s: %s' % (__addonname__, txt)
     xbmc.log(msg=message, level=xbmc.LOGDEBUG)
 
-def GetHttpData(url):
+def GetHttpData(url, referer=''):
     log("%s::url - %s" % (sys._getframe().f_code.co_name, url))
     req = urllib2.Request(url)
     req.add_header('User-Agent', UserAgent)
+    if referer:
+        req.add_header('Referer', referer)
     try:
         response = urllib2.urlopen(req)
         httpdata = response.read()
@@ -289,9 +292,11 @@ def getMovie(name,id,thumb,res):
             PlayVideo(name, match.group(1), thumb, res)
         else:
             # 解析预告片
-            match = re.compile('class="btnShow btnplaytrailer".*?data="\{videoId:(\d+),', re.DOTALL).search(link)
+            match = re.compile('class="btnShow btnplaytrailer".*?href="http://v.youku.com/v_show/id_(.+?)\.html[^"]*"', re.DOTALL).search(link)
             if match:
                 PlayVideo(name, match.group(1), thumb, res)
+            else:
+                xbmcgui.Dialog().ok(__addonname__, '解析地址异常，可能是收费节目，无法播放')
     else:
         PlayVideo(name, id, thumb, res)
 
@@ -401,10 +406,10 @@ def progList2(name,id,page,genre,year,order):
 def selResolution(streamtypes):
     ratelist = []
     for i in range(0,len(streamtypes)):
-        if streamtypes[i] == 'flv': ratelist.append([4, '标清', i]) # [清晰度设置值, 清晰度, streamtypes索引]
-        if streamtypes[i] == 'mp4': ratelist.append([3, '高清', i])
-        if streamtypes[i] == 'hd2': ratelist.append([2, '超清', i])
-        if streamtypes[i] == 'hd3': ratelist.append([1, '1080P', i])
+        if streamtypes[i] in ('flv', 'flvhd'): ratelist.append([4, '标清', i, 'flv']) # [清晰度设置值, 清晰度, streamtypes索引]
+        if streamtypes[i] in ('mp4', 'mp4hd'): ratelist.append([3, '高清', i, 'mp4'])
+        if streamtypes[i] in ('hd2', 'mp4hd2'): ratelist.append([2, '超清', i, 'hd2'])
+        if streamtypes[i] in ('hd3', 'mp4hd3'): ratelist.append([1, '1080P', i, 'hd3'])
     ratelist.sort()
     if len(ratelist) > 1:
         resolution = int(__addon__.getSetting('resolution'))
@@ -418,13 +423,13 @@ def selResolution(streamtypes):
             while sel < len(ratelist)-1 and resolution > ratelist[sel][0]: sel += 1
     else:
         sel = 0
-    return streamtypes[ratelist[sel][2]], ratelist[sel][1]
+    return streamtypes[ratelist[sel][2]], ratelist[sel][1], ratelist[sel][2], ratelist[sel][3]
 
 def PlayVideo(name,id,thumb,res):
-    url = 'http://v.youku.com/player/getPlayList/VideoIDS/%s/ctype/12/ev/1' % (id)
-    link = GetHttpData(url)
+    url = 'http://play.youku.com/play/get.json?vid=%s&ct=12' % (id)
+    link = GetHttpData(url, referer='http://static.youku.com/')
     json_response = simplejson.loads(link)
-    movdat = json_response['data'][0]
+    movdat = json_response['data']
 
     vid = id
     lang_select = int(__addon__.getSetting('lang_select')) # 默认|每次选择|自动首选
@@ -445,46 +450,49 @@ def PlayVideo(name,id,thumb,res):
                     name = '%s %s' % (name, langlist[i]['lang'].encode('utf-8'))
                     break
     if vid != id:
-        url = 'http://v.youku.com/player/getPlayList/VideoIDS/%s/ctype/12/ev/1' % (vid)
-        link = GetHttpData(url)
+        url = 'http://play.youku.com/play/get.json?vid=%s&ct=12' % (vid)
+        link = GetHttpData(url, referer='http://static.youku.com/')
         json_response = simplejson.loads(link)
-        movdat = json_response['data'][0]
+        movdat = json_response['data']
 
-    typeid, typename = selResolution(movdat['streamtypes'])
+    streamtypes = [stream['stream_type'].encode('utf-8') for stream in movdat['stream']]
+    typeid, typename, streamno, resolution = selResolution(streamtypes)
     if typeid:
-        video_id = movdat['videoid']
-        oip = movdat['ip']
-        ep = movdat['ep']
-        ep, token, sid = youkuDecoder()._calc_ep2(video_id, ep)
+        oip = movdat['security']['ip']
+        ep = movdat['security']['encrypt_string']
+        ep, token, sid = youkuDecoder()._calc_ep2(vid, ep)
         play_method = int(__addon__.getSetting('play_method'))
         if play_method != 0: # m3u8方式
             query = urllib.urlencode(dict(
-                vid=video_id, ts=int(time.time()), keyframe=1, type=typeid,
+                vid=vid, ts=int(time.time()), keyframe=1, type=resolution,
                 ep=ep, oip=oip, ctype=12, ev=1, token=token, sid=sid,
             ))
-            movurl = 'http://pl.youku.com/playlist/m3u8?%s' % (query)
+            cookie = ['%s=%s' % (x.name, x.value) for x in cj][0]
+            movurl = 'http://pl.youku.com/playlist/m3u8?%s|Cookie=%s' % (query, cookie)
 
         else: # 默认播放方式
-            total = len(movdat['segs'][typeid])
-            fileId = youkuDecoder().getFileId(movdat['streamfileids'][typeid].encode('utf-8'), movdat['seed'])
-            if typeid == 'mp4':
+            fileId = movdat['stream'][streamno]['stream_fileid'].encode('utf-8')
+            if typeid in ('mp4', 'mp4hd'):
                 type = 'mp4'
             else:
                 type = 'flv'
             urls = []
-            for seg in movdat['segs'][typeid]:
-                no = '%02X' % int(seg['no'])
-                segfileId = fileId[0:8]+no+fileId[10:]
+            segs = movdat['stream'][streamno]['segs']
+            total = len(segs)
+            for no in range(0, total):
+                number = '%02X' % no
+                segfileId = fileId[0:8]+number+fileId[10:]
                 ep = youkuDecoder()._calc_ep(sid, segfileId, token)
-                k = seg['k'].encode('utf-8')
-                ts = str(seg['seconds'])
+                k = segs[no]['key'].encode('utf-8')
                 query = urllib.urlencode(dict(
-                    K=k, hd=1, myp=0, ts=ts, ypp=0, ctype=12, ev=1, token=token, oip=oip, ep=ep,
+                    ctype=12, ev=1, K=k, ep=ep, oip=oip, token=token, yxon=1
                 ))
-                urls.append('http://k.youku.com/player/getFlvPath/sid/%s_00/st/%s/fileid/%s?%s' \
-                     % (sid, type, segfileId, query))
+                url = 'http://k.youku.com/player/getFlvPath/sid/%s_00/st/%s/fileid/%s?%s' \
+                     % (sid, type, segfileId, query)
+                link = GetHttpData(url)
+                json_response = simplejson.loads(link)
+                urls.append(json_response[0]['server'].encode('utf-8'))
             movurl = 'stack://' + ' , '.join(urls)
-
 
         name = '%s[%s]' % (name, typename)
         listitem=xbmcgui.ListItem(name,thumbnailImage=thumb)
@@ -630,6 +638,10 @@ try:
     mode = int(params["mode"])
 except:
     pass
+
+cj = cookielib.CookieJar()
+opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+urllib2.install_opener(opener)
 
 if mode == None:
     rootList()
