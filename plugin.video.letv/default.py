@@ -14,8 +14,8 @@ except:
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
-# Version 1.5.2 2015-12-12 (cmeng)
-# - Fixed logical errors
+# Version 1.5.3 2015-12-12 (cmeng)
+# - Cannot delete temporary video files when playback stops before next()
 
 # See changelog.txt for previous history
 ########################################################################
@@ -147,7 +147,8 @@ class LetvPlayer(xbmc.Player):
     def onPlayBackStopped(self):
         # print "### Player Stopped -Deleted!!!"
         self.is_active = False
-        self.delTsFile()
+        # cannot delete temporary files when last video playback stops before continues 
+        # self.delTsFile()
         
     def delTsFile(self):
         for k in range(10):
