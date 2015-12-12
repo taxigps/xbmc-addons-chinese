@@ -14,11 +14,8 @@ except:
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
-# Version 1.5.1 2015-12-11 (cmeng)
-# SubClass xbmc.player and use double buffers to reduce memory cache size 
-# Add user definable maximum video fragments concatenation (smooth play-back)
-# Remove memory size limit constraints
-
+# Version 1.5.2 2015-12-12 (cmeng)
+# - Fixed logical errors
 
 # See changelog.txt for previous history
 ########################################################################
@@ -46,7 +43,7 @@ COLOR_LIST = ['[COLOR FFFF0000]', '[COLOR FF00FF00]', '[COLOR FFFFFF00]', '[COLO
 FLVCD_PARSER_PHP = 'http://www.flvcd.com/parse.php'
 FLVCD_DIY_URL = 'http://www.flvcd.com/diy/diy00'
 
-CFRAGMAX = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100]
+CFRAGMAX = [10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100]
 
 ##################################################################################
 # LeTv player class
@@ -68,45 +65,45 @@ class LetvPlayer(xbmc.Player):
             
         self.videoplaycont = __addon__.getSetting('video_vplaycont')
         self.maxfp = CFRAGMAX[int(__addon__.getSetting('video_cfragmentmax'))]
-        self.playlist = xbmc.PlayList(0)
+        self.playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
         self.psize = self.playlist.size()
         self.geturl()
         self.playrun()
     
     def geturl(self):
+        ### Video  playback
         if (self.v_urls and (self.curpos <= len(self.v_urls))):
-            endIndex = min((self.curpos + self.maxfp - 1), len(self.v_urls))
-            
+            x = (self.curpos / self.maxfp) % 2
+            self.videourl = __profile__ + 'vfile-' + str(x) + '.ts'
+            fs = open(self.videourl, 'wb')
+
             title = "%s - 第(%s~%s)/%s节" % (self.name, str(self.curpos+1), str(self.curpos+self.maxfp), str(len(self.v_urls)))
             self.listitem = xbmcgui.ListItem(title, thumbnailImage=self.thumb)
             self.listitem.setInfo(type="Video", infoLabels={"Title":title})
 
-            x = (self.curpos / self.maxfp) % 2
-            self.videourl = __profile__ + 'vfile-' + str(x) + '.ts'
-            fs = open(self.videourl, 'wb')
+            endIndex = min((self.curpos + self.maxfp), len(self.v_urls))
             for i in range(self.curpos, endIndex):
                 v_url = self.v_urls[i]
                 bfile = getHttpData(v_url, True)
                 fs.write(bfile)
                 if (i == 3) and (not self.isPlayingVideo()):
                     xbmc.Player.play(self, self.videourl, self.listitem)
-                elif (i > 3) and (not self.isPlayingVideo()):
+                elif (i > 4) and (i < (endIndex - 1)) and (not self.isPlayingVideo()):
                     break;
             fs.close()
             self.curpos += self.maxfp
 
+        # ugc auto playback
         elif ((self.v_urls == None) and (self.curpos < self.psize)):
-            p_item = self.playlist.__getitem__(self.curpos)
-            p_url = p_item.getfilename(self.curpos)
-            p_list = p_item.getdescription(self.curpos)
-
-            print "### P_URL: " + p_url
-            self.listitem = p_item  # pass all li items including the embedded thumb image
-            self.listitem.setInfo(type="Video", infoLabels={"Title":p_list})    
-
             x = self.curpos % 2
             self.videourl = __profile__ + 'vfile-' + str(x) + '.ts'
             fs = open(self.videourl, 'wb')
+
+            p_item = self.playlist.__getitem__(self.curpos)
+            p_url = p_item.getfilename(self.curpos)
+            p_list = p_item.getdescription(self.curpos)
+            self.listitem = p_item  # pass all li items including the embedded thumb image
+            self.listitem.setInfo(type="Video", infoLabels={"Title":p_list})    
 
             v_urls = decrypt_url(p_url)
             for i, v_url in enumerate(v_urls):
@@ -114,7 +111,7 @@ class LetvPlayer(xbmc.Player):
                 fs.write(bfile)
                 if (i == 3) and (not self.isPlayingVideo()):
                     xbmc.Player.play(self, self.videourl, self.listitem)
-                elif (i > 3) and (not self.isPlayingVideo()):
+                elif (i > 4) and (not self.isPlayingVideo()):
                     break;
             fs.close()
             self.curpos += 1
@@ -123,6 +120,7 @@ class LetvPlayer(xbmc.Player):
 
     def playrun(self):
         if (not self.isPlayingVideo()):
+            # print "### Player resumed !!!"
             xbmc.Player.play(self, self.videourl, self.listitem)
         if self.videoplaycont:
             self.geturl() 
@@ -138,15 +136,16 @@ class LetvPlayer(xbmc.Player):
 
     def onPlayBackEnded(self):
         if self.videourl:
+            # print "### Player Ended-Continue !!!"
             self.playrun()
         else:
-            print "### Player Ended-Deleted !!!"
+            # print "### Player Ended-Deleted !!!"
             self.is_active = False
             xbmc.Player.onPlayBackEnded(self)
             self.delTsFile()
 
     def onPlayBackStopped(self):
-        print "### Player Stopped -Deleted!!!"
+        # print "### Player Stopped -Deleted!!!"
         self.is_active = False
         self.delTsFile()
         
@@ -160,7 +159,7 @@ class LetvPlayer(xbmc.Player):
                     pass       
 
 xplayer = LetvPlayer()
-mplaylist = xbmc.PlayList(0)
+mplaylist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
 
 ##################################################################################
 # Routine to fetech url site data using Mozilla browser

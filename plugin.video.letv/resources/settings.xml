@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
 	<setting id="video_resolution" type="enum" label="30200" lvalues="30300|30301|30302" default="2"/>
-	<setting id="video_cfragmentmax" type=enum label="30203" values="5|10|15|20|25|30|35|40|45|50|60|70|80|90|100" default="3"/>
+	<setting id="video_cfragmentmax" type=enum label="30203" values="10|15|20|25|30|35|40|45|50|60|70|80|90|100" default="2"/>
 	<setting id="video_vplaycont" type="bool" label="30201" default="true"/>
 	<setting id="http_proxy" type="text" label="30202" values="" default=""/>
 </settings>
