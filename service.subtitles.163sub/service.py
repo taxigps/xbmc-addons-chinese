@@ -118,9 +118,10 @@ def Download(id,lang):
         soup = BeautifulSoup(data)
         url = soup.find("a", class_="down_ink download_link").get('href').encode('utf-8')
         socket = urllib.urlopen( url )
-        filename = socket.headers['Content-Disposition'].split('filename=')[1]
-        if filename[0] == '"' or filename[0] == "'":
-            filename = filename[1:-1]
+        #filename = socket.headers['Content-Disposition'].split('filename=')[1]
+        #if filename[0] == '"' or filename[0] == "'":
+        #    filename = filename[1:-1]
+        filename = os.path.basename(url)
         data = socket.read()
         socket.close()
     except:
