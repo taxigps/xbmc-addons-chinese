@@ -103,6 +103,11 @@ def getcatList(listpage):
     catlist = re.compile('p2(.*?)_p3.+?>(.+?)</a>', re.DOTALL).findall(match[0])
     return catlist
 
+def getcatList2(listpage):
+    match = re.compile('<dt>子类：</dt>\s*<dd class="sort-tag">(.+?)</dd>', re.DOTALL).findall(listpage)
+    catlist = re.compile('p3(.*?)_p4.+?>(.+?)</a>', re.DOTALL).findall(match[0])
+    return catlist
+
 def getareaList(listpage):
     match = re.compile('<dt>地区：</dt>\s*<dd class="sort-tag">(.+?)</dd>', re.DOTALL).findall(listpage)
     arealist = re.compile('p3(.*?)_p4.+?>(.+?)</a>', re.DOTALL).findall(match[0])
@@ -221,6 +226,8 @@ def progList(name,id,page,cat,area,year,p5,p6,p11,order):
         if id not in ('121'):
             if id in ('130'):
                 catlist= getlabelList(listpage)
+            elif id in ('119'):
+                catlist= getcatList2(listpage)
             else:
                 catlist= getcatList(listpage)
             lxstr += '[COLOR FFFF0000]'
@@ -310,7 +317,7 @@ def progList(name,id,page,cat,area,year,p5,p6,p11,order):
                     match1 = re.compile('<a .*?href="([^"]+)"', re.DOTALL).search(match[i])
                     p_url = match1.group(1)
 
-            match1 = re.compile('<img .*?src="([^"]+)"', re.DOTALL).search(match[i])
+            match1 = re.compile('<img.*?src="([^"]+)"', re.DOTALL).search(match[i])
             p_thumb = match1.group(1)
             p_rating = 0
             p_votes = ''
@@ -373,9 +380,8 @@ def progList(name,id,page,cat,area,year,p5,p6,p11,order):
 ##################################################################################
 def seriesList(name, id,url,thumb):
     link = getHttpData(url)
-    if url.find('.shtml')>0:
-        match0 = re.compile('var vrs_playlist_id="(.+?)";', re.DOTALL).findall(link)
-        #print 'vrs_playlist_id:' + match0.groups()
+    if url.find('.html')>0:
+        match0 = re.compile('var playlistId\s*=\s*"(.+?)";', re.DOTALL).findall(link)
         link = getHttpData('http://hot.vrs.sohu.com/vrs_videolist.action?playlist_id='+match0[0])
         match = re.compile('"videoImage":"(.+?)",.+?"videoUrl":"(.+?)".+?"videoOrder":"(.+?)",', re.DOTALL).findall(link)
         totalItems = len(match)
@@ -490,6 +496,8 @@ def performChanges(name,id,cat,area,year,p5,p6,p11,order,listpage):
     if id not in ('121'):
         if id in ('130'):
             catlist= getlabelList(listpage)
+        elif id in ('119'):
+            catlist= getcatList2(listpage)
         else:
             catlist= getcatList(listpage)
         if len(catlist)>0:
@@ -674,7 +682,7 @@ def sohuSearchList(name, url, page):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def real_url(host,vid,tvid,new,clipURL,ck):
-    url = 'http://'+host+'/?prot=9&prod=flash&pt=1&file='+clipURL+'&new='+new +'&key='+ ck+'&vid='+str(vid)+'&uid='+str(int(time.time()*1000))+'&t='+str(random())
+    url = 'http://'+host+'/?prot=9&prod=flash&pt=1&file='+clipURL+'&new='+new +'&key='+ ck+'&vid='+str(vid)+'&uid='+str(int(time.time()*1000))+'&t='+str(random())+'&rb=1'
     return simplejson.loads(getHttpData(url))['url'].encode('utf-8')
  
 ##################################################################################
@@ -745,7 +753,9 @@ def PlayVideo(name,url,thumb):
     assert len(data['clipsURL']) == len(data['clipsBytes']) == len(data['su'])
     for new,clip,ck, in zip(data['su'], data['clipsURL'], data['ck']):
         clipURL = urlparse.urlparse(clip).path
-        urls.append(real_url(host,hqvid,tvid,new,clipURL,ck))
+        videourl = real_url(host,hqvid,tvid,new,clipURL,ck)
+        videourl = '%s|Range=' % (videourl)
+        urls.append(videourl)
 
     stackurl = 'stack://' + ' , '.join(urls)
     listitem = xbmcgui.ListItem(name,thumbnailImage=thumb)
