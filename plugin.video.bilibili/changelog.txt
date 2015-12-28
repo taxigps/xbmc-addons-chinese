@@ -1,3 +1,7 @@
+﻿[B]0.2.6[/B] (2015/12/28 jiangming1399)
+- 修正无法加载的BUG
+- 添加使用AV号直接进入的链接
+
 [B]0.2.5[/B] (2015/4/25 typcn)
 - Set quality to high
 
