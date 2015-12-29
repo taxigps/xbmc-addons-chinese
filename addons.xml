@@ -202,10 +202,11 @@
   </extension>
 </addon>
 
-<addon id="plugin.video.bilibili" name="哔哩哔哩(bilibili)" version="0.2.5" provider-name="Syndim">
+<addon id="plugin.video.bilibili" name="哔哩哔哩(bilibili)" version="0.2.6" provider-name="Syndim">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
         <import addon="script.module.xbmcswift2" version="2.4.0"/>
+		<import addon="script.module.keyboard.chinese" version="1.0.0"/>
     </requires>
     <extension point="xbmc.python.pluginsource" library="addon.py">
         <provides>video</provides>
