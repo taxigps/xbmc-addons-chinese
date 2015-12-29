@@ -4,6 +4,7 @@ from xbmcswift2 import Plugin, xbmcgui, xbmc
 from resources.lib.bilibili import Bili
 from resources.lib.config import TEMP_DIR
 from resources.lib.subtitle import subtitle_offset
+from ChineseKeyboard import Keyboard
 
 plugin = Plugin()
 bili = Bili()
@@ -94,6 +95,53 @@ def index():
             'label': name,
             'path': plugin.url_for('show_target_items', target=name)
         } for name in bili.ROOT_PATH ]
+    dir_list.insert(0, {'label': '【输入AV号】', 'path': plugin.url_for('searchvideo')})
+    return dir_list
+
+@plugin.route('/searchvideo/')
+def searchvideo():
+    """
+    search video
+    """
+    kb = Keyboard('',u'请输入AV号(不包括AV两字)')
+    kb.doModal()
+    if not kb.isConfirmed(): return
+    sstr = kb.getText()
+    if not sstr: return
+    
+    dir_list = []
+    for item in bili.get_video_list(sstr):
+        try:
+            dir_list.append({
+                'label': item[0],
+                'path': plugin.url_for('play_video', url=item[1], by_list = 0, show_comments=1),
+            })
+        except:
+            dir_list.append({
+                'label': item[0].decode('utf8'),
+                'path': plugin.url_for('play_video', url=item[1], by_list = 0, show_comments=1),
+            })
+        try:
+            dir_list.append({
+                'label': item[0] + u'(无弹幕)',
+                'path': plugin.url_for('play_video', url=item[1], by_list = 0, show_comments=0),
+            })
+        except:
+            dir_list.append({
+                'label': item[0].decode('utf8') + u'(无弹幕)',
+                'path': plugin.url_for('play_video', url=item[1], by_list = 0, show_comments=0),
+            })
+        try:
+            dir_list.append({
+                'label': item[0] + u'(分段无弹幕)',
+                'path': plugin.url_for('play_video', url=item[1], by_list = 1, show_comments=0),
+            })
+        except:
+            dir_list.append({
+                'label': item[0].decode('utf8') + u'(分段无弹幕)',
+                'path': plugin.url_for('play_video', url=item[1], by_list = 1, show_comments=0),
+            })
+
     return dir_list
 
 # 总列表页
