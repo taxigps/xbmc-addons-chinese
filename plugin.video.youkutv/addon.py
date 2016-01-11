@@ -3,6 +3,7 @@
 
 import xbmcgui, xbmcaddon, xbmc
 import json, sys, urllib, urllib2, gzip, StringIO, re, os, time, threading, socket, base64, math, cookielib
+from video_concatenate import video_concatenate
 try:
    import StorageServer
 except:
@@ -16,6 +17,7 @@ __resource__   = xbmc.translatePath( os.path.join( __cwd__, 'resources', 'lib' )
 sys.path.append (__resource__)
 cache = StorageServer.StorageServer(__addonid__, 87600)
 m3u8_file = __cwd__ + '/v.m3u8'
+vc = video_concatenate()
 
 #Set timeout of socket
 socket.setdefaulttimeout(10) 
@@ -42,8 +44,9 @@ mainData = [{'title': '搜索', 'image': 'yk_search.jpg', 'mtype': 'search'},
 settings_data = {'resolution':[u'1080P', u'超清', u'高清', u'标清', u'标清(3GP)'], 
                  'resolution_type':[['hd3','mp4hd3'], ['hd2','mp4hd2'], ['mp4','mp4hd'], ['flv','flvhd'], ['3gphd']], 
                  'language':[u'默认', u'国语', u'粤语', u'英语'], 
-                 'play':['分段', '堆叠', 'M3U8'],
-                 'play_type':['list', 'stack', 'm3u8']}
+                 'language_code':[u'', u'guoyu', u'yueyu', u'yingyu'], 
+                 'play':['整合(试验阶段)', '分段', '堆叠'],
+                 'play_type':['concatenate', 'list', 'stack']}
 settings={'resolution':0, 'language':0, 'play':0}
 resolution_map = {'3gphd':  '3gp',
                   'flv':    'flv',
@@ -152,9 +155,11 @@ class MyPlayer(xbmc.Player):
         except:
             pass
         xbmc.Player.onPlayBackEnded(self)
+        vc.stop()
 
     def onPlayBackStopped(self):
         cache.set(self.vid, repr({'offset':self.last, 'startpos':self.lastpos}))
+        vc.stop()
 
 
     def updateHistory(self, check=True, base=-1):
@@ -1901,7 +1906,10 @@ class youkuDecoder:
             h = (h + 1) % 256
             f = (f + b[h]) % 256
             b[h], b[f] = b[f], b[h]
-            result += chr(ord(c[q]) ^ b[(b[h] + b[f]) % 256])
+            if isinstance(c[q], int):
+                result += chr(c[q] ^ b[(b[h] + b[f]) % 256])
+            else:
+                result += chr(ord(c[q]) ^ b[(b[h] + b[f]) % 256])
             q += 1
         return result
 
@@ -1937,6 +1945,18 @@ class youkuDecoder:
         new_ep = self.trans_e(self.f_code_2, '%s_%s_%s' % (sid, vid, token))
         return base64.b64encode(new_ep), token, sid
 
+    def get_sid(self, ep):
+        e_code = self.trans_e(self.f_code_1, base64.b64decode(ep))
+        return e_code.split('_')
+
+    def generate_ep(self, no, streamfileids, sid, token):
+        number = hex(int(str(no), 10))[2:].upper()
+        if len(number) == 1:
+            number = '0' + number
+        fileid = streamfileids[0:8] + number + streamfileids[10:]
+        tmp = self.trans_e(self.f_code_2, sid + '_' + fileid + '_' + token)
+        ep = urllib.quote(base64.b64encode(tmp), safe='~()*!.\'')
+        return fileid, ep
 
 def getNumber(data, k):
     try:
@@ -1992,102 +2012,7 @@ def getProperty(item, key):
 def play(vid, playContinue=False):
     readSettings()
     playid = vid
-    xbmc.executebuiltin("ActivateWindow(busydialog)")
-    try:
-        moviesurl='http://play.youku.com/play/get.json?vid=%s&ct=12' % vid
-        result = GetHttpData(moviesurl)
-        movinfo = json.loads(result.replace('\r\n',''))
-        movdat = movinfo['data']
-    except:
-        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
-        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
-        return
 
-    #Set language
-    if movdat.has_key('dvd') and 'audiolang' in movdat['dvd']:
-        for item in movdat['dvd']['audiolang']:
-            if item['lang'] == settings_data['language'][settings['language']]:
-                if item['vid'] != vid:
-                    playid = item['vid']
-    if playid != vid:
-        try:
-            moviesurl='http://play.youku.com/play/get.json?vid=%s&ct=12' % playid
-            result = GetHttpData(moviesurl)
-            movinfo = json.loads(result.replace('\r\n',''))
-            movdat = movinfo['data']
-        except:
-            xbmc.executebuiltin( "Dialog.Close(busydialog)" )
-            xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
-            return
-
-    #Select resolution.
-    stream = {}
-    resolution = ''
-    try:
-        for i in range(settings['resolution'], len(settings_data['resolution'])):
-            for t in settings_data['resolution_type'][i]:
-                for s in movdat['stream']:
-                    if t == s['stream_type']:
-                        stream = s
-                        resolution = settings_data['resolution_type'][i][0]
-                        break
-                if stream.has_key('stream_type'):
-                    break
-            if stream.has_key('stream_type'):
-                break
-    except:
-        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
-        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
-        return
-
-    if not stream.has_key('stream_type'):
-        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
-        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
-        return
-
-
-    #Calculate the URLs
-    oip = movdat['security']['ip']
-    ep = movdat['security']['encrypt_string']
-    ep, token, sid = youkuDecoder()._calc_ep2(playid, ep)
-    
-    query = urllib.urlencode(dict(
-        vid=playid, ts=int(time.time()), keyframe=1, type=resolution,
-        ep=ep, oip=oip, ctype=12, ev=1, token=token, sid=sid,
-    ))
-    url = 'http://pl.youku.com/playlist/m3u8?%s' % (query)
-    try:
-        result = GetHttpData(url)
-        f = open(m3u8_file, 'wb')
-        f.write(result)
-        f.close()
-    except:
-        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
-        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
-        return
-    playlist = xbmc.PlayList(1)
-    playlist.clear()
-
-    urls = re.findall(r'(http://[^?]+)\?ts_start=0', result)
-    if settings_data['play_type'][settings['play']] == 'list':
-        for i in range(len(urls)):
-            title =movdat['video']['title'] + u" - 第"+str(i+1)+"/"+str(len(urls)) + u"节"
-            listitem=xbmcgui.ListItem(title)
-            listitem.setInfo(type="Video",infoLabels={"Title":title})
-            playlist.add(urls[i], listitem)
-    elif settings_data['play_type'][settings['play']] == 'stack':
-        playurl = 'stack://' + ' , '.join(urls)
-        listitem=xbmcgui.ListItem(movdat['video']['title'])
-        listitem.setInfo(type="Video", infoLabels={"Title":movdat['video']['title']})
-        playlist.add(playurl, listitem)
-    else:
-        listitem=xbmcgui.ListItem(movdat['video']['title'])
-        listitem.setInfo(type="Video", infoLabels={"Title":movdat['video']['title']})
-        playlist.add(m3u8_file, listitem)
-
-
-
-    xbmc.executebuiltin( "Dialog.Close(busydialog)" )
     try:
         ret = eval(cache.get('history'))
     except:
@@ -2097,9 +2022,6 @@ def play(vid, playContinue=False):
         history = ret[vid] 
     else:
         history = {}
-    history['title'] = movdat['video']['title']
-    history['vid'] = vid
-    history['logo'] = movdat['video']['logo']
     offset = 0
     startpos = 0
     try:
@@ -2118,6 +2040,147 @@ def play(vid, playContinue=False):
                 pass
         elif choice == -1:
             return
+
+    xbmc.executebuiltin("ActivateWindow(busydialog)")
+    try:
+        movinfo = json.loads(GetHttpData('http://play.youku.com/play/get.json?vid=%s&ct=12' % playid).replace('\r\n',''))
+        movdat = movinfo['data']
+        movinfo = json.loads(GetHttpData('http://play.youku.com/play/get.json?vid=%s&ct=10' % playid).replace('\r\n',''))
+        movdat1 = movinfo['data']
+        assert 'stream' in movdat
+        assert 'stream' in movdat1
+    except:
+        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
+        return
+
+    #Select resolution.
+    stream = {}
+    resolution = ''
+    language_code = settings_data['language_code'][settings['language']]
+    try:
+        for i in range(settings['resolution'], len(settings_data['resolution'])):
+            for t in settings_data['resolution_type'][i]:
+                for s in movdat1['stream']:
+                    if settings['language'] == 0 or language_code == s['audio_lang']:
+                        if t == s['stream_type']:
+                            stream = s
+                            resolution = settings_data['resolution_type'][i][0]
+                            break
+                if stream.has_key('stream_type'):
+                    break
+            if stream.has_key('stream_type'):
+                break
+    except:
+        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
+        return
+
+    if not stream.has_key('stream_type'):
+        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
+        return
+
+
+    #Calculate the URLs
+    try:
+        if 0:
+            oip = movdat['security']['ip']
+            ep = movdat['security']['encrypt_string']
+            ep, token, sid = youkuDecoder()._calc_ep2(playid, ep)
+            
+            query = urllib.urlencode(dict(
+                vid=playid, ts=int(time.time()), keyframe=1, type=resolution,
+                ep=ep, oip=oip, ctype=12, ev=1, token=token, sid=sid,
+            ))
+            url = 'http://pl.youku.com/playlist/m3u8?%s' % (query)
+            result = GetHttpData(url)
+            f = open(m3u8_file, 'wb')
+            f.write(result)
+            f.close()
+
+            playlist = xbmc.PlayList(1)
+            playlist.clear()
+
+            urls = re.findall(r'(http://[^?]+)\?ts_start=0', result)
+            if settings_data['play_type'][settings['play']] == 'list':
+                for i in range(len(urls)):
+                    title =movdat['video']['title'] + u" - 第"+str(i+1)+"/"+str(len(urls)) + u"节"
+                    listitem=xbmcgui.ListItem(title)
+                    listitem.setInfo(type="Video",infoLabels={"Title":title})
+                    playlist.add(urls[i], listitem)
+            elif settings_data['play_type'][settings['play']] == 'stack':
+                playurl = 'stack://' + ' , '.join(urls)
+                listitem=xbmcgui.ListItem(movdat['video']['title'])
+                listitem.setInfo(type="Video", infoLabels={"Title":movdat['video']['title']})
+                playlist.add(playurl, listitem)
+            else:
+                listitem=xbmcgui.ListItem(movdat['video']['title'])
+                listitem.setInfo(type="Video", infoLabels={"Title":movdat['video']['title']})
+                playlist.add(m3u8_file, listitem)
+
+        urls = []
+        segs = stream['segs']
+        streamfileid = stream['stream_fileid']
+
+        oip = movdat['security']['ip']
+        ep = movdat['security']['encrypt_string']
+        sid, token = youkuDecoder().get_sid(ep)
+
+        for no in range(len(segs)):
+            k = segs[no]['key']
+            assert k != -1
+            fileid, ep = youkuDecoder().generate_ep(no, streamfileid, sid, token)
+            q = urllib.urlencode(dict(
+                ctype = 12,
+                ev    = 1,
+                K     = k,
+                ep    = urllib.unquote(ep),
+                oip   = oip,
+                token = token,
+                yxon  = 1
+            ))
+            u = 'http://k.youku.com/player/getFlvPath/sid/{sid}_00/st/{container}/fileid/{fileid}?{q}'.format(
+                    sid       = sid,
+                    container = resolution_map[resolution],
+                    fileid    = fileid,
+                    q         = q
+            )
+            urls += [i['server'] for i in json.loads(GetHttpData(u))]
+
+        playlist = xbmc.PlayList(1)
+        playlist.clear()
+
+        if settings_data['play_type'][settings['play']] == 'concatenate' and resolution_map[resolution] == 'flv':
+            vc.start(urls)
+            port = vc.get_port()
+            assert(port != 0)
+            listitem=xbmcgui.ListItem(movdat['video']['title'])
+            listitem.setInfo(type="Video", infoLabels={"Title":movdat['video']['title']})
+            playlist.add('http://127.0.0.1:%d' % port, listitem)
+        elif settings_data['play_type'][settings['play']] == 'list':
+            for i in range(len(urls)):
+                title =movdat['video']['title'] + u" - 第"+str(i+1)+"/"+str(len(urls)) + u"节"
+                listitem=xbmcgui.ListItem(title)
+                listitem.setInfo(type="Video",infoLabels={"Title":title})
+                playlist.add(urls[i], listitem)
+        else:
+            playurl = 'stack://' + ' , '.join(urls)
+            listitem=xbmcgui.ListItem(movdat['video']['title'])
+            listitem.setInfo(type="Video", infoLabels={"Title":movdat['video']['title']})
+            playlist.add(playurl, listitem)
+    except:
+        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
+        return
+
+
+
+    xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+
+    history['title'] = movdat['video']['title']
+    history['vid'] = vid
+    history['logo'] = movdat['video']['logo']
 
     cache.set('currentVID', vid)
     if True:
@@ -2256,5 +2319,6 @@ except:
     if __name__ == '__main__':
         cj = cookielib.CookieJar()
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+        opener.addheaders = [('Cookie','r=WTF')]
         urllib2.install_opener(opener)
         openWindow('main')
