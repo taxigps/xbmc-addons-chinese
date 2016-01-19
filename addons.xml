@@ -380,7 +380,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.pptv"
     name="PPTV视频"
-    version="1.2.8"
+    version="1.2.9"
     provider-name="Uranus Zhou">
     <requires>
         <import addon="script.module.keyboard.chinese" version="1.0.0"/>
@@ -399,7 +399,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
         <platform>all</platform>
 		<license>GNU GENERAL PUBLIC LICENSE. Version 3, 29 June 2007</license>
 		<forum>http://bbs.htpc1.com/thread-259452-1-1.html</forum>
-		<website>http://zohead.com/</website>
+		<website>https://zohead.com/</website>
 		<source>https://github.com/zohead/pptv4xbmc</source>
 		<email>nocwat at gmail dot com</email>
     </extension>
