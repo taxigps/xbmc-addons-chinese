@@ -543,7 +543,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="script.module.keyboard.chinese"
     name="Chinese keyboard"
-    version="2.0.4"
+    version="2.0.5"
     provider-name="Taxigps">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
