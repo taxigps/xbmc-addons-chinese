@@ -1,2 +1,0 @@
-plugin.video.youkutv
-====================
