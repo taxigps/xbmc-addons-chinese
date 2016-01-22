@@ -1,0 +1,46 @@
+# Kodi Media Center language file
+# Addon Name: Picture Slideshow Screensaver
+# Addon id: screensaver.picture.slideshow
+# Addon Provider: Team-Kodi
+msgid ""
+msgstr ""
+"Project-Id-Version: XBMC Addons\n"
+"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Kodi Translation Team\n"
+"Language-Team: English (http://www.transifex.com/projects/p/xbmc-addons/language/en/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "#30000"
+msgid "Lines of every page"
+msgstr "每页数量"
+
+msgctxt "#30001"
+msgid "Video Quality"
+msgstr "清晰度"
+
+msgctxt "#30002"
+msgid "yuanhua"
+msgstr "原画"
+
+msgctxt "#30003"
+msgid "super"
+msgstr "超清"
+
+msgctxt "#30004"
+msgid "high"
+msgstr "高清"
+
+msgctxt "#30005"
+msgid "low"
+msgstr "低清"
+
+msgctxt "#30006"
+msgid "max"
+msgstr "最高"
+
