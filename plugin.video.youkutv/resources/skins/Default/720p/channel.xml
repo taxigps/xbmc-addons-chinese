@@ -1,0 +1,209 @@
+<window type="window">
+    <defaultcontrol>610</defaultcontrol>
+    <coordinates>
+        <system>1</system>
+        <posx>0</posx>
+        <posy>0</posy>
+    </coordinates>
+    <allowoverlay>no</allowoverlay>
+    <controls>
+        <control type="image">
+            <description>background</description>
+            <posx>0</posx>
+            <posy>0</posy>
+            <width>1280</width>
+            <height>720</height>
+            <texture>bg.png</texture>
+        </control>
+        <control type="image">
+            <description>sub-backgroung</description>
+            <posx>0</posx>
+            <posy>0</posy>
+            <width>213</width>
+            <height>720</height>
+            <texture>search_left_background_1080.png</texture>
+        </control>
+        <control type="image" id="601">
+            <description>channel-icon</description>
+            <posx>20</posx>
+            <posy>20</posy>
+            <width>36</width>
+            <height>36</height>
+            <aspectratio>stretch</aspectratio>
+        </control>
+        <control type="label" id="602">
+            <description>channel-title</description>
+            <posx>65</posx>
+            <posy>20</posy>
+            <width>340</width>
+            <height>60</height>   
+            <font>font30</font>
+            <textcolor>ff005194</textcolor>
+            <align>left</align>
+            <aligny>top</aligny>
+        </control>
+        <control type="button" id="603">
+            <description>filter</description>
+            <posx>1120</posx>
+            <posy>10</posy>
+            <width>129</width>
+            <height>42</height>
+            <onleft>610</onleft>
+            <ondown>620</ondown>
+            <align>center</align>
+            <aligny>center</aligny>
+            <texturefocus>btn_filter-focus.png</texturefocus>
+            <texturenofocus>btn_filter.png</texturenofocus>
+        </control>
+        <control type="panel" id="610">
+            <description>sub-type</description>
+            <posx>0</posx>
+            <posy>80</posy>
+            <width>200</width>
+            <height>600</height>
+            <viewtype>list</viewtype>
+            <onright>603</onright>
+            <itemlayout width="200" height="65">
+                <control type="image">
+                    <posx>20</posx>
+                    <posy>0</posy>
+                    <width>160</width>
+                    <height>1</height>        
+                    <texture>channel_bule_line.png</texture>
+                    <aspectratio>stretch</aspectratio>
+                </control>    
+                <control type="label">
+                    <posx>0</posx>
+                    <posy>0</posy>
+                    <width>200</width>
+                    <height>65</height>   
+                    <font>font30</font>
+                    <textcolor>white</textcolor>
+                    <selectedcolor>ff0080ff</selectedcolor>
+                    <shadowcolor>80000000</shadowcolor>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <info>ListItem.Label</info>
+                </control>
+            </itemlayout>
+            <focusedlayout width="200" height="65">
+                <control type="image">
+                    <posx>20</posx>
+                    <posy>0</posy>
+                    <width>160</width>
+                    <height>1</height>        
+                    <texture>channel_bule_line.png</texture>
+                    <aspectratio>stretch</aspectratio>
+                </control>    
+                <control type="image">
+                    <posx>0</posx>
+                    <posy>0</posy>
+                    <width>200</width>
+                    <height>65</height>        
+                    <texture>channel_tab_focus.png</texture>
+                    <aspectratio>stretch</aspectratio>
+                </control>    
+                <control type="label">
+                    <posx>0</posx>
+                    <posy>0</posy>
+                    <width>200</width>
+                    <height>65</height>   
+                    <font>font30</font>
+                    <textcolor>white</textcolor>
+                    <selectedcolor>ff0080ff</selectedcolor>
+                    <shadowcolor>80000000</shadowcolor>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <info>ListItem.Label</info>
+                </control>
+            </focusedlayout>
+        </control>
+        <control type="panel" id="620">
+            <description>sub-content</description>
+            <posx>280</posx>
+            <posy>80</posy>
+            <width>1000</width>
+            <height>600</height>
+            <viewtype>list</viewtype>
+            <onleft>610</onleft>
+            <onright>603</onright>
+            <preloaditems>10</preloaditems>
+            <onup>603</onup>
+            <ondown>-</ondown>
+            <itemlayout width="180" height="300">
+                <control type="image">
+                    <posx>10</posx>
+                    <posy>10</posy>
+                    <width>160</width>
+                    <height>240</height>        
+                    <info>ListItem.Icon</info>
+                    <aspectratio>stretch</aspectratio>
+                </control>    
+                <control type="label">
+                    <posx>0</posx>
+                    <posy>240</posy>
+                    <width>160</width>
+                    <height>60</height>   
+                    <font>font16</font>
+                    <textcolor>white</textcolor>
+                    <shadowcolor>80000000</shadowcolor>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <info>ListItem.Label</info>
+                </control>
+                <control type="label">
+                    <posx>140</posx>
+                    <posy>230</posy>
+                    <width>60</width>
+                    <height>20</height>   
+                    <font>font12</font>
+                    <textcolor>red</textcolor>
+                    <align>left</align>
+                    <aligny>center</aligny>
+                    <info>ListItem.Label2</info>
+                </control>
+            </itemlayout>
+            <focusedlayout width="180" height="300">
+                <control type="image">
+                    <posx>10</posx>
+                    <posy>10</posy>
+                    <width>160</width>
+                    <height>240</height>        
+                    <info>ListItem.Icon</info>
+                    <aspectratio>stretch</aspectratio>
+                </control>    
+                <control type="image">
+                    <posx>6</posx>
+                    <posy>6</posy>
+                    <width>168</width>
+                    <height>248</height>        
+                    <texture>border-content.png</texture>
+                    <aspectratio>stretch</aspectratio>
+                </control>    
+                <control type="label">
+                    <posx>140</posx>
+                    <posy>230</posy>
+                    <width>60</width>
+                    <height>20</height>   
+                    <font>font12</font>
+                    <textcolor>red</textcolor>
+                    <align>left</align>
+                    <aligny>center</aligny>
+                    <info>ListItem.Label2</info>
+                </control>
+                <control type="label">
+                    <posx>0</posx>
+                    <posy>240</posy>
+                    <width>160</width>
+                    <height>60</height>   
+                    <font>font16</font>
+                    <textcolor>ff0080ff</textcolor>
+                    <shadowcolor>80000000</shadowcolor>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <info>ListItem.Label</info>
+                </control>
+            </focusedlayout>
+        </control>
+    </controls>
+</window>

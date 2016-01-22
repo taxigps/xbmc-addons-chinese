@@ -1,0 +1,253 @@
+<window type="window">
+    <defaultcontrol>1720</defaultcontrol>
+    <coordinates>
+        <system>1</system>
+        <posx>0</posx>
+        <posy>0</posy>
+    </coordinates>
+    <allowoverlay>yes</allowoverlay>
+    <controls>
+        <control type="image">
+            <description>background</description>
+            <posx>0</posx>
+            <posy>0</posy>
+            <width>1280</width>
+            <height>720</height>
+            <texture>select-bg.png</texture>
+        </control>
+        <control type="button" id="1710">
+            <description>reset</description>
+            <posx>400</posx>
+            <posy>200</posy>
+            <width>134</width>
+            <height>40</height>
+            <ondown>1720</ondown>
+            <align>center</align>
+            <label>重置选项</label>
+            <texturefocus>channel_button_focus_720.png</texturefocus>
+            <texturenofocus>channel_button_normal_720.png</texturenofocus>
+        </control>
+        <control type="group">
+            <posx>400</posx>
+            <posy>260</posy>
+            <control type="image">
+                <posx>0</posx>
+                <posy>0</posy>
+                <width>512</width>
+                <height>40</height>   
+                <texture>filter.png</texture>
+            </control>
+            <control type="image">
+                <posx>0</posx>
+                <posy>50</posy>
+                <width>512</width>
+                <height>40</height>   
+                <texture>filter.png</texture>
+            </control>
+            <control type="image">
+                <posx>0</posx>
+                <posy>100</posy>
+                <width>512</width>
+                <height>40</height>   
+                <texture>filter.png</texture>
+            </control>
+            <control type="image">
+                <posx>0</posx>
+                <posy>0</posy>
+                <width>512</width>
+                <height>40</height>   
+                <texture>filter-focus.png</texture>
+                <visible>Control.HasFocus(1720)</visible>
+            </control>
+            <control type="image">
+                <posx>0</posx>
+                <posy>50</posy>
+                <width>512</width>
+                <height>40</height>   
+                <texture>filter-focus.png</texture>
+                <visible>Control.HasFocus(1721)</visible>
+            </control>
+            <control type="image">
+                <posx>0</posx>
+                <posy>100</posy>
+                <width>512</width>
+                <height>40</height>   
+                <texture>filter-focus.png</texture>
+                <visible>Control.HasFocus(1722)</visible>
+            </control>
+            <control type="label">
+                <posx>-10</posx>
+                <posy>0</posy>
+                <width>200</width>
+                <height>40</height>
+                <align>right</align>
+                <aligny>center</aligny>
+                <font>font16</font>
+                <textcolor>white</textcolor>
+                <label>清晰度</label>
+            </control>
+            <control type="label">
+                <posx>-10</posx>
+                <posy>50</posy>
+                <width>200</width>
+                <height>40</height>
+                <align>right</align>
+                <aligny>center</aligny>
+                <font>font16</font>
+                <textcolor>white</textcolor>
+                <label>语言</label>
+            </control>
+            <control type="label">
+                <posx>-10</posx>
+                <posy>100</posy>
+                <width>200</width>
+                <height>40</height>
+                <align>right</align>
+                <aligny>center</aligny>
+                <font>font16</font>
+                <textcolor>white</textcolor>
+                <label>地址解析</label>
+            </control>
+            <control type="panel" id="1720">
+                <posx>0</posx>
+                <posy>0</posy>
+                <width>512</width>
+                <height>40</height>
+                <viewtype>list</viewtype>
+                <orientation>horizontal</orientation>
+                <onup>1710</onup>
+                <ondown>1721</ondown>
+                <itemlayout width="128" height="40">
+                    <control type="label">
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>128</width>
+                        <height>40</height>   
+                        <font>font8</font>
+                        <textcolor>white</textcolor>
+                        <selectedcolor>ff0080ff</selectedcolor>
+                        <shadowcolor>80000000</shadowcolor>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <info>ListItem.Label</info>
+                    </control>
+                </itemlayout>
+                <focusedlayout width="128" height="40">
+                    <control type="image">
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>128</width>
+                        <height>40</height>   
+                        <texture>filter-select.png</texture>
+                    </control>
+                    <control type="label">
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>128</width>
+                        <height>40</height>   
+                        <font>font8</font>
+                        <textcolor>white</textcolor>
+                        <selectedcolor>white</selectedcolor>
+                        <shadowcolor>80000000</shadowcolor>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <info>ListItem.Label</info>
+                    </control>
+                </focusedlayout>
+            </control>
+            <control type="panel" id="1721">
+                <posx>0</posx>
+                <posy>50</posy>
+                <width>512</width>
+                <height>50</height>
+                <viewtype>list</viewtype>
+                <orientation>horizontal</orientation>
+                <onup>1720</onup>
+                <ondown>1722</ondown>
+                <itemlayout width="128" height="40">
+                    <control type="label">
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>128</width>
+                        <height>40</height>   
+                        <font>font8</font>
+                        <textcolor>white</textcolor>
+                        <selectedcolor>ff0080ff</selectedcolor>
+                        <shadowcolor>80000000</shadowcolor>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <info>ListItem.Label</info>
+                    </control>
+                </itemlayout>
+                <focusedlayout width="128" height="40">
+                    <control type="image">
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>128</width>
+                        <height>40</height>   
+                        <texture>filter-select.png</texture>
+                    </control>
+                    <control type="label">
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>128</width>
+                        <height>40</height>   
+                        <font>font8</font>
+                        <textcolor>white</textcolor>
+                        <selectedcolor>white</selectedcolor>
+                        <shadowcolor>80000000</shadowcolor>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <info>ListItem.Label</info>
+                    </control>
+                </focusedlayout>
+            </control>
+            <control type="panel" id="1722">
+                <posx>0</posx>
+                <posy>100</posy>
+                <width>512</width>
+                <height>50</height>
+                <viewtype>list</viewtype>
+                <orientation>horizontal</orientation>
+                <onup>1721</onup>
+                <itemlayout width="128" height="40">
+                    <control type="label">
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>128</width>
+                        <height>40</height>   
+                        <font>font8</font>
+                        <textcolor>white</textcolor>
+                        <selectedcolor>ff0080ff</selectedcolor>
+                        <shadowcolor>80000000</shadowcolor>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <info>ListItem.Label</info>
+                    </control>
+                </itemlayout>
+                <focusedlayout width="128" height="40">
+                    <control type="image">
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>128</width>
+                        <height>40</height>   
+                        <texture>filter-select.png</texture>
+                    </control>
+                    <control type="label">
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>128</width>
+                        <height>40</height>   
+                        <font>font8</font>
+                        <textcolor>white</textcolor>
+                        <selectedcolor>white</selectedcolor>
+                        <shadowcolor>80000000</shadowcolor>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <info>ListItem.Label</info>
+                    </control>
+                </focusedlayout>
+            </control>
+        </control>
+    </controls>
+</window>
