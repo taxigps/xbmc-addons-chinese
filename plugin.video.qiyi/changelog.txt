@@ -1,4 +1,7 @@
-﻿V2.2.3 (2015-12-20)
+﻿V2.2.4 (2016-01-30)
+- fixed: decode key changed.
+
+V2.2.3 (2015-12-20)
 - fixed: decode key changed.
 
 V2.2.2 (2015-12-07)
