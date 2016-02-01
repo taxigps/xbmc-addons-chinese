@@ -407,7 +407,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.qiyi"
     name="奇艺视频(QIYI)"
-    version="2.2.3"
+    version="2.2.4"
     provider-name="taxigps">
     <requires>
       <import addon="script.module.simplejson" version="3.3.0"/>
@@ -541,6 +541,24 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
     <summary>优酷TV</summary>
     <description>优酷视频是中国最大的视频分享网站</description>
   </extension>
+</addon>
+
+<addon id="plugin.video.zhanqitv"
+    name="战旗TV(ZhanqiTV)"
+    version="1.0.3"
+    provider-name="Albert">
+    <extension
+        point="xbmc.python.pluginsource"
+        library="addon.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">zhanqitv video plugin</summary>
+        <summary lang="zh">战旗TV插件</summary>
+        <description lang="en">online video from www.zhanqi.tv</description>
+        <description lang="zh">战旗TV</description>
+        <platform>all</platform>
+    </extension>
 </addon>
 
 <addon id="repository.xbmc-addons-chinese" name="Chinese Add-ons" version="1.2.0" provider-name="Taxigps">
