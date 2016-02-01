@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="plugin.video.pptv"
     name="PPTV视频"
-    version="1.2.9"
+    version="1.2.10"
     provider-name="Uranus Zhou">
     <requires>
         <import addon="script.module.keyboard.chinese" version="1.0.0"/>

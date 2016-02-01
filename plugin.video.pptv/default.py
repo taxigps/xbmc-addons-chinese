@@ -461,7 +461,7 @@ def GetPPTVEpisodesList(name, url, thumb):
 
 # generate sc_input for flvcd parser
 def flvcd_sc_input(sc_in, sc_time):
-	sc_base = "33168049015090945217180195488027"
+	sc_base = "03866305756728199277139531987074"
 	sc_t = int(sc_time / 600000)
 	sc_out = ""
 

@@ -1,6 +1,9 @@
 ﻿########################################################################
 # # PPTV视频 for XBMC by Uranus Zhou, 2012 - 2016
 ########################################################################
+# Version 1.2.10 2016-02-02 (Uranus Zhou - nocwat at gmail dot com)
+# Update flvcd key for Flash video URL (should be auto decrypted in future)
+
 # Version 1.2.9 2016-01-19 (Uranus Zhou - nocwat at gmail dot com)
 # Fix search doesn't work for PPTV new website
 # Fix get TV list from area list may fail cause XBMC script error bug
