@@ -428,7 +428,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.rrmj"
        name="人人美剧"
-       version="0.0.5"
+       version="0.0.6"
        provider-name="jindaxia">
   <requires>
     <import addon="xbmc.python" version="2.14.0"/>
