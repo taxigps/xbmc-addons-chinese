@@ -6,6 +6,7 @@ Note: Chinese repository is also applicable to Kodi (new releases - formerly kno
 
 * Forum Discuss in Chinese: [原动力论坛: XBMC媒体中心讨论版][1]
 * Forum Discuss in English: [XBMC Community Forum: Project xbmc-addons-chinese Release Thread][2]
+* QQ Group for Developers: 253355963
 
 # How To Use
 
