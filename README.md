@@ -1,7 +1,7 @@
 # plugin.video.rrmj
 
 ## todo list
-- [ ] auto play next episode
+- [x] auto play next episode
 - [ ] download and store
-- [ ] search
+- [x] search
 - [ ] history

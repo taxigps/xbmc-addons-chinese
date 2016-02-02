@@ -163,14 +163,13 @@ def video_detail(seasonId):
             'is_playable': True
         }
         yield item
+    plugin.set_content('episodes')
 
 
 @plugin.route('/play/<url>')
 def play(url):
 
     rs = RRMJResolver()
-    m3u8 = rs.get_m3u8(url)
-    print m3u8
-    plugin.set_resolved_url(m3u8["url"])
-    # else:
-    #     plugin.set_resolved_url("stack://" + " , ".join(urls))
+    play_url, _ = rs.get_m3u8(url, plugin.get_setting("quality"))
+    if play_url is not None:
+        plugin.set_resolved_url(play_url)
