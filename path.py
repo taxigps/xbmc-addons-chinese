@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 
-from xbmcswift2 import Plugin, CLI_MODE, xbmcaddon, ListItem, xbmc, xbmcgui
+from xbmcswift2 import Plugin, CLI_MODE, xbmcaddon, ListItem, xbmc, xbmcgui, xbmcplugin
 import os
 import sys
 
@@ -22,10 +22,12 @@ ADDON_DATA_PATH = xbmc.translatePath("special://profile/addon_data/%s" % ADDON_I
 sys.path.append(os.path.join(ADDON_PATH, 'resources', 'lib'))
 from rrmj import *
 from common import *
+from history import *
 
 plugin = Plugin()
 Meiju = RenRenMeiJu()
 PAGE_ROWS = plugin.get_setting("page_rows")
+VIDEO_CACHE = plugin.get_storage('video')
 
 
 def parse_qs(qs):
@@ -56,6 +58,11 @@ def index():
     yield {
         'label': "搜索",
         'path': plugin.url_for("hotword"),
+        'is_playable': False
+    }
+    yield {
+        'label': "历史",
+        'path': history_list.url_for("list_history"),
         'is_playable': False
     }
     data = Meiju.index_info()
@@ -140,7 +147,7 @@ def search(page, **kwargs):
         yield item
 
 
-@plugin.route('/album/<albumId>', name="album")
+@plugin.route('/album/<albumId>/', name="album")
 def get_album(albumId):
     c_list = Meiju.get_album(albumId)
     for one in c_list["data"]["results"]:
@@ -168,8 +175,13 @@ def video_detail(seasonId):
 
 @plugin.route('/play/<url>')
 def play(url):
-
+    print "aaaaa"
+    print plugin.added_items
     rs = RRMJResolver()
     play_url, _ = rs.get_m3u8(url, plugin.get_setting("quality"))
     if play_url is not None:
+        add_history(plugin.request.url, "播放历史")
         plugin.set_resolved_url(play_url)
+
+
+plugin.register_module(history_list, "/history")

@@ -1,3 +1,7 @@
+v0.0.7
+- fix error with new api
+- add history for testing
+
 v0.0.6
 - fix missing lib 
 - add content menu play whole episodes 增加右键菜单剧集自动播放
