@@ -12,7 +12,7 @@ def colorize(label, color):
     return "[COLOR %s]" % color + label + "[/COLOR]"
 
 
-def GetHttpData(url, data=None, cookie=None):
+def GetHttpData(url, data=None, cookie=None, headers=None):
 
     xbmc.log("Fetch URL :%s, with data: %s" % (url, data))
     try:
@@ -23,6 +23,9 @@ def GetHttpData(url, data=None, cookie=None):
         req.add_header('Accept-encoding', 'gzip')
         if cookie is not None:
             req.add_header('Cookie', cookie)
+        if headers is not None:
+            for header in headers:
+                req.add_header(header, headers[header])
         if data:
             response = urllib2.urlopen(req, data, timeout=3)
         else:
