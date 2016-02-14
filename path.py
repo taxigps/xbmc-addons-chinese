@@ -22,12 +22,12 @@ ADDON_DATA_PATH = xbmc.translatePath("special://profile/addon_data/%s" % ADDON_I
 sys.path.append(os.path.join(ADDON_PATH, 'resources', 'lib'))
 from rrmj import *
 from common import *
-from history import *
 
 plugin = Plugin()
 Meiju = RenRenMeiJu()
 PAGE_ROWS = plugin.get_setting("page_rows")
-VIDEO_CACHE = plugin.get_storage('video')
+SEASON_CACHE = plugin.get_storage('season')
+HISTORY = plugin.get_storage('history')
 
 
 def parse_qs(qs):
@@ -62,7 +62,7 @@ def index():
     }
     yield {
         'label': "历史",
-        'path': history_list.url_for("list_history"),
+        'path': plugin.url_for("list_history"),
         'is_playable': False
     }
     data = Meiju.index_info()
@@ -163,25 +163,51 @@ def get_album(albumId):
 def video_detail(seasonId):
     detail = Meiju.video_detail(seasonId)
     title = detail["data"]["seasonDetail"]["title"]
-    for index, episode in enumerate(sorted(detail["data"]["seasonDetail"]["playUrlList"], key=lambda episode: episode['id'])):
+    SEASON_CACHE[seasonId] = detail["data"]
+    for episode in detail["data"]["seasonDetail"]["episode_brief"]:
         item = {
-            'label': title + str(index+1),
-            'path': plugin.url_for("play", url=episode["playLink"]),
+            'label': title + episode["episode"],
+            'path': plugin.url_for("play_season", seasonId=seasonId, index=episode["episode"], Esid=episode["sid"]),
             'is_playable': True
         }
         yield item
     plugin.set_content('episodes')
 
 
-@plugin.route('/play/<url>')
-def play(url):
-    print "aaaaa"
-    print plugin.added_items
+@plugin.route('/play/<seasonId>/<index>/<Esid>', name="play_season")
+def play(seasonId="", index="", Esid=""):
+    season_data = SEASON_CACHE.get(seasonId)
+    title = season_data["seasonDetail"]["title"]
+    eipisodeSid = Esid
     rs = RRMJResolver()
-    play_url, _ = rs.get_m3u8(url, plugin.get_setting("quality"))
+    play_url, _ = rs.get_play(seasonId, eipisodeSid, plugin.get_setting("quality"))
     if play_url is not None:
-        add_history(plugin.request.url, "播放历史")
         plugin.set_resolved_url(play_url)
+        add_history(seasonId, index, Esid, title)
 
 
-plugin.register_module(history_list, "/history")
+def add_history(seasonId, index, Esid, title):
+    if "list" not in HISTORY:
+        HISTORY["list"] = []
+    for l in HISTORY["list"]:
+        if l["seasonId"] == seasonId:
+            HISTORY["list"].remove(l)
+    item = {"seasonId": seasonId,
+            "index": index,
+            "sid": Esid,
+            "season_name": title}
+    HISTORY["list"].insert(0, item)
+
+
+@plugin.route('/history/list')
+def list_history():
+    if "list" in HISTORY:
+        for l in HISTORY["list"]:
+            seasonId = l["seasonId"]
+            index = l["index"]
+            sid = l["sid"]
+            yield {
+                'label': l["season_name"] + l["index"],
+                'path': plugin.url_for("play_season", seasonId=seasonId, index=index, Esid=sid),
+                'is_playable': True
+            }
