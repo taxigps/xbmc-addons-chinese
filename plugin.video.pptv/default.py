@@ -460,8 +460,7 @@ def GetPPTVEpisodesList(name, url, thumb):
 		return None
 
 # generate sc_input for flvcd parser
-def flvcd_sc_input(sc_in, sc_time):
-	sc_base = "03866305756728199277139531987074"
+def flvcd_sc_input(sc_base, sc_in, sc_time):
 	sc_t = int(sc_time / 600000)
 	sc_out = ""
 
@@ -523,6 +522,11 @@ def GetPPTVVideoURL_Flash(url, quality):
 	# get key from flvcd.com, sorry we can't get it directly by now
 	parser_url1 = FLVCD_PARSER_PHP + '?format=' + PPTV_VIDEO_QUALITY_VALS[int(cur.encode('utf-8'))] + '&kw=' + url
 	data = GetHttpData(parser_url1)
+
+	flvcd_sc_base = CheckValidList(re.compile('\|for\|([^\|]*)\|createSc\|').findall(data))
+	if len(flvcd_sc_base) <= 0:
+		return []
+
 	forms = CheckValidList(parseDOM(unicode(data, 'utf-8', 'ignore'), 'form', attrs = { 'name' : 'mform' }))
 	if len(forms) <= 0:
 		return []
@@ -536,7 +540,7 @@ def GetPPTVVideoURL_Flash(url, quality):
 	input_dicts = dict(zip(input_names, input_values))
 	if input_dicts.has_key("msKey") and input_dicts.has_key("tt"):
 		tmp_tt = int(input_dicts["tt"])
-		input_dicts["sc"] = flvcd_sc_input(input_dicts["msKey"], tmp_tt)
+		input_dicts["sc"] = flvcd_sc_input(flvcd_sc_base, input_dicts["msKey"], tmp_tt)
 
 	parser_url2 = downparseurl + '?' + urllib.urlencode(input_dicts)
 	data = GetHttpData(parser_url2)
@@ -546,7 +550,6 @@ def GetPPTVVideoURL_Flash(url, quality):
 
 	parser_url3 = FLVCD_DIY_URL + flvcd_id + '.htm'
 	data = GetHttpData(parser_url3)
-	#xbmcgui.Dialog().ok(__addonname__, data)
 	key = CheckValidList(re.compile('<U>.*&(key=[^&\n]*)').findall(data))
 	if len(key) <= 0:
 		return []
