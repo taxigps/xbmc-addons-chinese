@@ -451,7 +451,10 @@ class Keyboard:
         except:
             py = int(it.posy.text)
         pw = int(it.width.text)
-        ph = int(it.height.text)
+        try:
+            ph = int(it.height.text)
+        except:
+            ph = 22  # set default text height if no height in skin
         font = it.font.text.encode('utf-8')
         tag_HZCODE = self.newLabelTag(soup, CTL_LABEL_HZCODE, px, py + ph, 90, 30, font)
         tag_HZLIST = self.newLabelTag(soup, CTL_LABEL_HZLIST, px + 95, py + ph, pw - 95, 30, font)

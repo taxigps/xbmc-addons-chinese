@@ -3,6 +3,7 @@
 
 import xbmcgui, xbmcaddon, xbmc
 import json, sys, urllib, urllib2, gzip, StringIO, re, os, time, threading, socket, base64, math, cookielib
+from video_concatenate import video_concatenate
 try:
    import StorageServer
 except:
@@ -16,9 +17,10 @@ __resource__   = xbmc.translatePath( os.path.join( __cwd__, 'resources', 'lib' )
 sys.path.append (__resource__)
 cache = StorageServer.StorageServer(__addonid__, 87600)
 m3u8_file = __cwd__ + '/v.m3u8'
+vc = video_concatenate()
 
 #Set timeout of socket
-socket.setdefaulttimeout(10) 
+socket.setdefaulttimeout(10)
 
 #URL base
 HOST = 'http://tv.api.3g.youku.com/'
@@ -36,14 +38,15 @@ ChannelData={'97': {'icon': 'channel_tv_icon.png', 'title': '电视剧'},
              '84': {'icon': 'channel_documentary_icon.png', 'title': '纪录片'},
              '87': {'icon': 'channel_education_icon.png', 'title': '教育'},
              }
-mainData = [{'title': '搜索', 'image': 'yk_search.jpg', 'mtype': 'search'},  
-            {'title': '观看记录', 'image': 'yk_history.jpg', 'mtype': 'history'}, 
+mainData = [{'title': '搜索', 'image': 'yk_search.jpg', 'mtype': 'search'},
+            {'title': '观看记录', 'image': 'yk_history.jpg', 'mtype': 'history'},
             {'title': '收藏', 'image': 'yk_favor.jpg', 'mtype': 'favor'}]
-settings_data = {'resolution':[u'1080P', u'超清', u'高清', u'标清', u'标清(3GP)'], 
-                 'resolution_type':[['hd3','mp4hd3'], ['hd2','mp4hd2'], ['mp4','mp4hd'], ['flv','flvhd'], ['3gphd']], 
-                 'language':[u'默认', u'国语', u'粤语', u'英语'], 
-                 'play':['分段', '堆叠', 'M3U8'],
-                 'play_type':['list', 'stack', 'm3u8']}
+settings_data = {'resolution':[u'1080P', u'超清', u'高清', u'标清', u'标清(3GP)'],
+                 'resolution_type':[['hd3','mp4hd3'], ['hd2','mp4hd2'], ['mp4','mp4hd'], ['flv','flvhd'], ['3gphd']],
+                 'language':[u'默认', u'国语', u'粤语', u'英语'],
+                 'language_code':[u'', u'guoyu', u'yue', u'yingyu'],
+                 'play':['整合(试验阶段)', '分段', '堆叠'],
+                 'play_type':['concatenate', 'list', 'stack']}
 settings={'resolution':0, 'language':0, 'play':0}
 resolution_map = {'3gphd':  '3gp',
                   'flv':    'flv',
@@ -152,9 +155,11 @@ class MyPlayer(xbmc.Player):
         except:
             pass
         xbmc.Player.onPlayBackEnded(self)
+        vc.stop()
 
     def onPlayBackStopped(self):
         cache.set(self.vid, repr({'offset':self.last, 'startpos':self.lastpos}))
+        vc.stop()
 
 
     def updateHistory(self, check=True, base=-1):
@@ -186,7 +191,7 @@ class BaseWindowDialog(xbmcgui.WindowXMLDialog):
     def doClose(self):
         self.session.window = self.oldWindow
         self.close()
-        
+
     def onInit(self):
         if player.isPlaying():
             player.stop()
@@ -198,17 +203,17 @@ class BaseWindowDialog(xbmcgui.WindowXMLDialog):
             except:
                 self.close()
         self.setSessionWindow()
-        
+
     def onFocus( self, controlId ):
         self.controlId = controlId
-        
+
     def setSessionWindow(self):
         try:
             self.oldWindow = self.session.window
         except:
             self.oldWindow=self
         self.session.window = self
-        
+
     def onAction(self,action):
         if action.getId() == ACTION_PARENT_DIR or action.getId() == ACTION_PREVIOUS_MENU:
             if player.isPlaying():
@@ -251,7 +256,7 @@ class ConfirmWindow(BaseWindowDialog):
     def select(self):
         self.doModal()
         return self.selected
-     
+
 
 class SettingsWindow(xbmcgui.WindowXMLDialog):
     def __init__( self, *args, **kwargs):
@@ -262,7 +267,7 @@ class SettingsWindow(xbmcgui.WindowXMLDialog):
         #BaseWindowDialog.__init__( self )
         xbmcgui.WindowXMLDialog.__init__(self)
 
-        
+
     def onInit(self):
         #BaseWindowDialog.onInit(self)
         xbmcgui.WindowXMLDialog.onInit(self)
@@ -355,7 +360,7 @@ class FilterWindow(BaseWindowDialog):
         self.pdata = None
         BaseWindowDialog.__init__( self )
 
-        
+
     def onInit(self):
         self.showBusy()
         try:
@@ -375,7 +380,7 @@ class FilterWindow(BaseWindowDialog):
         if data.has_key('status') == False:
             return
         if data['status'] != 'success':
-            return            
+            return
 
         self.pdata = data['results']
 
@@ -412,7 +417,7 @@ class FilterWindow(BaseWindowDialog):
 
         if len(data['results']) < 4:
             self.getControl(1623).setEnabled(False)
-        
+
         self.inited = True
 
     def select(self):
@@ -472,7 +477,7 @@ class BaseWindow(xbmcgui.WindowXML):
     def doClose(self):
         self.session.window = self.oldWindow
         self.close()
-        
+
     def onInit(self):
         if player.isPlaying():
             player.stop()
@@ -484,18 +489,18 @@ class BaseWindow(xbmcgui.WindowXML):
             except:
                 self.close()
         self.setSessionWindow()
-        
-        
+
+
     def onFocus( self, controlId ):
         self.controlId = controlId
-        
+
     def setSessionWindow(self):
         try:
             self.oldWindow = self.session.window
         except:
             self.oldWindow=self
         self.session.window = self
-        
+
     def onAction(self,action):
         if action.getId() == ACTION_PARENT_DIR or action.getId() == ACTION_PREVIOUS_MENU:
             if player.isPlaying():
@@ -561,7 +566,7 @@ class MainWindow(BaseWindow):
 
         self.navInited = True
 
-    
+
     def initMain(self):
         if self.mainInited:
             return
@@ -578,34 +583,34 @@ class MainWindow(BaseWindow):
             listitem = xbmcgui.ListItem(label=item['title'], thumbnailImage=item['image'])
             setProperties(listitem, item)
             self.getControl(521).addItem(listitem)
-            
+
         for item in data['results']['m2']:
             listitem = xbmcgui.ListItem(label=item['title'], thumbnailImage=item['big_vertical_image'])
             setProperties(listitem, item)
             self.getControl(522).addItem(listitem)
-            
+
         item = data['results']['m3'][0]
         listitem = xbmcgui.ListItem(label=item['title'], thumbnailImage=item['big_horizontal_image'])
         setProperties(listitem, item)
-        self.getControl(524).addItem(listitem)        
-            
+        self.getControl(524).addItem(listitem)
+
         for item in data['results']['m3'][1:]:
             listitem = xbmcgui.ListItem(label=item['title'], thumbnailImage=item['big_vertical_image'])
             setProperties(listitem, item)
             self.getControl(525).addItem(listitem)
-            
+
         item = data['results']['m4'][0]
         listitem = xbmcgui.ListItem(label=item['title'], thumbnailImage=item['big_horizontal_image'])
         setProperties(listitem, item)
-        self.getControl(527).addItem(listitem)        
-            
+        self.getControl(527).addItem(listitem)
+
         for item in data['results']['m4'][1:]:
             listitem = xbmcgui.ListItem(label=item['title'], thumbnailImage=item['big_vertical_image'])
             setProperties(listitem, item)
             self.getControl(528).addItem(listitem)
 
         self.mainInited = True
-            
+
 
     def initChannelTop(self):
         if self.channelInited:
@@ -638,7 +643,7 @@ class MainWindow(BaseWindow):
             self.getControl(580).addItem(listitem)
 
         self.channelInited = True
-        
+
 
     def onClick( self, controlId ):
         if controlId == 510:
@@ -689,7 +694,7 @@ class MainWindow(BaseWindow):
                 self.getControl(ContentID[self.selectedNavigation]).setEnabled(True)
                 self.getControl(ContentID[self.selectedNavigation]).setVisible(True)
                 self.getControl(510).getSelectedItem().select(True)
-                
+
 
 class TopWindow(BaseWindow):
     def __init__( self, *args, **kwargs):
@@ -699,7 +704,7 @@ class TopWindow(BaseWindow):
         self.sdata = kwargs.get('sdata')
         BaseWindow.__init__(self, args, kwargs)
 
-        
+
     def onInit(self):
         BaseWindow.onInit(self)
 
@@ -713,7 +718,7 @@ class TopWindow(BaseWindow):
 
         self.hideBusy()
 
-        
+
     def initSubChannel(self):
         if self.subInited:
             return
@@ -747,7 +752,7 @@ class TopWindow(BaseWindow):
 
         self.getControl(1520).reset()
         self.updateContent()
-            
+
         self.conInited = True
 
 
@@ -786,7 +791,7 @@ class TopWindow(BaseWindow):
                 #Enable new selection
                 self.selectedNavigation = self.getControl(1510).getSelectedPosition()
                 self.getControl(1510).getSelectedItem().select(True)
-        
+
 
     def onClick( self, controlId ):
         if controlId == 1510:
@@ -813,7 +818,7 @@ class ChannelWindow(BaseWindow):
         self.filterArgs = {'cid':self.sdata}
         BaseWindow.__init__(self, args, kwargs)
 
-        
+
     def onInit(self):
         BaseWindow.onInit(self)
 
@@ -827,7 +832,7 @@ class ChannelWindow(BaseWindow):
 
         self.hideBusy()
 
-        
+
     def initSubChannel(self):
         if self.subInited:
             return
@@ -869,7 +874,7 @@ class ChannelWindow(BaseWindow):
         self.urlArgs['pg'] = '1'
         self.getControl(620).reset()
         self.updateContent()
-            
+
         self.conInited = True
 
 
@@ -908,7 +913,7 @@ class ChannelWindow(BaseWindow):
                 #Enable new selection
                 self.selectedNavigation = self.getControl(610).getSelectedPosition()
                 self.getControl(610).getSelectedItem().select(True)
-        
+
 
     def onClick( self, controlId ):
         if controlId == 610:
@@ -954,7 +959,7 @@ class ChannelWindow(BaseWindow):
                 self.urlArgs['pg'] = str(pg)
                 self.updateContent()
                 self.getControl(620).selectItem(oldPos)
-                                
+
 
 class OtherWindow(BaseWindow):
     def __init__( self, *args, **kwargs):
@@ -964,7 +969,7 @@ class OtherWindow(BaseWindow):
         self.urlArgs = {'pz':'100', 'pg':'1', 'cid':'', 'ob':'2'}
         BaseWindow.__init__(self, args, kwargs)
 
-        
+
     def onInit(self):
         BaseWindow.onInit(self)
 
@@ -979,20 +984,20 @@ class OtherWindow(BaseWindow):
 
         self.hideBusy()
 
-        
+
     def initType(self):
         if self.typeInited:
             return
-            
+
         listitem = xbmcgui.ListItem(label='最新上线')
         self.getControl(903).addItem(listitem)
         listitem = xbmcgui.ListItem(label='最多播放')
         self.getControl(903).addItem(listitem)
         self.getControl(903).getListItem(1).select(True)
-    
+
         self.typeInited = True
-        
-        
+
+
     def initSubChannel(self):
         if self.subInited:
             return
@@ -1029,7 +1034,7 @@ class OtherWindow(BaseWindow):
         self.urlArgs['pg'] = '1'
         self.getControl(920).reset()
         self.updateContent()
-            
+
         self.conInited = True
 
 
@@ -1071,7 +1076,7 @@ class OtherWindow(BaseWindow):
                 #Enable new selection
                 self.selectedNavigation = self.getControl(910).getSelectedPosition()
                 self.getControl(910).getSelectedItem().select(True)
-        
+
 
     def onClick( self, controlId ):
         if controlId == 910:
@@ -1111,7 +1116,7 @@ class OtherWindow(BaseWindow):
                 self.urlArgs['pg'] = str(pg)
                 self.updateContent()
                 self.getControl(920).selectItem(oldPos)
-                                                
+
 
 class ResultWindow(BaseWindow):
     def __init__( self, *args, **kwargs):
@@ -1126,7 +1131,7 @@ class ResultWindow(BaseWindow):
         self.urlArgs = {'pz':'20', 'pg':'1', 'seconds':'0', 'seconds_end': '0', 'ob':'0'}
         BaseWindow.__init__(self, args, kwargs)
 
-        
+
     def onInit(self):
         BaseWindow.onInit(self)
 
@@ -1142,20 +1147,20 @@ class ResultWindow(BaseWindow):
 
         self.hideBusy()
 
-        
+
     def initType(self):
         if self.typeInited:
             return
-            
+
         listitem = xbmcgui.ListItem(label='节目')
         self.getControl(1304).addItem(listitem)
         listitem = xbmcgui.ListItem(label='视频')
         self.getControl(1304).addItem(listitem)
         self.getControl(1304).getListItem(1).select(True)
-    
+
         self.typeInited = True
-        
-        
+
+
     def initFilter(self):
         if self.filterInited:
             return
@@ -1209,7 +1214,7 @@ class ResultWindow(BaseWindow):
             self.getControl(1321).setVisible(False)
             self.getControl(1322).setVisible(True)
         self.updateContent()
-            
+
         self.conInited = True
 
 
@@ -1297,7 +1302,7 @@ class ResultWindow(BaseWindow):
                 self.selectAll = False
                 self.getControl(1310).getSelectedItem().select(False)
             self.urlArgs['ob'] = getProperty(self.getControl(1312).getListItem(self.selectOrder), "value")
-        
+
 
     def onClick( self, controlId ):
         if controlId == 1310 or controlId == 1311 or controlId == 1312:
@@ -1342,7 +1347,7 @@ class ResultWindow(BaseWindow):
                 self.urlArgs['pg'] = str(pg)
                 self.updateContent()
                 self.getControl(1322).selectItem(oldPos)
-                                                
+
 
 class SearchWindow(BaseWindow):
     def __init__( self, *args, **kwargs):
@@ -1352,13 +1357,13 @@ class SearchWindow(BaseWindow):
         self.keywords = ''
         BaseWindow.__init__(self, args, kwargs)
 
-        
+
     def onInit(self):
         BaseWindow.onInit(self)
         self.initSubChannel()
         self.initContent()
 
-        
+
     def initSubChannel(self):
         if self.subInited:
             return
@@ -1389,7 +1394,7 @@ class SearchWindow(BaseWindow):
 
         self.getControl(1220).reset()
         self.updateContent()
-            
+
         self.conInited = True
 
 
@@ -1444,10 +1449,10 @@ class SearchWindow(BaseWindow):
         else:
             xbmcgui.Dialog().ok('提示框', '此功能暂未实现，尽请期待')
             return
- 
+
         self.conInited = False
         self.initContent()
-                                
+
 
 class FavorWindow(BaseWindow):
     def __init__( self, *args, **kwargs):
@@ -1455,13 +1460,13 @@ class FavorWindow(BaseWindow):
         self.conInited = False
         BaseWindow.__init__(self, args, kwargs)
 
-        
+
     def onInit(self):
         BaseWindow.onInit(self)
         self.initSubChannel()
         self.initContent()
 
-        
+
     def initSubChannel(self):
         if self.subInited:
             return
@@ -1490,7 +1495,7 @@ class FavorWindow(BaseWindow):
         self.getControl(1020).reset()
         if self.selectedNavigation == 0:
             self.updateContent()
-            
+
         self.conInited = True
 
 
@@ -1516,7 +1521,7 @@ class FavorWindow(BaseWindow):
                 #Enable new selection
                 self.selectedNavigation = self.getControl(1010).getSelectedPosition()
                 self.getControl(1010).getSelectedItem().select(True)
-        
+
 
     def onClick( self, controlId ):
         if controlId == 1010:
@@ -1543,7 +1548,7 @@ class FavorWindow(BaseWindow):
                 self.setFocusId(1020)
         else:
             xbmcgui.Dialog().ok('提示框', '此功能暂未实现，尽请期待')
- 
+
 
 class HistoryWindow(BaseWindow):
     def __init__( self, *args, **kwargs):
@@ -1551,13 +1556,13 @@ class HistoryWindow(BaseWindow):
         self.conInited = False
         BaseWindow.__init__(self, args, kwargs)
 
-        
+
     def onInit(self):
         BaseWindow.onInit(self)
         self.initSubChannel()
         self.initContent()
 
-        
+
     def initSubChannel(self):
         if self.subInited:
             return
@@ -1565,7 +1570,7 @@ class HistoryWindow(BaseWindow):
         #Title
         self.getControl(1101).setImage('icon_my_history.png')
         self.getControl(1102).setLabel('历史')
- 
+
         self.subInited = True
 
 
@@ -1576,7 +1581,7 @@ class HistoryWindow(BaseWindow):
         self.getControl(1110).reset()
         self.updateContent()
         self.setFocusId(1110)
-            
+
         self.conInited = True
 
 
@@ -1609,7 +1614,7 @@ class HistoryWindow(BaseWindow):
             self.initContent()
             self.setFocusId(1110)
 
-            
+
 class DetailWindow(BaseWindow):
     def __init__( self, *args, **kwargs):
         self.inited = False
@@ -1617,12 +1622,12 @@ class DetailWindow(BaseWindow):
         self.pdata = None
         BaseWindow.__init__(self, args, kwargs)
 
-        
+
     def onInit(self):
         BaseWindow.onInit(self)
         self.init()
 
-        
+
     def init(self):
         if self.inited:
             return
@@ -1637,8 +1642,8 @@ class DetailWindow(BaseWindow):
                 return
             if data['status'] != 'success':
                 self.hideBusy()
-                return            
-            
+                return
+
             data = data['detail']
             self.pdata = data
             self.getControl(701).setImage(data['img'])
@@ -1686,7 +1691,7 @@ class DetailWindow(BaseWindow):
                 return
             if data['status'] != 'success':
                 self.hideBusy()
-                return            
+                return
 
             for item in data['results']:
                 listitem = xbmcgui.ListItem(label=item['showname'], thumbnailImage=item['show_vthumburl'])
@@ -1698,7 +1703,7 @@ class DetailWindow(BaseWindow):
         self.hideBusy()
 
         self.inited = True
-        
+
 
     def onClick( self, controlId ):
         if controlId == 740:
@@ -1733,8 +1738,8 @@ class DetailWindow(BaseWindow):
             ret[self.sdata] = self.pdata
             cache.set('favor', repr(ret))
             self.getControl(722).setLabel('已收藏')
-            
-            
+
+
 class SelectWindow(BaseWindow):
     def __init__( self, *args, **kwargs):
         self.inited = False
@@ -1742,8 +1747,8 @@ class SelectWindow(BaseWindow):
         self.pdata = None
         self.selected = 0
         BaseWindow.__init__( self )
-       
-        
+
+
     def onInit(self):
         BaseWindow.onInit( self )
 
@@ -1753,7 +1758,7 @@ class SelectWindow(BaseWindow):
         except:
             pass
         self.hideBusy()
-        
+
     def init(self):
         if self.inited:
             return
@@ -1765,7 +1770,7 @@ class SelectWindow(BaseWindow):
         if data.has_key('status') == False:
             return
         if data['status'] != 'success':
-            return            
+            return
 
         data = data['results']
         data.sort(lambda x,y: cmp(x['video_stage'], y['video_stage']))
@@ -1819,7 +1824,7 @@ class SelectWindow(BaseWindow):
             else:
                 listitem = xbmcgui.ListItem(label=str(self.pdata[i-1]['video_stage']), label2=str(i-1))
             self.getControl(820).addItem(listitem)
-        
+
 
     def onClick( self, controlId ):
         BaseWindow.onClick(self, controlId)
@@ -1835,26 +1840,26 @@ class SelectWindow(BaseWindow):
             if action.getId() == ACTION_MOVE_LEFT or action.getId() == ACTION_MOVE_RIGHT:
                 self.selectRange(self.getControl(810).getSelectedPosition())
 
-        
+
 class VstSession:
     def __init__(self,window=None):
         self.window = window
-        
+
     def removeCRLF(self,text):
         return " ".join(text.split())
-        
+
     def makeAscii(self,name):
         return name.encode('ascii','replace')
-        
+
     def closeWindow(self):
         self.window.doClose()
-            
+
     def clearSetting(self,key):
         __addon__.setSetting(key,'')
-        
+
     def setSetting(self,key,value):
         __addon__.setSetting(key,value and ENCODE(value) or '')
-        
+
     def getSetting(self,key,default=None):
         setting = __addon__.getSetting(key)
         if not setting: return default
@@ -1868,23 +1873,23 @@ class youkuDecoder:
     def __init__( self ):
         return
 
-    def getFileIDMixString(self,seed):  
-        mixed = []  
-        source = list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/\:._-1234567890")  
-        seed = float(seed)  
-        for i in range(len(source)):  
-            seed = (seed * 211 + 30031 ) % 65536  
-            index = math.floor(seed /65536 *len(source))  
-            mixed.append(source[int(index)])  
-            source.remove(source[int(index)])  
-        return mixed  
+    def getFileIDMixString(self,seed):
+        mixed = []
+        source = list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/\:._-1234567890")
+        seed = float(seed)
+        for i in range(len(source)):
+            seed = (seed * 211 + 30031 ) % 65536
+            index = math.floor(seed /65536 *len(source))
+            mixed.append(source[int(index)])
+            source.remove(source[int(index)])
+        return mixed
 
-    def getFileId(self,fileId,seed):  
-        mixed = self.getFileIDMixString(seed)  
-        ids = fileId.split('*')  
-        realId = []  
+    def getFileId(self,fileId,seed):
+        mixed = self.getFileIDMixString(seed)
+        ids = fileId.split('*')
+        realId = []
         for i in range(0,len(ids)-1):
-            realId.append(mixed[int(ids[i])])  
+            realId.append(mixed[int(ids[i])])
         return ''.join(realId)
 
     def trans_e(self, a, c):
@@ -1901,7 +1906,10 @@ class youkuDecoder:
             h = (h + 1) % 256
             f = (f + b[h]) % 256
             b[h], b[f] = b[f], b[h]
-            result += chr(ord(c[q]) ^ b[(b[h] + b[f]) % 256])
+            if isinstance(c[q], int):
+                result += chr(c[q] ^ b[(b[h] + b[f]) % 256])
+            else:
+                result += chr(ord(c[q]) ^ b[(b[h] + b[f]) % 256])
             q += 1
         return result
 
@@ -1937,6 +1945,18 @@ class youkuDecoder:
         new_ep = self.trans_e(self.f_code_2, '%s_%s_%s' % (sid, vid, token))
         return base64.b64encode(new_ep), token, sid
 
+    def get_sid(self, ep):
+        e_code = self.trans_e(self.f_code_1, base64.b64decode(ep))
+        return e_code.split('_')
+
+    def generate_ep(self, no, streamfileids, sid, token):
+        number = hex(int(str(no), 10))[2:].upper()
+        if len(number) == 1:
+            number = '0' + number
+        fileid = streamfileids[0:8] + number + streamfileids[10:]
+        tmp = self.trans_e(self.f_code_2, sid + '_' + fileid + '_' + token)
+        ep = urllib.quote(base64.b64encode(tmp), safe='~()*!.\'')
+        return fileid, ep
 
 def getNumber(data, k):
     try:
@@ -1954,25 +1974,25 @@ def getNumber(data, k):
     except:
         return '0次'
 
-        
+
 def setLabel(c, data, k, default, pre, app, sep):
     try:
         label = data[k]
         c.setLabel(pre + sep.join(label) + app)
     except:
         try:
-            c.setLabel(pre + str(sep.join(label)) + app) 
+            c.setLabel(pre + str(sep.join(label)) + app)
         except:
             try:
-                c.setLabel(pre + unicode(sep.join(label)) + app) 
+                c.setLabel(pre + unicode(sep.join(label)) + app)
             except:
-                c.setLabel(pre + default + app)   
+                c.setLabel(pre + default + app)
 
 
 def setProperties(listitem, item):
     for k in item:
-        try:     
-            listitem.setProperty(k, item[k])  
+        try:
+            listitem.setProperty(k, item[k])
         except:
             try:
                 listitem.setProperty(k, str(item[k]))
@@ -1992,114 +2012,16 @@ def getProperty(item, key):
 def play(vid, playContinue=False):
     readSettings()
     playid = vid
-    xbmc.executebuiltin("ActivateWindow(busydialog)")
-    try:
-        moviesurl='http://play.youku.com/play/get.json?vid=%s&ct=12' % vid
-        result = GetHttpData(moviesurl)
-        movinfo = json.loads(result.replace('\r\n',''))
-        movdat = movinfo['data']
-    except:
-        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
-        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
-        return
 
-    #Set language
-    if movdat.has_key('dvd') and 'audiolang' in movdat['dvd']:
-        for item in movdat['dvd']['audiolang']:
-            if item['lang'] == settings_data['language'][settings['language']]:
-                if item['vid'] != vid:
-                    playid = item['vid']
-    if playid != vid:
-        try:
-            moviesurl='http://play.youku.com/play/get.json?vid=%s&ct=12' % playid
-            result = GetHttpData(moviesurl)
-            movinfo = json.loads(result.replace('\r\n',''))
-            movdat = movinfo['data']
-        except:
-            xbmc.executebuiltin( "Dialog.Close(busydialog)" )
-            xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
-            return
-
-    #Select resolution.
-    stream = {}
-    resolution = ''
-    try:
-        for i in range(settings['resolution'], len(settings_data['resolution'])):
-            for t in settings_data['resolution_type'][i]:
-                for s in movdat['stream']:
-                    if t == s['stream_type']:
-                        stream = s
-                        resolution = settings_data['resolution_type'][i][0]
-                        break
-                if stream.has_key('stream_type'):
-                    break
-            if stream.has_key('stream_type'):
-                break
-    except:
-        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
-        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
-        return
-
-    if not stream.has_key('stream_type'):
-        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
-        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
-        return
-
-
-    #Calculate the URLs
-    oip = movdat['security']['ip']
-    ep = movdat['security']['encrypt_string']
-    ep, token, sid = youkuDecoder()._calc_ep2(playid, ep)
-    
-    query = urllib.urlencode(dict(
-        vid=playid, ts=int(time.time()), keyframe=1, type=resolution,
-        ep=ep, oip=oip, ctype=12, ev=1, token=token, sid=sid,
-    ))
-    url = 'http://pl.youku.com/playlist/m3u8?%s' % (query)
-    try:
-        result = GetHttpData(url)
-        f = open(m3u8_file, 'wb')
-        f.write(result)
-        f.close()
-    except:
-        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
-        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
-        return
-    playlist = xbmc.PlayList(1)
-    playlist.clear()
-
-    urls = re.findall(r'(http://[^?]+)\?ts_start=0', result)
-    if settings_data['play_type'][settings['play']] == 'list':
-        for i in range(len(urls)):
-            title =movdat['video']['title'] + u" - 第"+str(i+1)+"/"+str(len(urls)) + u"节"
-            listitem=xbmcgui.ListItem(title)
-            listitem.setInfo(type="Video",infoLabels={"Title":title})
-            playlist.add(urls[i], listitem)
-    elif settings_data['play_type'][settings['play']] == 'stack':
-        playurl = 'stack://' + ' , '.join(urls)
-        listitem=xbmcgui.ListItem(movdat['video']['title'])
-        listitem.setInfo(type="Video", infoLabels={"Title":movdat['video']['title']})
-        playlist.add(playurl, listitem)
-    else:
-        listitem=xbmcgui.ListItem(movdat['video']['title'])
-        listitem.setInfo(type="Video", infoLabels={"Title":movdat['video']['title']})
-        playlist.add(m3u8_file, listitem)
-
-
-
-    xbmc.executebuiltin( "Dialog.Close(busydialog)" )
     try:
         ret = eval(cache.get('history'))
     except:
         ret = {}
 
     if ret.has_key(vid):
-        history = ret[vid] 
+        history = ret[vid]
     else:
         history = {}
-    history['title'] = movdat['video']['title']
-    history['vid'] = vid
-    history['logo'] = movdat['video']['logo']
     offset = 0
     startpos = 0
     try:
@@ -2118,6 +2040,147 @@ def play(vid, playContinue=False):
                 pass
         elif choice == -1:
             return
+
+    xbmc.executebuiltin("ActivateWindow(busydialog)")
+    try:
+        movinfo = json.loads(GetHttpData('http://play.youku.com/play/get.json?vid=%s&ct=12' % playid).replace('\r\n',''))
+        movdat = movinfo['data']
+        movinfo = json.loads(GetHttpData('http://play.youku.com/play/get.json?vid=%s&ct=10' % playid).replace('\r\n',''))
+        movdat1 = movinfo['data']
+        assert 'stream' in movdat
+        assert 'stream' in movdat1
+    except:
+        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
+        return
+
+    #Select resolution.
+    stream = {}
+    resolution = ''
+    language_code = settings_data['language_code'][settings['language']]
+    try:
+        for i in range(settings['resolution'], len(settings_data['resolution'])):
+            for t in settings_data['resolution_type'][i]:
+                for s in movdat1['stream']:
+                    if settings['language'] == 0 or language_code == s['audio_lang'] or s['audio_lang'] == 'default':
+                        if t == s['stream_type']:
+                            stream = s
+                            resolution = settings_data['resolution_type'][i][0]
+                            break
+                if stream.has_key('stream_type'):
+                    break
+            if stream.has_key('stream_type'):
+                break
+    except:
+        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
+        return
+
+    if not stream.has_key('stream_type'):
+        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
+        return
+
+
+    #Calculate the URLs
+    try:
+        if 0:
+            oip = movdat['security']['ip']
+            ep = movdat['security']['encrypt_string']
+            ep, token, sid = youkuDecoder()._calc_ep2(playid, ep)
+
+            query = urllib.urlencode(dict(
+                vid=playid, ts=int(time.time()), keyframe=1, type=resolution,
+                ep=ep, oip=oip, ctype=12, ev=1, token=token, sid=sid,
+            ))
+            url = 'http://pl.youku.com/playlist/m3u8?%s' % (query)
+            result = GetHttpData(url)
+            f = open(m3u8_file, 'wb')
+            f.write(result)
+            f.close()
+
+            playlist = xbmc.PlayList(1)
+            playlist.clear()
+
+            urls = re.findall(r'(http://[^?]+)\?ts_start=0', result)
+            if settings_data['play_type'][settings['play']] == 'list':
+                for i in range(len(urls)):
+                    title =movdat['video']['title'] + u" - 第"+str(i+1)+"/"+str(len(urls)) + u"节"
+                    listitem=xbmcgui.ListItem(title)
+                    listitem.setInfo(type="Video",infoLabels={"Title":title})
+                    playlist.add(urls[i], listitem)
+            elif settings_data['play_type'][settings['play']] == 'stack':
+                playurl = 'stack://' + ' , '.join(urls)
+                listitem=xbmcgui.ListItem(movdat['video']['title'])
+                listitem.setInfo(type="Video", infoLabels={"Title":movdat['video']['title']})
+                playlist.add(playurl, listitem)
+            else:
+                listitem=xbmcgui.ListItem(movdat['video']['title'])
+                listitem.setInfo(type="Video", infoLabels={"Title":movdat['video']['title']})
+                playlist.add(m3u8_file, listitem)
+
+        urls = []
+        segs = stream['segs']
+        streamfileid = stream['stream_fileid']
+
+        oip = movdat['security']['ip']
+        ep = movdat['security']['encrypt_string']
+        sid, token = youkuDecoder().get_sid(ep)
+
+        for no in range(len(segs)):
+            k = segs[no]['key']
+            assert k != -1
+            fileid, ep = youkuDecoder().generate_ep(no, streamfileid, sid, token)
+            q = urllib.urlencode(dict(
+                ctype = 12,
+                ev    = 1,
+                K     = k,
+                ep    = urllib.unquote(ep),
+                oip   = oip,
+                token = token,
+                yxon  = 1
+            ))
+            u = 'http://k.youku.com/player/getFlvPath/sid/{sid}_00/st/{container}/fileid/{fileid}?{q}'.format(
+                    sid       = sid,
+                    container = resolution_map[resolution],
+                    fileid    = fileid,
+                    q         = q
+            )
+            urls += [i['server'] for i in json.loads(GetHttpData(u))]
+
+        playlist = xbmc.PlayList(1)
+        playlist.clear()
+
+        if settings_data['play_type'][settings['play']] == 'concatenate' and resolution_map[resolution] == 'flv':
+            vc.start(urls)
+            port = vc.get_port()
+            assert(port != 0)
+            listitem=xbmcgui.ListItem(movdat['video']['title'])
+            listitem.setInfo(type="Video", infoLabels={"Title":movdat['video']['title']})
+            playlist.add('http://127.0.0.1:%d' % port, listitem)
+        elif settings_data['play_type'][settings['play']] == 'list':
+            for i in range(len(urls)):
+                title =movdat['video']['title'] + u" - 第"+str(i+1)+"/"+str(len(urls)) + u"节"
+                listitem=xbmcgui.ListItem(title)
+                listitem.setInfo(type="Video",infoLabels={"Title":title})
+                playlist.add(urls[i], listitem)
+        else:
+            playurl = 'stack://' + ' , '.join(urls)
+            listitem=xbmcgui.ListItem(movdat['video']['title'])
+            listitem.setInfo(type="Video", infoLabels={"Title":movdat['video']['title']})
+            playlist.add(playurl, listitem)
+    except:
+        xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+        xbmcgui.Dialog().ok('提示框', '解析地址异常，无法播放')
+        return
+
+
+
+    xbmc.executebuiltin( "Dialog.Close(busydialog)" )
+
+    history['title'] = movdat['video']['title']
+    history['vid'] = vid
+    history['logo'] = movdat['video']['logo']
 
     cache.set('currentVID', vid)
     if True:
@@ -2166,7 +2229,7 @@ def openWindow(window_name,session=None,**kwargs):
         return ret
     else:
         w = BaseWindow(windowFile , __cwd__, "Default",session=session,**kwargs)
-    w.doModal()            
+    w.doModal()
     del w
 
 
@@ -2205,7 +2268,7 @@ def registerHotKey(key='F12'):
     path = xbmc.translatePath('special://userdata/keymaps')
     keymap = os.path.join(path, 'youkutv.xml')
     if os.path.exists(keymap):
-        fp = open(keymap, 'r') 
+        fp = open(keymap, 'r')
         if '<' + key + '>' in fp.read():
             fp.close()
             return
@@ -2221,9 +2284,9 @@ def log(msg):
 
 def readSettings():
     try:
-        settings['resolution'] = int(__addon__.getSetting('resolution')) 
-        settings['language'] = int(__addon__.getSetting('language')) 
-        settings['play'] = int(__addon__.getSetting('play')) 
+        settings['resolution'] = int(__addon__.getSetting('resolution'))
+        settings['language'] = int(__addon__.getSetting('language'))
+        settings['play'] = int(__addon__.getSetting('play'))
         registerHotKey()
     except:
         __addon__.openSettings()
@@ -2256,5 +2319,6 @@ except:
     if __name__ == '__main__':
         cj = cookielib.CookieJar()
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+        opener.addheaders = [('Cookie', '__ysuid={0}'.format(time.time()))]
         urllib2.install_opener(opener)
         openWindow('main')

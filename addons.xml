@@ -202,10 +202,11 @@
   </extension>
 </addon>
 
-<addon id="plugin.video.bilibili" name="哔哩哔哩(bilibili)" version="0.2.5" provider-name="Syndim">
+<addon id="plugin.video.bilibili" name="哔哩哔哩(bilibili)" version="0.2.6" provider-name="Syndim">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
         <import addon="script.module.xbmcswift2" version="2.4.0"/>
+		<import addon="script.module.keyboard.chinese" version="1.0.0"/>
     </requires>
     <extension point="xbmc.python.pluginsource" library="addon.py">
         <provides>video</provides>
@@ -379,7 +380,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.pptv"
     name="PPTV视频"
-    version="1.2.8"
+    version="1.2.11"
     provider-name="Uranus Zhou">
     <requires>
         <import addon="script.module.keyboard.chinese" version="1.0.0"/>
@@ -398,7 +399,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
         <platform>all</platform>
 		<license>GNU GENERAL PUBLIC LICENSE. Version 3, 29 June 2007</license>
 		<forum>http://bbs.htpc1.com/thread-259452-1-1.html</forum>
-		<website>http://zohead.com/</website>
+		<website>https://zohead.com/</website>
 		<source>https://github.com/zohead/pptv4xbmc</source>
 		<email>nocwat at gmail dot com</email>
     </extension>
@@ -406,7 +407,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.qiyi"
     name="奇艺视频(QIYI)"
-    version="2.2.3"
+    version="2.2.4"
     provider-name="taxigps">
     <requires>
       <import addon="script.module.simplejson" version="3.3.0"/>
@@ -423,6 +424,25 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
         <description lang="zh">奇艺（QIYI.COM）是由百度创立的大型专业网站，专注于提供免费、高清网络视频服务。奇艺的优质版权视频丰富多元，涵盖了电影、电视剧、综艺、纪录片、动漫、旅游等众多内容形态。</description>
         <platform>all</platform>
     </extension>
+</addon>
+
+<addon id="plugin.video.rrmj"
+       name="人人美剧"
+       version="0.1.0"
+       provider-name="jindaxia">
+  <requires>
+    <import addon="xbmc.python" version="2.14.0"/>
+    <import addon="script.module.xbmcswift2" version="2.4.0"/>
+    <import addon="script.module.keyboard.chinese" version="2.0.4" optional="true"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="default.py">
+        <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="zh-CN">由人人影视转型后专门为美剧迷们打造的高质量讨论交流社区</summary>
+    <description lang="en"></description>
+    <platform>all</platform>
+  </extension>
 </addon>
 
 <addon id="plugin.video.sohuvideo"
@@ -508,7 +528,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
   </extension>
 </addon>
 
-<addon id="plugin.video.youkutv" name="YouKu TV" version="1.6.3" provider-name="catro">
+<addon id="plugin.video.youkutv" name="YouKu TV" version="1.7.6" provider-name="catro">
   <requires>
     <import addon="script.common.plugin.cache" version="0.9.1"/>
   </requires>
@@ -521,6 +541,24 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
     <summary>优酷TV</summary>
     <description>优酷视频是中国最大的视频分享网站</description>
   </extension>
+</addon>
+
+<addon id="plugin.video.zhanqitv"
+    name="战旗TV(ZhanqiTV)"
+    version="1.0.3"
+    provider-name="Albert">
+    <extension
+        point="xbmc.python.pluginsource"
+        library="addon.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">zhanqitv video plugin</summary>
+        <summary lang="zh">战旗TV插件</summary>
+        <description lang="en">online video from www.zhanqi.tv</description>
+        <description lang="zh">战旗TV</description>
+        <platform>all</platform>
+    </extension>
 </addon>
 
 <addon id="repository.xbmc-addons-chinese" name="Chinese Add-ons" version="1.2.0" provider-name="Taxigps">
@@ -542,7 +580,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="script.module.keyboard.chinese"
     name="Chinese keyboard"
-    version="2.0.4"
+    version="2.0.5"
     provider-name="Taxigps">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>

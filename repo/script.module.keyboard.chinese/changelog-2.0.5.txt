@@ -1,6 +1,6 @@
 ﻿v2.0.5 2016-01-21
  - Fix exception with skins which edit control has no height tag
- - Add links to the forum thread
+ - Add links to the forum thread 
 
 v2.0.4 2015-02-01
  - Create customized xml file to support more skin
