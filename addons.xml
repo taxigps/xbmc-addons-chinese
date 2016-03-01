@@ -428,15 +428,14 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.rrmj"
        name="人人美剧"
-       version="0.1.0"
+       version="0.1.4"
        provider-name="jindaxia">
   <requires>
-    <import addon="xbmc.python" version="2.14.0"/>
     <import addon="script.module.xbmcswift2" version="2.4.0"/>
     <import addon="script.module.keyboard.chinese" version="2.0.4" optional="true"/>
   </requires>
   <extension point="xbmc.python.pluginsource" library="default.py">
-        <provides>video</provides>
+    <provides>audio video</provides>
   </extension>
   <extension point="xbmc.addon.metadata">
     <summary lang="zh-CN">由人人影视转型后专门为美剧迷们打造的高质量讨论交流社区</summary>
