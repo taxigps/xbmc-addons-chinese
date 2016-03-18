@@ -544,7 +544,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.zhanqitv"
     name="战旗TV(ZhanqiTV)"
-    version="1.0.3"
+    version="1.0.4"
     provider-name="Albert">
     <extension
         point="xbmc.python.pluginsource"

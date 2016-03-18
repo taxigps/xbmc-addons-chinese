@@ -66,7 +66,7 @@ def play_video(room_id):
     obj = json.loads(f.read())
     #path = 'http://dlhls.cdn.zhanqi.tv/zqlive/{video}.m3u8'.format(video=obj['data']['videoIdKey']);
     #path = 'http://ebithdl.cdn.zhanqi.tv/zqlive/{video}.flv'.format(video=obj['data']['videoIdKey'])
-    path = 'rtmp://dlrtmp.load.cdn.zhanqi.tv/zqlive/{video}'.format(video=obj['data']['videoIdKey'])
+    path = 'rtmp://wsrtmp.load.cdn.zhanqi.tv/zqlive/{video}'.format(video=obj['data']['videoIdKey'])
     play_item = xbmcgui.ListItem(path=path, thumbnailImage=obj['data']['bpic'])
     play_item.setInfo(type="Video", infoLabels={"Title":obj['data']['title']})
     # Pass the item to the Kodi player.
