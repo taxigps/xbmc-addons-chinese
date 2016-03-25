@@ -428,7 +428,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.qiyi"
     name="奇艺视频(QIYI)"
-    version="2.2.5"
+    version="2.2.6"
     provider-name="taxigps">
     <requires>
       <import addon="script.module.simplejson" version="3.3.0"/>
