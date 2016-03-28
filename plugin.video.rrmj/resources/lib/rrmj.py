@@ -7,7 +7,7 @@ from common import *
 import xbmcvfs
 import xbmcgui
 import xbmcaddon
-SERVER = "http://api2.rrmj.tv"
+SERVER = "http://api.rrmj.tv"
 __ADDON__ = xbmcaddon.Addon()
 
 
