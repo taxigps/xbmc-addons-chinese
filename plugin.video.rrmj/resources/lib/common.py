@@ -14,12 +14,29 @@ def colorize(label, color):
 
 
 def setSettingByRPC(key, value):
+    """Set Kodi Setting by JSON-RPC
+
+    Args:
+        key (TYPE): Description
+        value (TYPE): Description
+
+    Returns:
+        TYPE: Description
+    """
     result = xbmc.executeJSONRPC('{"jsonrpc":"2.0", "method":"Settings.SetSettingValue", "params":{"setting":"%s", "value":%s}, "id":1}' % (key, value))
     result = json.loads(result)
     return result
 
 
 def getSettingByRPC(key):
+    """Get Kodi Setting by JSON-RPC
+
+    Args:
+        key (TYPE): Description
+
+    Returns:
+        TYPE: Description
+    """
     result = xbmc.executeJSONRPC('{"jsonrpc":"2.0","method":"Settings.GetSettingValue","params":{"setting":"%s"},"id":1}' % key)
     result = json.loads(result)
     return result["result"]["value"]

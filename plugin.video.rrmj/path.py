@@ -31,10 +31,11 @@ HISTORY = plugin.get_storage('history')
 
 
 def parse_qs(qs):
+    "Query String to Dictionary"
     return dict([s1.split('=') for s1 in urllib.unquote(qs).split('&')])
 
 
-def remap_url(req_url, page=1):
+def remap_url(req_url):
     array = req_url.split("?")
     params = parse_qs(array[1])
     if array[0] == "/video/search":
@@ -53,6 +54,7 @@ def set_auto_play():
     print setSettingByRPC("videoplayer.autoplaynextitem", auto_play_setting)
 
 
+# main entrance
 @plugin.route('/')
 def index():
     set_auto_play()
@@ -96,6 +98,7 @@ def index():
         yield item
 
 
+# list catagories
 @plugin.route('/cat/')
 def category():
     for ca in CATE:
@@ -107,6 +110,7 @@ def category():
         yield item
 
 
+# search entrance
 @plugin.route('/hotword/')
 def hotword():
     yield {
@@ -125,6 +129,7 @@ def hotword():
         yield item
 
 
+# get search result by input keyword
 @plugin.route("/input/")
 def input_keyword():
     keyboard = Keyboard('', '请输入搜索内容')
@@ -136,40 +141,53 @@ def input_keyword():
         plugin.redirect(url)
 
 
-@plugin.route('/search/cat_<cat>/page_<page>', name="cat_list", options={"page": "1"})
-@plugin.route('/search/title_<title>/page_<page>', name="search_title", options={"page": "1"})
-@plugin.route('/search/s_<sort>/o_<order>/m_<mark>/page_<page>', name="mark_list", options={"page": "1"})
-@plugin.route('/search/page_<page>', options={"page": "1"})
+@plugin.route('/search/cat_<cat>/page_<page>', name="cat_list", options={"page": "1"})  # get search result by catagory
+@plugin.route('/search/title_<title>/page_<page>', name="search_title", options={"page": "1"})  # get search result by search title
+@plugin.route('/search/s_<sort>/o_<order>/m_<mark>/page_<page>', name="mark_list", options={"page": "1"})  # get search result by catagory and page
+@plugin.route('/search/page_<page>', options={"page": "1"})  # get search result by nothing??
 def search(page, **kwargs):
     c_list = Meiju.search(page, PAGE_ROWS, **kwargs)
     for one in c_list["data"]["results"]:
-        item = {
+        item = ListItem(**{
             'label': one.get("title"),
             'path': plugin.url_for("detail", seasonId=one.get("id")),
             'icon': one["cover"],
             'thumbnail': one["cover"],
-            'is_playable': False
-        }
+        })
+        item.set_info("video", {"plot": one.get("brief", ""),
+                                "rating ": float(one["score"]),
+                                "genre": one["cat"],
+                                "season": one["seasonNo"]})
+        item.set_is_playable(False)
         yield item
+    plugin.set_content('TVShows')
 
 
 @plugin.route('/album/<albumId>/', name="album")
 def get_album(albumId):
     c_list = Meiju.get_album(albumId)
     for one in c_list["data"]["results"]:
-        item = {
+        item = ListItem(**{
             'label': one.get("title"),
             'path': plugin.url_for("detail", seasonId=one.get("id")),
-            'is_playable': False
-        }
+            'icon': one["cover"],
+            'thumbnail': one["cover"],
+        })
+        item.set_info("video", {"plot": one.get("brief", ""),
+                                "rating ": float(one["score"]),
+                                "genre": one["cat"],
+                                "season": one["seasonNo"]})
+        item.set_is_playable(False)
         yield item
+    plugin.set_content('TVShows')
 
 
+# get season episodes by season id
 @plugin.route('/detail/<seasonId>', name="detail")
 def video_detail(seasonId):
     detail = Meiju.video_detail(seasonId)
     title = detail["data"]["seasonDetail"]["title"]
-    SEASON_CACHE[seasonId] = detail["data"]
+    SEASON_CACHE[seasonId] = detail["data"]  # store season detail
     history = HISTORY.get("list", None)
     playing_episode = "0"
     if history is not None:
@@ -180,11 +198,15 @@ def video_detail(seasonId):
         label = title + episode["episode"]
         if episode["episode"] == playing_episode:
             label = "[B]" + colorize(label, "green") + "[/B]"
-        item = {
+        item = ListItem(**{
             'label': label,
             'path': plugin.url_for("play_season", seasonId=seasonId, index=episode["episode"], Esid=episode["sid"]),
-            'is_playable': True
-        }
+        })
+        item.set_info("video", {"plot": episode["text"],
+                                "TVShowTitle": episode["text"],
+                                "episode": int(episode["episode"]),
+                                "season": 0})
+        item.set_is_playable(True)
         yield item
     plugin.set_content('episodes')
 
@@ -198,7 +220,8 @@ def play(seasonId="", index="", Esid=""):
     play_url, _ = rs.get_play(seasonId, episode_sid, plugin.get_setting("quality"))
     if play_url is not None:
         add_history(seasonId, index, Esid, title)
-        plugin.set_resolved_url(play_url)
+        li = ListItem(title, path=play_url)
+        plugin.set_resolved_url(li)
 
 
 def add_history(seasonId, index, Esid, title):
