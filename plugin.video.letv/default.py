@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, re, string, sys, os, gzip, StringIO
-import math, os.path, httplib, time, random
+import math, os.path, httplib, time, random, socket
 import cookielib
 import base64
 import simplejson
@@ -14,11 +14,8 @@ except:
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
-# Version 1.5.4 2016-05-16 (cmeng)
-# - Improve UI feedback to user
-# - Allow fragment max to 300
-# - Add fragment start number for replay
-# - Update html tag structure changes
+# Version 1.5.5 2016-05-17 (cmeng)
+# - add socket.timeout exception handler to improve video download reliability
 
 # See changelog.txt for previous history
 ########################################################################
@@ -73,7 +70,6 @@ class LetvPlayer(xbmc.Player):
         self.maxfp = CFRAGMAX[int(__addon__.getSetting('video_cfragmentmax'))]
         self.playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
         self.psize = self.playlist.size()
-        pDialog.create('文件下载', '请稍候。下载视频文件 ....')
         self.geturl()
         self.playrun()
         pDialog.close()
@@ -81,6 +77,8 @@ class LetvPlayer(xbmc.Player):
     def geturl(self):
         ### Video  playback
         if (self.v_urls and (self.curpos < self.v_urls_size)):
+            if (not self.isPlayingVideo()):
+                pDialog.create('文件下载', '请稍候。下载视频文件 ....')
             x = (self.curpos / self.maxfp) % 2
             # Delete old file if exists!
             # self.delTsFile(x)
@@ -116,6 +114,7 @@ class LetvPlayer(xbmc.Player):
                     i = self.v_urls_size
                     break;
             fs.close()
+            pDialog.close()
             # set self.curpos to the last loaded video index
             self.curpos = i + 1
             print "### Last video file download segment: " + str(i)
@@ -148,8 +147,8 @@ class LetvPlayer(xbmc.Player):
     def playrun(self):
         if (not self.isPlayingVideo()):
             print "### Player resumed: " + self.videourl
-            xbmc.Player.play(self, self.videourl, self.listitem)
             pDialog.close()
+            xbmc.Player.play(self, self.videourl, self.listitem)
         if ((self.curpos < self.v_urls_size) or self.videoplaycont):
             print "### Get next video segment @ " + str(self.curpos)
             self.geturl() 
@@ -179,6 +178,7 @@ class LetvPlayer(xbmc.Player):
 
     def onPlayBackStopped(self):
         print "### Player Stopped!!!" 
+        pDialog.close()
         self.is_active = False
         
     def delTsFile(self, index = 10):
