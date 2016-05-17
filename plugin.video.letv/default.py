@@ -14,8 +14,11 @@ except:
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
-# Version 1.5.3 2015-12-12 (cmeng)
-# - Cannot delete temporary video files when playback stops before next()
+# Version 1.5.4 2016-05-16 (cmeng)
+# - Improve UI feedback to user
+# - Allow fragment max to 300
+# - Add fragment start number for replay
+# - Update html tag structure changes
 
 # See changelog.txt for previous history
 ########################################################################
@@ -43,7 +46,7 @@ COLOR_LIST = ['[COLOR FFFF0000]', '[COLOR FF00FF00]', '[COLOR FFFFFF00]', '[COLO
 FLVCD_PARSER_PHP = 'http://www.flvcd.com/parse.php'
 FLVCD_DIY_URL = 'http://www.flvcd.com/diy/diy00'
 
-CFRAGMAX = [10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100]
+CFRAGMAX = [10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500]
 
 ##################################################################################
 # LeTv player class
@@ -56,10 +59,13 @@ class LetvPlayer(xbmc.Player):
         self.is_active = True
         self.name = name
         self.thumb = thumb
+        self.v_urls_size = 0
+        self.curpos = 0
         
         self.v_urls = v_urls
         if (v_urls):
-            self.curpos = 0
+            self.curpos = int(__addon__.getSetting('video_fragmentstart')) * 10
+            self.v_urls_size = len(v_urls)
         else:
             self.curpos = int(name.split('.')[0]) - 1
             
@@ -67,31 +73,52 @@ class LetvPlayer(xbmc.Player):
         self.maxfp = CFRAGMAX[int(__addon__.getSetting('video_cfragmentmax'))]
         self.playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
         self.psize = self.playlist.size()
+        pDialog.create('文件下载', '请稍候。下载视频文件 ....')
         self.geturl()
         self.playrun()
+        pDialog.close()
     
     def geturl(self):
         ### Video  playback
-        if (self.v_urls and (self.curpos <= len(self.v_urls))):
+        if (self.v_urls and (self.curpos < self.v_urls_size)):
             x = (self.curpos / self.maxfp) % 2
+            # Delete old file if exists!
+            # self.delTsFile(x)
             self.videourl = __profile__ + 'vfile-' + str(x) + '.ts'
             fs = open(self.videourl, 'wb')
 
-            title = "%s - 第(%s~%s)/%s节" % (self.name, str(self.curpos+1), str(self.curpos+self.maxfp), str(len(self.v_urls)))
+            endIndex = min((self.curpos + self.maxfp), self.v_urls_size)
+            title = "%s - 第(%s~%s)/%s节" % (self.name, str(self.curpos+1), str(endIndex), str(self.v_urls_size))
+            print "### Preparing: " + title
             self.listitem = xbmcgui.ListItem(title, thumbnailImage=self.thumb)
             self.listitem.setInfo(type="Video", infoLabels={"Title":title})
 
-            endIndex = min((self.curpos + self.maxfp), len(self.v_urls))
             for i in range(self.curpos, endIndex):
                 v_url = self.v_urls[i]
+                
                 bfile = getHttpData(v_url, True)
+                # give another trial if playback is active and bfile is invalid
+                if ((len(bfile) < 30) and self.isPlayingVideo()) :
+                    bfile = getHttpData(v_url, True)
                 fs.write(bfile)
-                if (i == 3) and (not self.isPlayingVideo()):
+                
+                if (not self.isPlayingVideo() and (i < (self.curpos + 3))):
+                    pDialog.update((i + 1) * 25)
+                # Start playback after fetching 4th video files 
+                if (i == (self.curpos + 3)) and (not self.isPlayingVideo()):
+                    pDialog.close()
                     xbmc.Player.play(self, self.videourl, self.listitem)
-                elif (i > 4) and (i < (endIndex - 1)) and (not self.isPlayingVideo()):
+                    # Reset fragment start after successful playback
+                    __addon__.setSetting('video_fragmentstart', '0')
+                # Stop further video download if user stops playback
+                elif (i > (self.curpos + 4)) and (i < (endIndex - 1)) and (not self.isPlayingVideo()):
+                    self.videourl = None
+                    i = self.v_urls_size
                     break;
             fs.close()
-            self.curpos += self.maxfp
+            # set self.curpos to the last loaded video index
+            self.curpos = i + 1
+            print "### Last video file download segment: " + str(i)
 
         # ugc auto playback
         elif ((self.v_urls == None) and (self.curpos < self.psize)):
@@ -120,15 +147,18 @@ class LetvPlayer(xbmc.Player):
 
     def playrun(self):
         if (not self.isPlayingVideo()):
-            # print "### Player resumed !!!"
+            print "### Player resumed: " + self.videourl
             xbmc.Player.play(self, self.videourl, self.listitem)
-        if self.videoplaycont:
+            pDialog.close()
+        if ((self.curpos < self.v_urls_size) or self.videoplaycont):
+            print "### Get next video segment @ " + str(self.curpos)
             self.geturl() 
         
     def onPlayBackStarted(self):
         xbmc.Player.onPlayBackStarted(self)
 
     def onPlayBackSeek(self, time, seekOffset):
+        # print "### Player seek forward: " + str(time) + str(seekOffset)
         xbmc.Player.onPlayBackSeek(self, time, seekOffset)
 
     def onPlayBackSeekChapter(self, chapter):
@@ -136,22 +166,23 @@ class LetvPlayer(xbmc.Player):
 
     def onPlayBackEnded(self):
         if self.videourl:
-            # print "### Player Ended-Continue !!!"
+            print "### Player Ended - Continue Playing"
             self.playrun()
+        elif (self.curpos < self.v_urls_size):
+            print "### Player Ended - Fetching next segment @ " + str(self.curpos)
+            self.geturl() 
         else:
-            # print "### Player Ended-Deleted !!!"
+            print "### Player Ended-Deleted !!!"
             self.is_active = False
             xbmc.Player.onPlayBackEnded(self)
             self.delTsFile()
 
     def onPlayBackStopped(self):
-        # print "### Player Stopped -Deleted!!!"
+        print "### Player Stopped!!!" 
         self.is_active = False
-        # cannot delete temporary files when last video playback stops before continues 
-        # self.delTsFile()
         
-    def delTsFile(self):
-        for k in range(10):
+    def delTsFile(self, index = 10):
+        for k in range(index):
             tsfile = __profile__ + 'vfile-' + str(k) + '.ts'
             if os.path.isfile(tsfile):
                 try:
@@ -161,6 +192,8 @@ class LetvPlayer(xbmc.Player):
 
 xplayer = LetvPlayer()
 mplaylist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
+dialog = xbmcgui.Dialog()
+pDialog = xbmcgui.DialogProgressBG()
 
 ##################################################################################
 # Routine to fetech url site data using Mozilla browser
@@ -206,6 +239,8 @@ def getHttpData(url, binary=False):
             httpdata = e.read()
         except urllib2.URLError, e:
             httpdata = "IO Timeout Error"
+        except socket.timeout, e:
+            httpdata = "IO Timeout Error"
         else:
             httpdata = response.read()
             response.close()
@@ -250,7 +285,7 @@ def getListSEL(listpage):
     match = re.compile('<li>(.+?)</li>').findall(listpage)
     for k, list in enumerate(match):
         title = re.compile('<h2.+?>(.+?)</h2>').findall(list)
-        itemLists = re.compile('href="(.+?)"><b.+?>(.+?)</b>').findall(list)
+        itemLists = re.compile('href="(.+?)"><b.*?>(.+?)</b>').findall(list)
         if (len(itemLists) > 1):
             itemList = [[x[0], x[1].strip()] for x in itemLists]
     
@@ -265,7 +300,7 @@ def getListSEL(listpage):
                     break
             
             icnt = len(itemList)
-                            # no filter for first item selection i.e. "全部"
+            # no filter for first item selection i.e. "全部"
             for i in range (icnt):
                 if (i == 0) and (ilist1 < ilist2):
                     itemList[i][0] = ''
@@ -422,7 +457,8 @@ def progListMovie(name, url, cat, filtrs, page, listpage):
     
     if (listpage == None):
         link = getHttpData(url)
-        listpage = re.compile('<ul class="label_list.+?>(.+?)</ul>').findall(link)[0]
+        # print link
+        listpage = re.compile('<ulclass="label_list.+?>(.+?)</ul>').findall(link)[0]
         match = re.compile('<div class="sort_navy.+?">(.+?)</div>').findall(link)
         if len(match):
             listpage += match[0].replace('li', 'lo')
@@ -939,6 +975,7 @@ def decrypt_url(url):
     except:
         return ''
 
+    pDialog.update(30)
     stream_id = None
     support_stream_id = info["playurl"]["dispatch"].keys()
 #     print("Current Video Supports:")
@@ -973,11 +1010,15 @@ def decrypt_url(url):
     ext = vodRes[stream_id][1].split('.')[-1]
 
     r2 = getHttpData(url)
+    pDialog.update(60)
+
     # try:
     info2 = simplejson.loads(r2)
 
-    # need to decrypt m3u8 (encoded)
+    # need to decrypt m3u8 (encoded) - may hang here
     m3u8 = getHttpData(info2["location"])
+    pDialog.update(90)
+
     m3u8_list = decode(m3u8)
 	# urls contains array of v_url video links for playback
     urls = re.findall(r'^[^#][^\r]*', m3u8_list, re.MULTILINE)
@@ -989,14 +1030,15 @@ def decrypt_url(url):
 
 ##################################################################################
 def playVideoLetv(name, url, thumb):
-    dialog = xbmcgui.Dialog()
-    pDialog = xbmcgui.DialogProgress()
-    pDialog.create('匹配视频', '请耐心等候! 尝试匹配视频文件 ...')
+    # dialog = xbmcgui.Dialog()
+    # pDialog = xbmcgui.DialogProgressBG()
     
+    pDialog.create('匹配视频', '请耐心等候! 尝试匹配视频文件 ...')
+    pDialog.update(0)
+
     v_urls = decrypt_url(url)
     pDialog.close()
 
-    vLen = len(v_urls)
     if len(v_urls):
         xplayer.play(name, thumb, v_urls)
         while xplayer.is_active:
@@ -1012,8 +1054,8 @@ def playVideoLetv(name, url, thumb):
 def playVideoUgc(name, url, thumb):
     videoplaycont = __addon__.getSetting('video_vplaycont')
     
-    dialog = xbmcgui.Dialog()
-    pDialog = xbmcgui.DialogProgress()
+#    dialog = xbmcgui.Dialog()
+#    pDialog = xbmcgui.DialogProgress()
     pDialog.create('匹配视频', '请耐心等候! 尝试匹配视频文件 ...')
 
     # check selected url and abort if failed and single time playback
@@ -1021,12 +1063,14 @@ def playVideoUgc(name, url, thumb):
         v_urls = decrypt_url(url)
     except:
         pass
-    pDialog.close()
+    # pDialog.close()
     if len(v_urls):
         xplayer.play(name, thumb)
         while xplayer.is_active:
             xbmc.sleep(100)
+        pDialog.close()
     else:
+        # pDialog.close()
         # if '解析失败' in link:
         dialog.ok(__addonname__, '无法播放：未匹配到视频文件，请选择其它视频')
 
@@ -1037,8 +1081,8 @@ def playVideoLetvx(name, url, thumb):
     videoRes = int(__addon__.getSetting('video_resolution'))
     vparamap = {0:'normal', 1:'high', 2:'super'}
     
-    dialog = xbmcgui.Dialog()
-    pDialog = xbmcgui.DialogProgress()
+    # dialog = xbmcgui.Dialog()
+    # pDialog = xbmcgui.DialogProgress()
     ret = pDialog.create('匹配视频', '请耐心等候! 尝试匹配视频文件 ...')
     
     # p_url = "http://www.flvcd.com/parse.php?kw="+url+"&format="+str(videoRes)
@@ -1124,7 +1168,7 @@ def playVideoUgcx(name, url, thumb):
     errcnt = 0
     k = 0
     
-    pDialog = xbmcgui.DialogProgress()
+    # pDialog = xbmcgui.DialogProgress()
     ret = pDialog.create('匹配视频', '请耐心等候! 尝试匹配视频文件 ...')
     
     for x in range(psize):

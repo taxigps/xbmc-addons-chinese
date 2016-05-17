@@ -306,7 +306,7 @@
 
 <addon id="plugin.video.letv"
     name="乐视网 (LeTV)"
-    version="1.5.3"
+    version="1.5.4"
     provider-name="cmeng">
   	<requires>
   	    <import addon="script.module.simplejson" version="3.3.0"/>
