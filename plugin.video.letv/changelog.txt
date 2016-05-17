@@ -1,6 +1,9 @@
 ﻿########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
+# Version 1.5.5 2016-05-18 (cmeng)
+# - add socket.timeout exception handler to improve video download reliability
+
 # Version 1.5.4 2016-05-16 (cmeng)
 # - Improve UI feedback to user
 # - Allow fragment max to 300
