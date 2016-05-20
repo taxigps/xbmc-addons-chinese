@@ -14,11 +14,9 @@ except:
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
-# Version 1.5.6 2016-05-18 (cmeng)
-# - Start next video segment loading only after xmbc.player has started to avoid race condition
-# - Improve video loading handling on player aborted
-# - change ugc and star data fetch routine due to html changes
-# - Add support for ugc playlist continuous playback function
+# Version 1.5.7 2016-05-20 (cmeng)
+# - Playback retries every 4th video segment download if aborted due to starve network data
+# - Pick a random domain from the given fetch list to load video 
 
 # See changelog.txt for previous history
 ########################################################################
@@ -71,7 +69,7 @@ class LetvPlayer(xbmc.Player):
         else: # ugc playlist playback
             self.curpos = int(name.split('.')[0]) - 1
             # Get the number of video items in PlayList for ugc playback
-            self.playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
+            self.playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
             self.psize = self.playlist.size()
             
         self.videoplaycont = __addon__.getSetting('video_vplaycont')
@@ -104,10 +102,6 @@ class LetvPlayer(xbmc.Player):
                     self.videourl = None
                     i = self.v_urls_size
                     break
-                
-                # allow some free time for xbmc callback
-                if (not i/5):
-                    xbmc.sleep(100)
                                     
                 v_url = self.v_urls[i]
                 bfile = getHttpData(v_url, True)
@@ -116,17 +110,18 @@ class LetvPlayer(xbmc.Player):
                     bfile = getHttpData(v_url, True)
                 fs.write(bfile)
                 
-                if (not self.isPlayingVideo() and (i < (self.curpos + 3))):
+                if (not self.isPlayingVideo() and (i < (self.curpos + 4))):
                     pDialog.update((i + 1) * 25)
 
-                # Start playback after fetching 4th video files 
-                if (i == (self.curpos + 3)) and (not self.isPlayingVideo()):
+                # Start playback after fetching 4th video files, restart every 4 fetches if playback aborted unless stop by user
+                if (not self.isPlayingVideo() and (i < self.v_urls_size) and (self.curpos % 4 == 3)):
                     pDialog.close()
                     xbmc.Player.play(self, self.videourl, self.listitem)
                     # Only reset fragment start after successful playback
                     __addon__.setSetting('video_fragmentstart', '0')
                     
             fs.close()
+            print "### Last video file download fragment: " + str(i)
             # set self.curpos to the next loading video index
             self.curpos = i + 1
 
@@ -158,25 +153,22 @@ class LetvPlayer(xbmc.Player):
                     i = self.v_urls_size
                     break
                 
-                # allow some free time for xbmc callback
-                if (not i/5):
-                    xbmc.sleep(100)
-
                 bfile = getHttpData(v_url, True)
                 fs.write(bfile)
                 
-                if (not self.isPlayingVideo() and (i < ( 3))):
+                if (not self.isPlayingVideo() and (i < 4)):
                     pDialog.update((i + 1) * 25)
 
-                if (i == 3) and (not self.isPlayingVideo()):
+                # Start playback after fetching 4th video files, restart every 4 fetches if playback aborted unless stop by user
+                if (not self.isPlayingVideo() and (i < self.v_urls_size) and (i % 4 == 3)):
                     pDialog.close()
                     xbmc.Player.play(self, self.videourl, self.listitem)
             fs.close()
+            print "### Last video file download total fragment: " + str(i)
             self.curpos += 1
             
         # close dialog on all mode when fetching end
         pDialog.close()
-        print "### Last video file downloaded fragment: " + str(i)
 
     def playrun(self):
         if (self.videourl and not self.isPlayingVideo()):
@@ -209,7 +201,7 @@ class LetvPlayer(xbmc.Player):
 
     def onPlayBackEnded(self):
         if self.videourl:
-            print "### Player Ended - Continue Playing"
+            print "### Player Ended - Continue next video playback !!!"
             self.playrun()
         else:
             print "### Player Ended-Deleted !!!"
@@ -231,7 +223,7 @@ class LetvPlayer(xbmc.Player):
                     pass       
 
 xplayer = LetvPlayer()
-mplaylist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
+mplaylist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
 dialog = xbmcgui.Dialog()
 pDialog = xbmcgui.DialogProgressBG()
 
@@ -1029,7 +1021,11 @@ def decrypt_url(url):
     else:
         stream_id = sorted(support_stream_id, key=lambda i: int(i[1:]))[-1]
         
-    domain = playurl['domain'][0]
+    # pick a random domain
+    index = random.randint(0, len(playurl['domain']) - 1)
+    domain = playurl['domain'][index]
+    # print "domains: " + str(index), playurl['domain']
+
     vodRes = playurl['dispatch']
     vod = None
     while ((vod == None) and (videoRes >= 0)):
@@ -1083,6 +1079,7 @@ def playVideoLetv(name, url, thumb):
         # need xmbc.sleep to make xbmc callback working
         while xplayer.is_active:
             xbmc.sleep(100)
+        pDialog.close()
     else:
         # if '解析失败' in link: (license constraint etc)
     	dialog.ok(__addonname__, '无法播放：未匹配到视频文件，请选择其它视频')
@@ -1093,15 +1090,45 @@ def playVideoLetv(name, url, thumb):
 ##################################################################################
 def playVideoUgc(name, url, thumb):
     xplayer.play(name, thumb)
-    
-    # need xmbc.sleep to make xbmc callback working
+    # need xmbc.sleep(100) to make xbmc callback working
     while xplayer.is_active:
         xbmc.sleep(100)
+    pDialog.close()
+    return
+    
+    # Below method is not good on slow network data streaming
+    # Get the number of video items in PlayList for ugc playback
+    playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+    psize = playlist.size()
+
+    curpos = int(name.split('.')[0]) - 1
+    for i in range (curpos, psize):
+        p_item = playlist.__getitem__(i)
+        p_url = p_item.getfilename(i)
+        # p_url auto replaced with self.videourl by xbmc after played
+        if "http:" in p_url:
+            p_list = p_item.getdescription(i)
+            listitem = p_item  # pass all li items including the embedded thumb image
+            listitem.setInfo(type="Video", infoLabels={"Title":p_list})    
+            curpos = i
+        else:
+            continue
+
+        pDialog.create('匹配视频', '请耐心等候! 尝试匹配视频文件 ...')
+        pDialog.update(0)
+
+        v_urls = decrypt_url(p_url)
+        pDialog.close()
+        xplayer.play(name, thumb, v_urls)
+    
+        # need xmbc.sleep(100) to make xbmc callback working
+        while xplayer.is_active:
+            xbmc.sleep(100)
 
 ##################################################################################    
 # Routine to extra video link using flvcd - not use (url link fetech problem)
 ##################################################################################
-def playVideoLetvx(name, url, thumb):
+def playVideoLetvx(name, url, thumb): # Obsoleted
     videoRes = int(__addon__.getSetting('video_resolution'))
     vparamap = {0:'normal', 1:'high', 2:'super'}
     
@@ -1148,7 +1175,7 @@ def playVideoLetvx(name, url, thumb):
         pDialog.close() 
         ok = dialog.ok(__addonname__, '无法播放：多次未匹配到视频文件，请选择其它视频')
 
-def flvcd(urlData):
+def flvcd(urlData):  # Obsoleted
     flvDnLink = "http://wwwa.flvcd.com/downparse.php?t=%s&name=%s&url=%s&tsn=%s&msKey=%s&passport=%s"
 
     # get hidden values in form
@@ -1178,7 +1205,7 @@ def flvcd(urlData):
         return match        
 
 ##################################################################################
-def playVideoUgcx(name, url, thumb):
+def playVideoUgcx(name, url, thumb):  # Obsoleted
     videoRes = int(__addon__.getSetting('video_resolution'))
     videoplaycont = __addon__.getSetting('video_vplaycont')
 
