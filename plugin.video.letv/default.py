@@ -14,9 +14,10 @@ except:
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
-# Version 1.5.7 2016-05-20 (cmeng)
-# - Playback retries every 4th video segment download if aborted due to starve network data
-# - Pick a random domain from the given fetch list to load video 
+# Version 1.5.8 2016-05-21 (cmeng)
+# - Fixed implementation error to start video playback
+# - Drop DialogProgressBG usage due to uncontrolled zombie dialog generation
+# - Allow user cancellation during video loading
 
 # See changelog.txt for previous history
 ########################################################################
@@ -61,6 +62,8 @@ class LetvPlayer(xbmc.Player):
         self.is_active = True
         self.load_url_sync = False
         self.xbmc_player_stop = False
+        self.title = name
+        self.mCheck = True
         
         self.v_urls = v_urls
         if (v_urls): # single video file playback
@@ -77,12 +80,14 @@ class LetvPlayer(xbmc.Player):
         
         # Start download video and playback
         self.geturl()
+        # Do not display dialog on subsequent UGC list loading
+        self.mCheck = False
         self.playrun()
         pDialog.close()
     
     def geturl(self):
         if (not self.isPlayingVideo()):
-            pDialog.create('文件下载', '请稍候。下载视频文件 ....')
+            pDialog.create('视频文件下载', '请稍候。下载视频文件 ....')
 
         if (self.v_urls and (self.curpos < self.v_urls_size)):
             # Use double buffering for smooth playback
@@ -91,80 +96,81 @@ class LetvPlayer(xbmc.Player):
             fs = open(self.videourl, 'wb')
 
             endIndex = min((self.curpos + self.maxfp), self.v_urls_size)
-            title = "%s - 第(%s~%s)/%s节" % (self.name, str(self.curpos+1), str(endIndex), str(self.v_urls_size))
-            print "### Preparing: " + title
-            self.listitem = xbmcgui.ListItem(title, thumbnailImage=self.thumb)
-            self.listitem.setInfo(type="Video", infoLabels={"Title":title})
+            self.title = "%s - 第(%s~%s)/%s节" % (self.name, str(self.curpos+1), str(endIndex), str(self.v_urls_size))
+            # print "### Preparing: " + self.title
+            self.listitem = xbmcgui.ListItem(self.title, thumbnailImage=self.thumb)
+            self.listitem.setInfo(type="Video", infoLabels={"Title":self.title})
 
             for i in range(self.curpos, endIndex):
                 # Stop further video loading and terminate if user stop playback
-                if (self.xbmc_player_stop):
+                if (self.xbmc_player_stop or pDialog.iscanceled()):
                     self.videourl = None
                     i = self.v_urls_size
                     break
                                     
                 v_url = self.v_urls[i]
-                bfile = getHttpData(v_url, True)
+                bfile = getHttpData(v_url, True, True)
                 # give another trial if playback is active and bfile is invalid
                 if ((len(bfile) < 30) and self.isPlayingVideo()) :
-                    bfile = getHttpData(v_url, True)
+                    bfile = getHttpData(v_url, True, True)
                 fs.write(bfile)
                 
                 if (not self.isPlayingVideo() and (i < (self.curpos + 4))):
                     pDialog.update((i + 1) * 25)
 
                 # Start playback after fetching 4th video files, restart every 4 fetches if playback aborted unless stop by user
-                if (not self.isPlayingVideo() and (i < self.v_urls_size) and (self.curpos % 4 == 3)):
+                if (not self.isPlayingVideo() and (i < self.v_urls_size) and (((i - self.curpos) % 4) == 3)):
                     pDialog.close()
                     xbmc.Player.play(self, self.videourl, self.listitem)
                     # Only reset fragment start after successful playback
                     __addon__.setSetting('video_fragmentstart', '0')
                     
             fs.close()
-            print "### Last video file download fragment: " + str(i)
+            # print "### Last video file download fragment: " + str(i)
             # set self.curpos to the next loading video index
             self.curpos = i + 1
 
         # ugc auto playback
         elif ((self.v_urls == None) and (self.curpos < self.psize)):
-            # find next not play item
-            for i in range (self.curpos, self.psize):
-                p_item = self.playlist.__getitem__(i)
-                p_url = p_item.getfilename(i)
-                # p_url auto replaced with self.videourl by xbmc after played
+            # find next not play item in ugc playlist
+            for idx in range (self.curpos, self.psize):
+                p_item = self.playlist.__getitem__(idx)
+                p_url = p_item.getfilename(idx)
+                # p_url auto replaced with self.videourl by xbmc after played. To refresh, back and re-enter
                 if "http:" in p_url:
-                    p_list = p_item.getdescription(i)
+                    p_list = p_item.getdescription(idx)
                     self.listitem = p_item  # pass all li items including the embedded thumb image
                     self.listitem.setInfo(type="Video", infoLabels={"Title":p_list})    
-                    self.curpos = i
+                    self.curpos = idx
                     break;
                 
             x = self.curpos % 2
             self.videourl = __profile__ + 'vfile-' + str(x) + '.ts'
             fs = open(self.videourl, 'wb')
 
-            v_urls = decrypt_url(p_url)
+            v_urls = decrypt_url(p_url, self.mCheck)
             self.v_urls_size = len(v_urls)
-            print "### Preparing UGC playback @ %s (size = %s): %s" % (str(self.curpos), str(self.v_urls_size), p_list)
+            self.title = "UGC list @ %s (size = %s): %s" % (str(self.curpos), str(self.v_urls_size), p_list)
+            # print "### Preparing: " + self.title
 
             for i, v_url in enumerate(v_urls):
-                if (self.xbmc_player_stop):
+                if (self.xbmc_player_stop or pDialog.iscanceled()):
                     self.videourl = None
                     i = self.v_urls_size
                     break
                 
-                bfile = getHttpData(v_url, True)
+                bfile = getHttpData(v_url, True, True)
                 fs.write(bfile)
                 
                 if (not self.isPlayingVideo() and (i < 4)):
                     pDialog.update((i + 1) * 25)
 
                 # Start playback after fetching 4th video files, restart every 4 fetches if playback aborted unless stop by user
-                if (not self.isPlayingVideo() and (i < self.v_urls_size) and (i % 4 == 3)):
+                if (not self.isPlayingVideo() and (i < self.v_urls_size) and ((i % 4) == 3)):
                     pDialog.close()
                     xbmc.Player.play(self, self.videourl, self.listitem)
             fs.close()
-            print "### Last video file download total fragment: " + str(i)
+            # print "### Last video file download total fragment: " + str(i)
             self.curpos += 1
             
         # close dialog on all mode when fetching end
@@ -172,21 +178,22 @@ class LetvPlayer(xbmc.Player):
 
     def playrun(self):
         if (self.videourl and not self.isPlayingVideo()):
-            print "### Player resumed: " + self.videourl
+            # print "### Player resume: " + self.title
             pDialog.close()
             xbmc.Player.play(self, self.videourl, self.listitem)
             # Next video segment loading must wait until player started to avoid race condition
             self.load_url_sync = True;
         elif ((self.curpos < self.v_urls_size) or self.videoplaycont):
-            print "### Async fetch next video segment @ " + str(self.curpos)
+            # print "### Async fetch next video segment @ " + str(self.curpos)
             self.geturl()
         
     def onPlayBackStarted(self):
-        print "### Player Started: " + self.videourl
+        # may display next title to playback due to async
+        # print "### onPlayBackStarted Callback: " + self.title
         if (self.load_url_sync):
             self.load_url_sync = False
             if ((self.curpos < self.v_urls_size) or self.videoplaycont):
-                print "### Sync fetch next video segment @ " + str(self.curpos)
+                # print "### Sync fetch next video segment @ " + str(self.curpos)
                 self.geturl()
         xbmc.Player.onPlayBackStarted(self)
 
@@ -195,21 +202,22 @@ class LetvPlayer(xbmc.Player):
         xbmc.Player.onPlayBackSeek(self, time, seekOffset)
 
     def onPlayBackSeekChapter(self, chapter):
+        # no effect, valid on playlist playback by xmbc
         self.curpos += 1
-        print "### Player seek next chapter: " + str(self.curpos)
+        # print "### Player seek next chapter: " + str(self.curpos)
         xbmc.Player.onPlayBackSeek(self, chapter)
 
     def onPlayBackEnded(self):
         if self.videourl:
-            print "### Player Ended - Continue next video playback !!!"
+            # print "### onPlayBackEnded callback: Continue next video playback !!!"
             self.playrun()
         else:
-            print "### Player Ended-Deleted !!!"
-            self.delTsFile(10)
+            # print "### onPlayBackEnded callback: Ended-Deleted !!!"
+            ## self.delTsFile(10)
             xbmc.Player.onPlayBackEnded(self)
 
     def onPlayBackStopped(self):
-        print "### Player Stopped!!!" 
+        # print "### onPlayBackStopped callback - Ending playback!!!" 
         self.is_active = False
         self.xbmc_player_stop = True
         
@@ -225,7 +233,7 @@ class LetvPlayer(xbmc.Player):
 xplayer = LetvPlayer()
 mplaylist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
 dialog = xbmcgui.Dialog()
-pDialog = xbmcgui.DialogProgressBG()
+pDialog = xbmcgui.DialogProgress()
 
 ##################################################################################
 # Routine to fetech url site data using Mozilla browser
@@ -234,7 +242,7 @@ pDialog = xbmcgui.DialogProgressBG()
 # - unicode with 'replace' option to avoid exception on some url
 # - translate to utf8
 ##################################################################################
-def getHttpData(url, binary=False):
+def getHttpData(url, binary = False, mCheck = False):
     print "getHttpData: " + url
     # setup proxy support
     proxy = __addon__.getSetting('http_proxy')
@@ -265,6 +273,9 @@ def getHttpData(url, binary=False):
     # req.add_header('cookie', 'PHPSESSID=ruebtvftj69ervhpt24n1b86i3')
     
     for k in range(3):  # give 3 trails to fetch url data
+        if (mCheck and pDialog.iscanceled()):  # exit if cancelled by user
+            return None
+        
         try:
             response = opener.open(req)
         except urllib2.HTTPError, e:
@@ -991,8 +1002,8 @@ def decode(data):
         # directly return
         return data
 
-# # ------ video links decryptio ---------------------- ##
-def decrypt_url(url):
+# # ------ video links decrypt ---------------------- ##
+def decrypt_url(url, mCheck = True):
     videoRes = int(__addon__.getSetting('video_resolution'))
     vparamap = {0:'1300', 1:'720p', 2:'1080p'}
     
@@ -1008,7 +1019,8 @@ def decrypt_url(url):
     except:
         return ''
 
-    pDialog.update(30)
+    if (mCheck):
+        pDialog.update(30)
     stream_id = None
     support_stream_id = info["playurl"]["dispatch"].keys()
 #     print("Current Video Supports:")
@@ -1021,10 +1033,9 @@ def decrypt_url(url):
     else:
         stream_id = sorted(support_stream_id, key=lambda i: int(i[1:]))[-1]
         
-    # pick a random domain
+    # pick a random domain to minimize overloading single server
     index = random.randint(0, len(playurl['domain']) - 1)
     domain = playurl['domain'][index]
-    # print "domains: " + str(index), playurl['domain']
 
     vodRes = playurl['dispatch']
     vod = None
@@ -1047,23 +1058,23 @@ def decrypt_url(url):
     ext = vodRes[stream_id][1].split('.')[-1]
 
     r2 = getHttpData(url)
-    pDialog.update(60)
+    if (mCheck):
+        pDialog.update(60)
 
     # try:
     info2 = simplejson.loads(r2)
 
     # need to decrypt m3u8 (encoded) - may hang here
-    m3u8 = getHttpData(info2["location"])
-    pDialog.update(90)
-
+    m3u8 = getHttpData(info2["location"], False, True)
+    if (m3u8 == None):
+        return None
+    
+    if (mCheck):
+        pDialog.update(90)
     m3u8_list = decode(m3u8)
 	# urls contains array of v_url video links for playback
     urls = re.findall(r'^[^#][^\r]*', m3u8_list, re.MULTILINE)
     return urls   
-    
-    # except:
-        # if '解析失败' in link:
-    #    return ''
 
 ##################################################################################
 def playVideoLetv(name, url, thumb):
@@ -1076,7 +1087,7 @@ def playVideoLetv(name, url, thumb):
     if len(v_urls):
         xplayer.play(name, thumb, v_urls)
 
-        # need xmbc.sleep to make xbmc callback working
+        # need xmbc.sleep to make xbmc callback working properly
         while xplayer.is_active:
             xbmc.sleep(100)
         pDialog.close()
@@ -1090,12 +1101,14 @@ def playVideoLetv(name, url, thumb):
 ##################################################################################
 def playVideoUgc(name, url, thumb):
     xplayer.play(name, thumb)
-    # need xmbc.sleep(100) to make xbmc callback working
+    
+    # need xmbc.sleep(100) to make xbmc callback working properly
     while xplayer.is_active:
         xbmc.sleep(100)
     pDialog.close()
-    return
+    # return
     
+'''
     # Below method is not good on slow network data streaming
     # Get the number of video items in PlayList for ugc playback
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
@@ -1125,6 +1138,8 @@ def playVideoUgc(name, url, thumb):
         while xplayer.is_active:
             xbmc.sleep(100)
 
+'''
+'''
 ##################################################################################    
 # Routine to extra video link using flvcd - not use (url link fetech problem)
 ##################################################################################
@@ -1281,6 +1296,7 @@ def playVideoUgcx(name, url, thumb):  # Obsoleted
             xbmc.Player(1).play(playlist)
         if videoplaycont == 'false': break
            
+'''
 ##################################################################################    
 # Routine to extra parameters from xbmc
 ##################################################################################
