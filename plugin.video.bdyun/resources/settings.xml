@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <setting id="show_stream_type" type="bool" label="是否在播放视频前显示转码格式选择？" default="true"/>
+    <setting id="stream_type" type="labelenum" label="默认转码格式" values="M3U8_AUTO_720|M3U8_AUTO_480" default="M3U8_AUTO_480"/>
+</settings>

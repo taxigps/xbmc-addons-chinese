@@ -201,6 +201,33 @@
   </extension>
 </addon>
 
+<addon id="plugin.video.bdyun" name="百度云盘" version="0.1.0" provider-name="caasiu">
+	<requires>
+		<import addon="xbmc.python" version="2.20.0" />
+		<import addon="script.module.xbmcswift2" version="2.4.0" />
+        <import addon="script.module.requests" version="2.9.1" option="false" />
+        <import addon="script.module.keyboard.chinese" option="true" />
+	</requires>
+	<extension point="xbmc.python.pluginsource" library="default.py">
+		<provides>audio video</provides>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<platform>all</platform>
+        <language></language>
+        <summary lang="en">Baidu Yun (Personal Cloud Storage)</summary>
+        <summary lang="zh">百度云</summary>
+        <description lang="en">
+            This is Baidu Yun client for kodi/xbmc.
+            The code of addon is in here https://github.com/caasiu/plugin.video.bdyun
+        </description>
+        <description lang="zh">
+        在kodi/xbmc播放百度云盘中的视频和音频,项目地址https://github.com/caasiu/plugin.video.bdyun
+        </description>
+		<license>GNU General Public License, v3</license>
+		<language></language>
+	</extension>
+</addon>
+
 <addon id="plugin.video.bilibili" name="哔哩哔哩(bilibili)" version="0.2.6" provider-name="Syndim">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
