@@ -14,10 +14,11 @@ except:
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
-# Version 1.5.8 2016-05-21 (cmeng)
-# - Fixed implementation error to start video playback
-# - Drop DialogProgressBG usage due to uncontrolled zombie dialog generation
-# - Allow user cancellation during video loading
+# Version 1.5.9 2016-05-25 (cmeng)
+# Implement all possible fixes to handle slow network response (starve network data)
+# Add video server selection option
+# Stop last video from repeating playback
+# Improve user UI feedback on slow network data fetching actual status (background)
 
 # See changelog.txt for previous history
 ########################################################################
@@ -64,6 +65,7 @@ class LetvPlayer(xbmc.Player):
         self.xbmc_player_stop = False
         self.title = name
         self.mCheck = True
+        self.LOVS = 0
         
         self.v_urls = v_urls
         if (v_urls): # single video file playback
@@ -78,16 +80,10 @@ class LetvPlayer(xbmc.Player):
         self.videoplaycont = __addon__.getSetting('video_vplaycont')
         self.maxfp = CFRAGMAX[int(__addon__.getSetting('video_cfragmentmax'))]
         
-        # Start download video and playback
+        # Start filling first buffer video and start playback
         self.geturl()
-        # Do not display dialog on subsequent UGC list loading
-        self.mCheck = False
-        self.playrun()
-        pDialog.close()
     
     def geturl(self):
-        if (not self.isPlayingVideo()):
-            pDialog.create('视频文件下载', '请稍候。下载视频文件 ....')
 
         if (self.v_urls and (self.curpos < self.v_urls_size)):
             # Use double buffering for smooth playback
@@ -108,20 +104,27 @@ class LetvPlayer(xbmc.Player):
                     i = self.v_urls_size
                     break
                                     
+                if (not self.isPlayingVideo()):
+                    pDialog.create('视频缓冲', '请稍候。下载视频文件 ....')
+                    pDialog.update(((i - self.curpos) * 100 / self.maxfp), line2 = "### " + self.title)
+                else:
+                    pDialog.close()
+                
                 v_url = self.v_urls[i]
                 bfile = getHttpData(v_url, True, True)
                 # give another trial if playback is active and bfile is invalid
                 if ((len(bfile) < 30) and self.isPlayingVideo()) :
                     bfile = getHttpData(v_url, True, True)
                 fs.write(bfile)
-                
-                if (not self.isPlayingVideo() and (i < (self.curpos + 4))):
-                    pDialog.update((i + 1) * 25)
 
                 # Start playback after fetching 4th video files, restart every 4 fetches if playback aborted unless stop by user
                 if (not self.isPlayingVideo() and (i < self.v_urls_size) and (((i - self.curpos) % 4) == 3)):
                     pDialog.close()
+                    # Must stop sync loading to avoid overwritten current video when onPlayerStarted
+                    self.load_url_sync = False
                     xbmc.Player.play(self, self.videourl, self.listitem)
+                    # give some time to xmbc to upate its player status before continue
+                    xbmc.sleep(100)
                     # Only reset fragment start after successful playback
                     __addon__.setSetting('video_fragmentstart', '0')
                     
@@ -129,9 +132,24 @@ class LetvPlayer(xbmc.Player):
             # print "### Last video file download fragment: " + str(i)
             # set self.curpos to the next loading video index
             self.curpos = i + 1
+            
+            # Last of video segment loaded, enable play once only
+            if (self.curpos == self.v_urls_size):
+                self.LOVS = 1
+            else: # reset
+                self.LOVS = 0
+                
+            # Start next video segment loading if sync loading not enable
+            if (not self.load_url_sync and (self.curpos < self.v_urls_size)):
+                # Reset to sync loading on subsequent video segment
+                self.load_url_sync = True
+                self.playrun();
 
         # ugc auto playback
         elif ((self.v_urls == None) and (self.curpos < self.psize)):
+            if (self.mCheck and not self.isPlayingVideo()):
+                pDialog.create('匹配视频', '请耐心等候! 尝试匹配视频文件 ...')
+            
             # find next not play item in ugc playlist
             for idx in range (self.curpos, self.psize):
                 p_item = self.playlist.__getitem__(idx)
@@ -159,39 +177,63 @@ class LetvPlayer(xbmc.Player):
                     i = self.v_urls_size
                     break
                 
+                if (not self.isPlayingVideo()):
+                    pDialog.create('视频缓冲', '请稍候。下载视频文件 ....')
+                    pDialog.update((i * 100 / self.v_urls_size), line2 = self.title)
+                else:
+                    pDialog.close()
+
                 bfile = getHttpData(v_url, True, True)
                 fs.write(bfile)
-                
-                if (not self.isPlayingVideo() and (i < 4)):
-                    pDialog.update((i + 1) * 25)
-
+ 
                 # Start playback after fetching 4th video files, restart every 4 fetches if playback aborted unless stop by user
                 if (not self.isPlayingVideo() and (i < self.v_urls_size) and ((i % 4) == 3)):
                     pDialog.close()
+                    # Must stop sync loading to avoid overwritten current video when onPlayerStarted
+                    self.load_url_sync = False
                     xbmc.Player.play(self, self.videourl, self.listitem)
+                    # give some time to xmbc to upate its player status before continue
+                    xbmc.sleep(100)
             fs.close()
-            # print "### Last video file download total fragment: " + str(i)
+            # print "### Last video file download total fragment: %s ==> %s" % (str(i), self.title) 
+            # set self.curpos to the next loading ugc index
             self.curpos += 1
             
+            # Last of video segment loaded, enable play once only
+            if (self.curpos == self.psize):
+                self.LOVS = 1
+            else: # reset
+                self.LOVS = 0
+                
+            # Start next video segment loading if sync loading not enable
+            if (not self.load_url_sync and (self.curpos < self.psize)):
+                # Do not display dialog on subsequent UGC list loading
+                self.mCheck = False
+                
+                # Reset to sync loading on subsequent ugc item
+                self.load_url_sync = True
+                self.playrun();
+
         # close dialog on all mode when fetching end
         pDialog.close()
 
     def playrun(self):
         if (self.videourl and not self.isPlayingVideo()):
-            # print "### Player resume: " + self.title
+            # print "### Player resume: %s \n### %s" % (self.title, self.videourl)
             pDialog.close()
-            xbmc.Player.play(self, self.videourl, self.listitem)
             # Next video segment loading must wait until player started to avoid race condition
-            self.load_url_sync = True;
+            self.load_url_sync = True
+            xbmc.Player.play(self, self.videourl, self.listitem)
+            xbmc.sleep(100)
         elif ((self.curpos < self.v_urls_size) or self.videoplaycont):
-            # print "### Async fetch next video segment @ " + str(self.curpos)
-            self.geturl()
+           # print "### Async fetch next video segment @ " + str(self.curpos)
+           self.geturl()
         
     def onPlayBackStarted(self):
         # may display next title to playback due to async
         # print "### onPlayBackStarted Callback: " + self.title
+        pDialog.close()
         if (self.load_url_sync):
-            self.load_url_sync = False
             if ((self.curpos < self.v_urls_size) or self.videoplaycont):
                 # print "### Sync fetch next video segment @ " + str(self.curpos)
                 self.geturl()
@@ -208,9 +250,17 @@ class LetvPlayer(xbmc.Player):
         xbmc.Player.onPlayBackSeek(self, chapter)
 
     def onPlayBackEnded(self):
-        if self.videourl:
-            # print "### onPlayBackEnded callback: Continue next video playback !!!"
-            self.playrun()
+        # Do not restart resume playback if video aborted due to starve network data
+        if (self.videourl and self.load_url_sync):
+        # if (self.videourl):
+            # print "### onPlayBackEnded callback: Continue next video playback !!! " + str(self.LOVS)
+            if (self.LOVS < 2):
+                self.playrun()
+            else: # reset
+                self.LOVS = 0
+            # set flag to play last video segment once only
+            if (self.LOVS == 1):
+                self.LOVS += 1
         else:
             # print "### onPlayBackEnded callback: Ended-Deleted !!!"
             ## self.delTsFile(10)
@@ -1005,6 +1055,7 @@ def decode(data):
 # # ------ video links decrypt ---------------------- ##
 def decrypt_url(url, mCheck = True):
     videoRes = int(__addon__.getSetting('video_resolution'))
+    serverIndex = int(__addon__.getSetting('video_server')) - 1
     vparamap = {0:'1300', 1:'720p', 2:'1080p'}
     
     t_url = 'http://api.letv.com/mms/out/video/playJson?id={}&platid=1&splatid=101&format=1&tkey={}&domain=www.letv.com'
@@ -1033,9 +1084,13 @@ def decrypt_url(url, mCheck = True):
     else:
         stream_id = sorted(support_stream_id, key=lambda i: int(i[1:]))[-1]
         
-    # pick a random domain to minimize overloading single server
-    index = random.randint(0, len(playurl['domain']) - 1)
+    # pick a random domain or user selected to minimize overloading single server
+    if (serverIndex == -1 ):
+        index = random.randint(0, len(playurl['domain']) - 1)
+    else:
+        index = serverIndex % len(playurl['domain'])
     domain = playurl['domain'][index]
+    # print "### Video Server Selection: %i %i = %s" % (serverIndex, index, playurl['domain'])
 
     vodRes = playurl['dispatch']
     vod = None
@@ -1059,7 +1114,7 @@ def decrypt_url(url, mCheck = True):
 
     r2 = getHttpData(url)
     if (mCheck):
-        pDialog.update(60)
+        pDialog.update(60, line2 = "### 服务器  [ %i ]" % (index + 1))
 
     # try:
     info2 = simplejson.loads(r2)
