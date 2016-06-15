@@ -41,8 +41,6 @@ def json_loads_single(s):
 
 
 def RSA_encrypt(public_key, message):
-    #if not globals().get('RSA'):
-        #return ''
     rsakey = RSA.importKey(public_key)
     rsakey = PKCS1_v1_5.new(rsakey)
     encrypted = rsakey.encrypt(message.encode('utf-8'))
@@ -248,13 +246,16 @@ def parse_bdstoken(content):
 
 
 #get baidu accout token
-def get_bdstoken(auth_cookie):
+def get_bdstoken(temp_cookie):
     url = PAN_REFERER
     headers_merged = default_headers.copy()
 
-    req = requests.get(url, headers=headers_merged, cookies=auth_cookie, timeout=50)
+    req = requests.get(url, headers=headers_merged, cookies=temp_cookie, timeout=50)
     req.encoding = 'utf-8'
     if req:
-        return parse_bdstoken(req.text)
+        _cookie = req.headers['Set-Cookie']
+        key = ['STOKEN','SCRC','PANPSC']
+        auth_cookie = add_cookie(temp_cookie, _cookie, key)
+        return (auth_cookie, parse_bdstoken(req.text))
     else:
         return None

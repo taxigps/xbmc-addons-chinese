@@ -1,3 +1,7 @@
+V0.1.1 2016-06-15
+-修复错误
+-Fix Bugs
+
 V0.1.0 2016-05-20
 -第一个稳定版本
 -First Stable Version
