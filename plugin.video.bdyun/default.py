@@ -51,12 +51,16 @@ def main_menu():
         }]
 
         if avatar_url:
-            homemenu = plugin.get_storage('homemenu')
-            if homemenu.get('item_list'):
-                item_list = homemenu.get('item_list')
-            else:
-                item_list = menu_cache(user_info['cookie'], user_info['tokens'])
-            items.extend(item_list)
+            try:
+                homemenu = plugin.get_storage('homemenu')
+                if homemenu.get('item_list'):
+                    item_list = homemenu.get('item_list')
+                else:
+                    item_list = menu_cache(user_info['cookie'], user_info['tokens'])
+                items.extend(item_list)
+            except (KeyError, TypeError, UnicodeError):
+                dialog.ok('Error', u'请求参数错误', u'请点击登出再重新登录')
+                items.extend([{'label': u'登出 && 重新登录', 'path': plugin.url_for('clear_cache')}])
         else:
             items.extend([{'label': u'重新登录', 'path': plugin.url_for('relogin')}])
 
