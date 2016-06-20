@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
-	<setting id="video_resolution" type="enum" label="30200" lvalues="30300|30301|30302" default="2"/>
-	<setting id="video_cfragmentmax" type=enum label="30203" values="10|15|20|25|30|35|40|45|50|60|70|80|90|100" default="2"/>
+	<setting id="video_resolution" type="enum" label="30200" lvalues="30300|30301|30302" default="1"/>
+	<setting id="video_server" type="enum" label="30205" lvalues="30310|30311|30312|30313" default="0"/>
+	<setting id="video_cfragmentmax" type="enum" label="30203" values="10|15|20|25|30|35|40|45|50|60|70|80|90|100|200|300|400|500" default="4"/>
+	<setting id="video_fragmentstart" type="enum" label="30204" values="1|10|20|30|40|50|60|70|80|90|100|110|120|130|140|150|160|170|180|190|200" default="0"/>
 	<setting id="video_vplaycont" type="bool" label="30201" default="true"/>
 	<setting id="http_proxy" type="text" label="30202" values="" default=""/>
 </settings>

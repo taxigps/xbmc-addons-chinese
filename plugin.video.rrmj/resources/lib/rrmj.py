@@ -7,13 +7,15 @@ from common import *
 import xbmcvfs
 import xbmcgui
 import xbmcaddon
-SERVER = "http://api2.rrmj.tv"
+SERVER = "http://api.rrmj.tv"
 __ADDON__ = xbmcaddon.Addon()
 
 
 FAKE_HEADERS = {
     "a": "cf2ecd4d-dea3-40ca-814f-3f0462623b1c",
     "b": "",
+    "clientType": "android_%E5%B0%8F%E7%B1%B3",
+    "clientVersion": "2.0.7.3",
     "c": "5a1fb134-9384-4fc8-a5ae-6e711e24afc1",
     "d": "",
     "e": "d4dd075d894dd2b8c81f96062dbe7dcbf7d467fd"
@@ -102,7 +104,7 @@ class RenRenMeiJu(object):
 
     def index_info(self):
         API = '/v2/video/indexInfo'
-        return self.get_json(SERVER + API, pretty=True)
+        return self.get_json(SERVER + API)
 
     def video_detail(self, seasonId, userId=0, **kwargs):
         API = '/v2/video/detail'
@@ -119,7 +121,7 @@ class RRMJResolver(RenRenMeiJu):
 
     def get_by_sid(self, **kwargs):
         API = "/v2/video/findM3u8ByEpisodeSid"
-        data = self.get_json(SERVER + API, data=urllib.urlencode(kwargs), pretty=True)
+        data = self.get_json(SERVER + API, data=urllib.urlencode(kwargs), pretty=False)
         if data["code"] != "0000":
             return None, None
         else:

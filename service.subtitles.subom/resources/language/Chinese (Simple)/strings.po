@@ -1,0 +1,16 @@
+msgid ""
+msgstr ""
+
+#Chinese Simplified
+
+msgctxt "#32001"
+msgid "Keyword to search"
+msgstr "搜索关键字"
+
+msgctxt "#32002"
+msgid "Title"
+msgstr "片名"
+
+msgctxt "#32003"
+msgid "Original Title"
+msgstr "原始片名"

@@ -425,7 +425,7 @@ def getVrsEncodeCode(vlink):
     return loc2[::-1]
 
 def mix(tvid):
-    salt = '6ab6d0280511493ba85594779759d4ed'
+    salt = '4a1caba4b4465345366f28da7c117d20'
     tm = str(randint(2000,4000))
     src = 'eknas'
     sc = hashlib.md5(salt + tm + tvid).hexdigest()

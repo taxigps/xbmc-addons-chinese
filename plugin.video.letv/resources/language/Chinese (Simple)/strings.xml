@@ -8,11 +8,17 @@
     <string id="30200">默认播放清晰度</string>
     <string id="30201">连续视频播放</string>
     <string id="30202">代理服务器（IP:端口）- 空白，如果不是必需的</string>
-    <string id="30203">片断连续 - 存储量成正比</string>
-    
+    <string id="30203">片段连续 - 存储量成正比</string>
+    <string id="30204">片段的开始</string>
+    <string id="30205">视频服务器选择</string>
+        
     <!-- Plugin settings values -->
     <string id="30300">标清</string>
     <string id="30301">高清</string>
     <string id="30302">超清</string>
     
+    <string id="30310">随意</string>
+    <string id="30311">1</string>
+    <string id="30312">2</string>
+    <string id="30313">3</string>        
 </strings>

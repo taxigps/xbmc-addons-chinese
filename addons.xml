@@ -2,11 +2,10 @@
 <addons>
 <addon id="metadata.doubantv.com"
        name="doubantv"
-       version="1.1.0"
+       version="1.2.0"
        provider-name="janplus">
   <requires>
     <import addon="xbmc.metadata" version="1.0"/>
-    <import addon="metadata.common.imdb.com" version="2.7.8"/>
   </requires>
   <extension point="xbmc.metadata.scraper.tvshows"
              language="zh"
@@ -202,6 +201,33 @@
   </extension>
 </addon>
 
+<addon id="plugin.video.bdyun" name="百度云盘" version="0.1.0" provider-name="caasiu">
+	<requires>
+		<import addon="xbmc.python" version="2.20.0" />
+		<import addon="script.module.xbmcswift2" version="2.4.0" />
+        <import addon="script.module.requests" version="2.9.1" option="false" />
+        <import addon="script.module.keyboard.chinese" option="true" />
+	</requires>
+	<extension point="xbmc.python.pluginsource" library="default.py">
+		<provides>audio video</provides>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<platform>all</platform>
+        <language></language>
+        <summary lang="en">Baidu Yun (Personal Cloud Storage)</summary>
+        <summary lang="zh">百度云</summary>
+        <description lang="en">
+            This is Baidu Yun client for kodi/xbmc.
+            The code of addon is in here https://github.com/caasiu/plugin.video.bdyun
+        </description>
+        <description lang="zh">
+        在kodi/xbmc播放百度云盘中的视频和音频,项目地址https://github.com/caasiu/plugin.video.bdyun
+        </description>
+		<license>GNU General Public License, v3</license>
+		<language></language>
+	</extension>
+</addon>
+
 <addon id="plugin.video.bilibili" name="哔哩哔哩(bilibili)" version="0.2.6" provider-name="Syndim">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
@@ -307,7 +333,7 @@
 
 <addon id="plugin.video.letv"
     name="乐视网 (LeTV)"
-    version="1.5.3"
+    version="1.5.9"
     provider-name="cmeng">
   	<requires>
   	    <import addon="script.module.simplejson" version="3.3.0"/>
@@ -323,6 +349,27 @@
         <summary lang="zh">乐视网插件</summary>
         <description lang="en">Letv video plugin[CR][CR]LeTV.com (Chinese: 乐视网), operated by Beijing LeTV Mobile Media and Technology Co. Ltd, is an online video portal in Beijing. It offers online video programs and movie viewing through legal channels.</description>
         <description lang="zh">Letv video plugin[CR][CR]乐视网(LeTV.com)是以正版,高清影视剧为主的视频门户网站,为用户提供正版高清电影,电视剧,动漫,综艺,娱乐等视频在线观看,视频分享,视频搜索等服务</description>
+        <platform>all</platform>
+    </extension>
+</addon>
+
+<addon id="plugin.video.pandatv"
+    name="熊猫TV(pandatv)"
+    version="2.0.0"
+    provider-name="Yangqian">
+    <requires>
+        <import addon="script.module.beautifulsoup" version="3.0.8"/>
+    </requires>
+    <extension
+        point="xbmc.python.pluginsource"
+        library="addon.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">pandatv video plugin</summary>
+        <summary lang="zh">熊猫TV插件</summary>
+        <description lang="en">online video from www.panda.tv</description>
+        <description lang="zh">熊猫TV</description>
         <platform>all</platform>
     </extension>
 </addon>
@@ -407,7 +454,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.qiyi"
     name="奇艺视频(QIYI)"
-    version="2.2.4"
+    version="2.2.6"
     provider-name="taxigps">
     <requires>
       <import addon="script.module.simplejson" version="3.3.0"/>
@@ -428,20 +475,22 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.rrmj"
        name="人人美剧"
-       version="0.1.0"
+       version="0.1.6"
        provider-name="jindaxia">
   <requires>
-    <import addon="xbmc.python" version="2.14.0"/>
     <import addon="script.module.xbmcswift2" version="2.4.0"/>
     <import addon="script.module.keyboard.chinese" version="2.0.4" optional="true"/>
   </requires>
   <extension point="xbmc.python.pluginsource" library="default.py">
-        <provides>video</provides>
+    <provides>audio video</provides>
   </extension>
   <extension point="xbmc.addon.metadata">
     <summary lang="zh-CN">由人人影视转型后专门为美剧迷们打造的高质量讨论交流社区</summary>
     <description lang="en"></description>
     <platform>all</platform>
+    <website><![CDATA[https://github.com/jindaxia/plugin.video.rrmj]]></website>
+    <forum></forum>
+    <source><![CDATA[https://github.com/jindaxia/plugin.video.rrmj]]></source>
   </extension>
 </addon>
 
@@ -545,7 +594,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.zhanqitv"
     name="战旗TV(ZhanqiTV)"
-    version="1.0.3"
+    version="1.0.4"
     provider-name="Albert">
     <extension
         point="xbmc.python.pluginsource"
@@ -684,7 +733,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="service.subtitles.subom"
        name="subom"
-       version="1.0.1"
+       version="1.0.2"
        provider-name="taxigps">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>

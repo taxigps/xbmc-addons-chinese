@@ -43,3 +43,7 @@ msgstr ""
 msgctxt "#30006"
 msgid "max"
 msgstr ""
+
+msgctxt "#30007"
+msgid "auto play next"
+msgstr ""

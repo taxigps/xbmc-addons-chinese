@@ -4,7 +4,12 @@
 BASE_URL = r'http://www.bilibili.com/'
 
 # B站接口地址（用于获取视频地址）
-INTERFACE_URL = r'http://interface.bilibili.com/playurl?cid={0}&sign=fd627105c78c7b877fee35f997a63eb0&quality=4&appkey=19bf1f1192873efa'
+# 请不要将这个APPKEY和APPSECRET用于其他用途，谢谢！
+INTERFACE_URL = r'http://interface.bilibili.com/playurl?{0}&sign={1}'
+
+INTERFACE_PARAMS = r'appkey=19bf1f1192873efa&cid={0}&quality=4&ts={1}'
+
+INTERFACE_ASKEY = r'87677fc06b0afc08cb86e008183390e5'
 
 # B站评论页面地址
 COMMENT_URL = r'http://comment.bilibili.tv/{0}.xml'
