@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 '''Author is caasiu <caasiu@outlook.com> && source code is under GPLv3'''
 
+
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
-import os, sys, re, json 
+import os, sys, re, json
 
 from resources.modules import get_auth, pcs, utils, cnkeyboard, myplayer
 from xbmcswift2 import Plugin, actions
@@ -51,12 +52,16 @@ def main_menu():
         }]
 
         if avatar_url:
-            homemenu = plugin.get_storage('homemenu')
-            if homemenu.get('item_list'):
-                item_list = homemenu.get('item_list')
-            else:
-                item_list = menu_cache(user_info['cookie'], user_info['tokens'])
-            items.extend(item_list)
+            try:
+                homemenu = plugin.get_storage('homemenu')
+                if homemenu.get('item_list'):
+                    item_list = homemenu.get('item_list')
+                else:
+                    item_list = menu_cache(user_info['cookie'], user_info['tokens'])
+                items.extend(item_list)
+            except (KeyError, TypeError, UnicodeError):
+                dialog.ok('Error', u'请求参数错误', u'请点击登出再重新登录')
+                items.extend([{'label': u'登出 && 重新登录', 'path': plugin.url_for('clear_cache')}])
         else:
             items.extend([{'label': u'重新登录', 'path': plugin.url_for('relogin')}])
 
@@ -140,23 +145,23 @@ def search():
                     item = {
                             'label': result['server_filename'],
                             'path': plugin.url_for('directory', path=result['path'].encode('utf-8')),
-                            'is_playable': False 
+                            'is_playable': False
                             }
                     items.append(item)
                 elif result['category'] == 1:
-                    if 'thumbs' in result and 'url2' in result['thumbs']:   
+                    if 'thumbs' in result and 'url2' in result['thumbs']:
                         ThumbPath = result['thumbs']['url2']
                         item = {
                                 'label': result['server_filename'],
                                 'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
-                                'is_playable': False, 
+                                'is_playable': False,
                                 'icon': ThumbPath,
                                 }
                     else:
                         item = {
                                 'label': result['server_filename'],
                                 'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
-                                'is_playable': False, 
+                                'is_playable': False,
                                 }
                     items.append(item)
                 elif result['category'] == 2:
@@ -177,16 +182,16 @@ def search():
                     item = {
                             'label': result['path'],
                             'path': plugin.url_for('directory', path=result['path'].encode('utf-8')),
-                            'is_playable': False 
+                            'is_playable': False
                             }
                     items.insert(0, item)
                 elif result['category'] == 1:
-                    if 'thumbs' in result and 'url2' in result['thumbs']:   
+                    if 'thumbs' in result and 'url2' in result['thumbs']:
                         ThumbPath = result['thumbs']['url2']
                         item = {
                                 'label': result['path'],
                                 'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
-                                'is_playable': False, 
+                                'is_playable': False,
                                 'icon': ThumbPath,
                                 }
                     else:
@@ -212,18 +217,20 @@ def search():
             dialog.ok('',u'没有找到文件')
             return None
 
-    return 
+    return
 
 
 @plugin.route('/directory/<path>')
 def directory(path):
+    if isinstance(path, str):
+        path = path.decode('utf-8')
     user_info = get_user_info()
     user_cookie = user_info['cookie']
     user_tokens = user_info['tokens']
-    dir_files = pcs.list_dir_all(user_info['cookie'], user_info['tokens'], path.decode('utf-8'))
+    dir_files = pcs.list_dir_all(user_info['cookie'], user_info['tokens'], path)
     item_list = MakeList(dir_files)
 
-    previous_path = os.path.dirname(path)
+    previous_path = os.path.dirname(path).encode('utf-8')
     if previous_path == '/':
         item_list.insert(0,{
                 'label': u'<< 返回首页',
@@ -236,7 +243,7 @@ def directory(path):
             })
 
     item_list.insert(0,{
-                'label': u'## 当前目录: %s' %path.decode('utf-8'), 
+                'label': u'## 当前目录: %s' % path,
                 'path': plugin.url_for('refresh')
             })
     return plugin.finish(item_list, update_listing=True)
@@ -260,25 +267,31 @@ def quality(filepath):
             stream = stream_type[choice]
     else:
         stream = plugin.get_setting('stream_type', str)
+    if isinstance(filepath, str):
+        filepath = filepath.decode('utf-8')
+    video_path = playlist_path(filepath, stream)
 
-    video_path = playlist_path(filepath.decode('utf-8'), stream)
-
-    name = os.path.basename(filepath.decode('utf-8'))
+    name = os.path.basename(filepath)
     listitem = xbmcgui.ListItem(name)
     listitem.setInfo(type='Video', infoLabels={'Title': name})
 
-    player = myplayer.Player()
-    player.play(video_path, listitem, windowed=False)
+    if video_path:
+        player = myplayer.Player()
+        player.play(video_path, listitem, windowed=False)
 
 
 @plugin.route('/play_music/<filepath>')
 def play_music(filepath):
+    if isinstance(filepath, str):
+        filepath = filepath.decode('utf-8')
     url = playlist_path(filepath, stream=False)
-    name = os.path.basename(filepath.decode('utf-8'))
+    name = os.path.basename(filepath)
     listitem = xbmcgui.ListItem(name)
     listitem.setInfo(type='Music', infoLabels={'Title': name})
-    player = myplayer.Player()
-    player.play(url,listitem,windowed=True)
+
+    if url:
+        player = myplayer.Player()
+        player.play(url,listitem,windowed=True)
 
 
 # cache the output of content menu
@@ -312,10 +325,10 @@ def save_user_info(username, password, cookie, tokens):
 def MakeList(pcs_files):
     item_list = []
     ContextMenu = [
-            ('搜索', actions.background(plugin.url_for('search'))),
-            ('刷新', actions.background(plugin.url_for('refresh'))),
-            ('登出', actions.background(plugin.url_for('clear_cache'))),
-            ]
+        ('搜索', actions.background(plugin.url_for('search'))),
+        ('刷新', actions.background(plugin.url_for('refresh'))),
+        ('登出', actions.background(plugin.url_for('clear_cache'))),
+    ]
     for result in pcs_files:
         if result['isdir'] == 1:
             item = {
@@ -326,12 +339,12 @@ def MakeList(pcs_files):
                     }
             item_list.append(item)
         elif result['category'] == 1:
-            if 'thumbs' in result and 'url2' in result['thumbs']:   
+            if 'thumbs' in result and 'url2' in result['thumbs']:
                 ThumbPath = result['thumbs']['url2']
                 item = {
                         'label': result['server_filename'],
                         'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
-                        'is_playable': False, 
+                        'is_playable': False,
                         'icon': ThumbPath,
                         'context_menu': ContextMenu,
                         }
@@ -352,7 +365,7 @@ def MakeList(pcs_files):
                     }
             item_list.append(item)
     return item_list
-    
+
 
 def playlist_path(pcs_file_path, stream):
     user_info = get_user_info()
@@ -371,12 +384,13 @@ def playlist_path(pcs_file_path, stream):
             filename = ''.join([r.group(1), stream, '.m3u8'])
             dirpath = os.path.join(utils.data_dir(), user_name, dirname)
             if not xbmcvfs.exists(dirpath):
-                xbmcvfs.mkdir(dirpath)
+                xbmcvfs.mkdirs(dirpath)
             filepath = os.path.join(dirpath, filename)
-            with open(filepath, 'w') as f:
-                f.write(playlist_data)
+            tmpFile = xbmcvfs.File(filepath, 'w')
+            tmpFile.write(bytearray(playlist_data, 'utf-8'))
             return filepath
         else:
+            dialog.notification('', u'无法打开视频,请尝试其他清晰度', xbmcgui.NOTIFICATION_INFO, 6000)
             return None
     else:
         url = pcs.get_download_link(user_cookie, user_tokens, pcs_file_path)
@@ -385,5 +399,3 @@ def playlist_path(pcs_file_path, stream):
 
 if __name__ == '__main__':
     plugin.run()
-
-

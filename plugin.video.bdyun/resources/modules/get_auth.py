@@ -43,8 +43,8 @@ def run(username,password):
         if len(verifycode) == 4:
             err_no,query = auth.post_login(cookie,tokens,username,password_enc,rsakey,verifycode,codeString)
             if err_no == 0:
-                auth_cookie = query
-                bdstoken = auth.get_bdstoken(auth_cookie)
+                temp_cookie = query
+                auth_cookie, bdstoken = auth.get_bdstoken(temp_cookie)
                 if bdstoken:
                     tokens['bdstoken'] = bdstoken
                     return auth_cookie,tokens
