@@ -10,7 +10,7 @@ Note: Chinese repository is also applicable to Kodi (new releases - formerly kno
 
 # How To Use
 
-## Install Respoistory
+## Install Repository
 
 To install the repository, you need to download the latest repository zip file [repository.xbmc-addons-chinese-1.2.0.zip][3]. And then:
 * Launch XBMC
