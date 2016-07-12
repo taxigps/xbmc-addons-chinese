@@ -2,9 +2,13 @@
 # -*- coding: utf-8 -*-
 '''Author is caasiu <caasiu@outlook.com> && source code is under GPLv3'''
 
-
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 import os, sys, re, json
+
+__addon_id__= 'plugin.video.bdyun'
+plugin_path = xbmcaddon.Addon(__addon_id__).getAddonInfo('path')
+lib_path = os.path.join(plugin_path, 'resources', 'modules')
+sys.path.append(lib_path)
 
 from resources.modules import get_auth, pcs, utils, cnkeyboard, myplayer
 from xbmcswift2 import Plugin, actions

@@ -7,8 +7,7 @@
 
 import time, json, base64, re, random, urlparse, os
 import requests
-from Crypto.PublicKey import RSA
-from Crypto.Cipher import PKCS1_v1_5
+import rsa
 from resources.modules import utils
 
 
@@ -41,9 +40,8 @@ def json_loads_single(s):
 
 
 def RSA_encrypt(public_key, message):
-    rsakey = RSA.importKey(public_key)
-    rsakey = PKCS1_v1_5.new(rsakey)
-    encrypted = rsakey.encrypt(message.encode('utf-8'))
+    rsakey = rsa.PublicKey.load_pkcs1_openssl_pem(public_key)
+    encrypted = rsa.encrypt(message.encode('utf-8'), rsakey)
     return base64.encodestring(encrypted).decode('utf-8').replace('\n', '')
 
 
@@ -64,7 +62,7 @@ def get_BAIDUID():
                     '&tt=', timestamp,
                     '&class=login&logintype=basicLogin',
                     ])
-    req = requests.get(url, headers={'Referer': ''}, timeout=50)
+    req = requests.get(url, headers={'Referer': ''}, timeout=50, verify=False)
     if req:
         cookie = req.cookies.get_dict()
         cookie['cflag'] = '65535%3A1'
@@ -92,7 +90,7 @@ def get_token(cookie):
     for key in headers.keys():
         headers_merged[key] = headers[key]
 
-    req = requests.get(url, headers=headers_merged, cookies=cookie, timeout=50)
+    req = requests.get(url, headers=headers_merged, cookies=cookie, timeout=50, verify=False)
     if req:
         hosupport = req.headers['Set-Cookie']
         content_obj = json_loads_single(req.text)
@@ -118,7 +116,7 @@ def get_UBI(cookie, tokens):
     for key in headers.keys():
         headers_merged[key] = headers[key]
 
-    req=requests.get(url, headers=headers_merged, cookies=cookie, timeout=50)
+    req=requests.get(url, headers=headers_merged, cookies=cookie, timeout=50, verify=False)
     if req:
         ubi=req.headers['Set-Cookie']
         return ubi
@@ -141,7 +139,7 @@ def get_public_key(cookie, tokens):
     for key in headers.keys():
         headers_merged[key] = headers[key]
 
-    req = requests.get(url, headers=headers_merged, cookies=cookie, timeout=50)
+    req = requests.get(url, headers=headers_merged, cookies=cookie, timeout=50, verify=False)
     if req:
         data = json_loads_single(req.text)
         return data
@@ -187,7 +185,7 @@ def post_login(cookie, tokens, username, password_enc, rsakey='', verifycode='',
         'callback':'parent.bd__pcbs__28g1kg',
 
         }
-    req = requests.post(url, headers=headers_merged, cookies=cookie, data=data, timeout=50)
+    req = requests.post(url, headers=headers_merged, cookies=cookie, data=data, timeout=50, verify=False)
     content = req.text
     if content:
         match = re.search('"(err_no[^"]+)"', content)
@@ -223,7 +221,7 @@ def get_signin_vcode(cookie, codeString):
         #merge the headers
         for key in headers.keys():
             headers_merged[key] = headers[key]
-        req=requests.get(url, headers=headers_merged, cookies=cookie, timeout=50)
+        req=requests.get(url, headers=headers_merged, cookies=cookie, timeout=50, verify=False)
         #vcode_data is bytes
         vcode_data=req.content
         if vcode_data:
@@ -250,7 +248,7 @@ def get_bdstoken(temp_cookie):
     url = PAN_REFERER
     headers_merged = default_headers.copy()
 
-    req = requests.get(url, headers=headers_merged, cookies=temp_cookie, timeout=50)
+    req = requests.get(url, headers=headers_merged, cookies=temp_cookie, timeout=50, verify=False)
     req.encoding = 'utf-8'
     if req:
         _cookie = req.headers['Set-Cookie']

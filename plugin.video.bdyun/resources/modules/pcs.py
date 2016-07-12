@@ -41,7 +41,7 @@ def get_user_uk(cookie, tokens):
     '获取用户的uk'
     url = 'http://yun.baidu.com'
     headers_merged = default_headers.copy()
-    req = requests.get(url, cookies=cookie, headers=headers_merged)
+    req = requests.get(url, cookies=cookie, headers=headers_merged, timeout=50, verify=False)
     if req:
         content = req.text
         match = re.findall('/share/home\?uk=(\d+)" target=', content)
@@ -71,7 +71,7 @@ def get_user_info(tokens, uk):
     headers_merged = default_headers.copy()
     headers_merged['Referer'] = 'http://yun.baidu.com/share/home?uk=' + uk
     headers_merged['Host'] = 'yun.baidu.com'
-    req = requests.get(url, headers=headers_merged, params=url_params)
+    req = requests.get(url, headers=headers_merged, params=url_params, timeout=50, verify=False)
     if req:
         info = json.loads(req.text)
         if info and info['errno'] == 0:
@@ -121,7 +121,7 @@ def list_dir(cookie, tokens, path, page=1, num=100):
     headers_merged = default_headers.copy()
     headers_merged.update({'Content-type': CONTENT_FORM_UTF8})
 
-    req = requests.get(url, headers=headers_merged, cookies=cookie, params=url_params)
+    req = requests.get(url, headers=headers_merged, cookies=cookie, params=url_params, timeout=50, verify=False)
     if req:
         content = req.text
         return json.loads(content)
@@ -154,7 +154,7 @@ def get_category(cookie, tokens, category, page=1):
         '&bdstoken=', cookie['STOKEN'],
     ])
     headers_merged = default_headers.copy()
-    req = requests.get(url, cookies=cookie, headers=headers_merged)
+    req = requests.get(url, cookies=cookie, headers=headers_merged, timeout=50, verify=False)
     if req:
         content = req.text
         return json.loads(content)
@@ -179,7 +179,7 @@ def get_download_link(cookie, tokens, path):
     url = '{0}&cflg={1}'.format(dlink, cookie['cflag'])
     headers_merged = default_headers.copy()
     headers_merged.update({'Accept': ACCEPT_HTML})
-    req = requests.get(url, headers=headers_merged, cookies=cookie, allow_redirects=False)
+    req = requests.get(url, headers=headers_merged, cookies=cookie, allow_redirects=False, timeout=50, verify=False)
     if not req:
         return url
     else:
@@ -197,7 +197,7 @@ def stream_download(cookie, tokens, path):
         '&path=', path,
         '&app_id=250528',
     ])
-    req = requests.get(url, cookies=cookie, allow_redirects=False)
+    req = requests.get(url, cookies=cookie, allow_redirects=False, timeout=50, verify=False)
     if req:
         return req
     else:
@@ -219,7 +219,7 @@ def get_streaming_playlist(cookie, path, video_type='M3U8_AUTO_480'):
         '&app_id=250528',
     ])
     headers_merged = default_headers.copy()
-    req = requests.get(url, cookies=cookie, headers=headers_merged)
+    req = requests.get(url, cookies=cookie, headers=headers_merged, timeout=50, verify=False)
     if req.status_code == 200:
         return req.text
     else:
@@ -252,7 +252,7 @@ def get_metas(cookie, tokens, filelist, dlink=True):
                 }
     headers_merged = default_headers.copy()
     headers_merged.update({'Content-type': CONTENT_FORM})
-    req = requests.post(url, headers=headers_merged, cookies=cookie, data=data)
+    req = requests.post(url, headers=headers_merged, cookies=cookie, data=data, timeout=50, verify=False)
     if req:
         content = req.text
         return json.loads(content)
@@ -276,7 +276,7 @@ def search(cookie, tokens, key, path='/'):
         '&bdstoken=', tokens['bdstoken'],
     ])
     headers_merged = default_headers.copy()
-    req = requests.get(url, cookies=cookie, headers=headers_merged)
+    req = requests.get(url, cookies=cookie, headers=headers_merged, timeout=50, verify=False)
     if req:
         content = req.text
         return json.loads(content)
