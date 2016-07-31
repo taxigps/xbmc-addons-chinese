@@ -232,6 +232,35 @@ def get_signin_vcode(cookie, codeString):
         return vcode_path
 
 
+def get_refresh_codeString(cookie, tokens, vcodetype):
+    url = ''.join([
+        PASSPORT_BASE,
+        'v2/?reggetcodestr',
+        '&token=', tokens['token'],
+        '&tpl=pp&apiver=v3',
+        '&tt=', timestamp,
+        '&fr=ligin',
+        '&vcodetype=', vcodetype,
+        ])
+
+    headers_merged = default_headers.copy()
+    headers_merged.update({'Referer': REFERER})
+
+    req = requests.get(url, headers=headers_merged, cookies=cookie, timeout=50, verify=False)
+    if req:
+        req.encoding = 'gbk'
+        return json.loads(req.text)
+
+    return None
+
+
+def refresh_vcode(cookie, tokens, vcodetype):
+    _info = get_refresh_codeString(cookie, tokens, vcodetype)
+    codeString = _info['data']['verifyStr']
+    vcode_path = get_signin_vcode(cookie, codeString)
+    return (codeString, vcode_path)
+
+
 def parse_bdstoken(content):
     bdstoken = ''
     bds_re = re.compile('"bdstoken"\s*:\s*"([^"]+)"', re.IGNORECASE)

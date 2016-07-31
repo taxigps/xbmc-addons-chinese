@@ -1,3 +1,7 @@
+V0.1.5 2016-07-31
+-新增刷新验证码功能
+-Add refresh verify code
+
 V0.1.4 2016-07-11
 -Fix RSA encryption issue 
 

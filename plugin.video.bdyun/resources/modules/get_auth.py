@@ -8,18 +8,36 @@ dialog = xbmcgui.Dialog()
 
 
 class VcodeWindow(xbmcgui.WindowDialog):
-    def __init__(self, vcode_path):
-        self.image = xbmcgui.ControlImage(80, 100, 500, 200, vcode_path)
-        self.button = xbmcgui.ControlButton(100, 330, 140, 50, label=u'输入验证码', font='font20', textColor='0xFFFFFFFF')
-        self.addControl(self.image)
-        self.addControl(self.button)
-        self.setFocus(self.button)
+    def __init__(self, cookie, tokens, vcodetype, codeString, vcode_path):
+        self.cookie = cookie
+        self.tokens = tokens
+        self.vcodetype = vcodetype
+        self.codeString = codeString
+        self.vcode_path = vcode_path
+
+        # windowItems
+        self.image = xbmcgui.ControlImage(80, 100, 500, 200, self.vcode_path)
+        self.buttonInput = xbmcgui.ControlButton(100, 330, 140, 50, label=u'输入验证码', font='font20', textColor='0xFFFFFFFF')
+        self.buttonRefresh = xbmcgui.ControlButton(150, 330, 140, 50, label=u'刷新验证码', font='font20', textColor='0xFFFFFFFF')
+        self.addControls([self.image, self.buttonInput, self.buttonRefresh])
+        self.setFocus(self.buttonInput)
+
 
     def onControl(self, event):
-        if event == self.button:
+        if event == self.buttonInput:
             self.close()
+        elif event == self.buttonRefresh:
+            (self.codeString, self.vcode_path) = auth.refresh_vcode(self.cookie, self.tokens, self.vcodetype)
+            if self.codeString and self.vcode_path:
+                self.removeControl(self.image)
+                self.image = xbmcgui.ControlImage(80, 100, 500, 200, self.vcode_path)
+                self.addControl(self.image)
+            else:
+                dialog.ok('Error', u'无法刷新验证码，请重试')
 
 
+
+# Authorisation Process
 def run(username,password):
     cookie = auth.get_BAIDUID()
     token = auth.get_token(cookie)
@@ -36,8 +54,9 @@ def run(username,password):
         codeString = query['codeString']
         vcode_path = auth.get_signin_vcode(cookie, codeString)
 
-        win = VcodeWindow(vcode_path)
+        win = VcodeWindow(cookie, tokens, vcodetype, codeString, vcode_path)
         win.doModal()
+        codeString = win.codeString
 
         verifycode = dialog.input(u'验证码', type=xbmcgui.INPUT_ALPHANUM)
         if len(verifycode) == 4:
