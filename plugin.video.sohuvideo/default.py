@@ -605,7 +605,10 @@ def performChanges(name,id,cat,area,year,p5,p6,p11,order,listpage):
 ##################################################################################
 def searchSohu():
     result=''
-    keyboard = ChineseKeyboard.Keyboard('','请输入搜索内容')
+    if (__addon__.getSetting('keyboard')=='0'):
+        keyboard = xbmc.Keyboard('','请输入搜索内容')
+    else:
+        keyboard = ChineseKeyboard.Keyboard('','请输入搜索内容')
     xbmc.sleep( 1500 )
     keyboard.doModal()
     if (keyboard.isConfirmed()):
