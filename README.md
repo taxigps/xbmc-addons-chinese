@@ -54,6 +54,7 @@ For proper Chinese text display on xbmc, do the following steps:
 * 优酷视频2(YouKu2) - plugin.video.youku2 - Online tv and movies from www.youku.com
 * YouKu TV - plugin.video.youkutv - Online tv and movies from www.youku.com, with wonderful GUI
 * 战旗TV(ZhanqiTV) - plugin.video.zhanqitv - Online video from www.zhanqi.tv
+* 百度云(BaiDuYun) - plugin.video.bdyun - Personal Cloud Storage from yun.baidu.com
 
 Note: PPS影音(PPS.tv) and PPS网络电视(PPStream)
 
