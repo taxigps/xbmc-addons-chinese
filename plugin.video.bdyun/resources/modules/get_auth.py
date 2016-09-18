@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 import os, sys, re, json 
-from resources.modules import auth
+from resources.modules import auth, cnkeyboard
 
 dialog = xbmcgui.Dialog()
 
@@ -18,7 +18,7 @@ class VcodeWindow(xbmcgui.WindowDialog):
         # windowItems
         self.image = xbmcgui.ControlImage(80, 100, 500, 200, self.vcode_path)
         self.buttonInput = xbmcgui.ControlButton(100, 330, 140, 50, label=u'输入验证码', font='font20', textColor='0xFFFFFFFF')
-        self.buttonRefresh = xbmcgui.ControlButton(150, 330, 140, 50, label=u'刷新验证码', font='font20', textColor='0xFFFFFFFF')
+        self.buttonRefresh = xbmcgui.ControlButton(290, 330, 140, 50, label=u'刷新验证码', font='font20', textColor='0xFFFFFFFF')
         self.addControls([self.image, self.buttonInput, self.buttonRefresh])
         self.setFocus(self.buttonInput)
 
@@ -58,8 +58,8 @@ def run(username,password):
         win.doModal()
         codeString = win.codeString
 
-        verifycode = dialog.input(u'验证码', type=xbmcgui.INPUT_ALPHANUM)
-        if len(verifycode) == 4:
+        verifycode = cnkeyboard.keyboard(heading=u'验证码')
+        if verifycode:
             err_no,query = auth.post_login(cookie,tokens,username,password_enc,rsakey,verifycode,codeString)
             if err_no == 0:
                 temp_cookie = query
@@ -77,7 +77,7 @@ def run(username,password):
             else:
                 dialog.ok('Error',u'未知错误，请重试')
         else:
-            dialog.ok('Error',u'验证码为四位数')
+            dialog.ok('Error',u'请输入验证码')
     
     elif err_no == 4:
         dialog.ok('Error',u'密码错误')
