@@ -16,9 +16,9 @@ latency = str(random.random())
 CONTENT_FORM = 'application/x-www-form-urlencoded'
 CONTENT_FORM_UTF8 = CONTENT_FORM + '; charset=UTF-8'
 # 一般的服务器名
-PCS_URL = 'http://pcs.baidu.com/rest/2.0/pcs/'
+PCS_URL = 'https://pcs.baidu.com/rest/2.0/pcs/'
 # 下载的服务器名
-PCS_URL_D = 'http://d.pcs.baidu.com/rest/2.0/pcs/'
+PCS_URL_D = 'https://d.pcs.baidu.com/rest/2.0/pcs/'
 ## HTTP 请求时的一些常量
 ACCEPT_HTML = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
 
@@ -197,9 +197,11 @@ def stream_download(cookie, tokens, path):
         '&path=', path,
         '&app_id=250528',
     ])
-    req = requests.get(url, cookies=cookie, allow_redirects=False, timeout=50, verify=False)
+    headers_merged = default_headers.copy()
+    headers_merged.update({'Accept': ACCEPT_HTML})
+    req = requests.get(url, headers=headers_merged, cookies=cookie, allow_redirects=False, timeout=50, verify=False)
     if req:
-        return req
+        return req.headers['location']
     else:
         return None
 

@@ -263,16 +263,22 @@ def refresh():
 @plugin.route('/quality/<filepath>')
 def quality(filepath):
     if plugin.get_setting('show_stream_type', bool):
-        stream_type = ['M3U8_AUTO_480','M3U8_AUTO_720']
-        choice = dialog.select(u'请选择画质', [u'流畅480P(推荐)',u'高清720P'])
+        stream_type = ['M3U8_AUTO_720', 'NONE']
+        choice = dialog.select(u'请选择画质', [u'流畅',u'原画'])
         if choice < 0:
             return
-        elif choice == 0 or choice == 1:
+        elif choice == 0:
             stream = stream_type[choice]
+        elif choice == 1:
+            stream = False
+    elif plugin.get_setting('stream_type', str) == 'NONE':
+        stream = False
     else:
         stream = plugin.get_setting('stream_type', str)
+
     if isinstance(filepath, str):
         filepath = filepath.decode('utf-8')
+
     video_path = playlist_path(filepath, stream)
 
     name = os.path.basename(filepath)
@@ -280,8 +286,7 @@ def quality(filepath):
     listitem.setInfo(type='Video', infoLabels={'Title': name})
 
     if video_path:
-        player = myplayer.Player()
-        player.play(video_path, listitem, windowed=False)
+        xbmc.Player().play(video_path, listitem, windowed=False)
 
 
 @plugin.route('/play_music/<filepath>')
@@ -394,11 +399,15 @@ def playlist_path(pcs_file_path, stream):
             tmpFile.write(bytearray(playlist_data, 'utf-8'))
             return filepath
         else:
-            dialog.notification('', u'无法打开视频,请尝试其他清晰度', xbmcgui.NOTIFICATION_INFO, 6000)
+            dialog.notification('', u'无法打开视频', xbmcgui.NOTIFICATION_INFO, 4000)
             return None
     else:
-        url = pcs.get_download_link(user_cookie, user_tokens, pcs_file_path)
-        return url
+        url = pcs.stream_download(user_cookie, user_tokens, pcs_file_path)
+        if url:
+            return url
+        else:
+            dialog.notification('', u'无法打开原画，请尝试流畅模式', xbmcgui.NOTIFICATION_INFO, 4000)
+            return None
 
 
 if __name__ == '__main__':
