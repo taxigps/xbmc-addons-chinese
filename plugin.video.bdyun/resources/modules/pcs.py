@@ -44,11 +44,9 @@ def get_user_uk(cookie, tokens):
     req = requests.get(url, cookies=cookie, headers=headers_merged, timeout=50, verify=False)
     if req:
         content = req.text
-        match = re.findall('/share/home\?uk=(\d+)" target=', content)
+        match = re.findall('\"uk\":(\d+)', content)
         if len(match) == 1:
             return match[0]
-        else:
-            print('pcs.get_user_uk(), failed to parse uk')
     return None
 
 
