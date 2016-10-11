@@ -137,6 +137,8 @@ def Download(id,lang):
         xbmc.executebuiltin(('XBMC.Extract("%s","%s")' % (tempfile,__temp__,)).encode('utf-8'), True)
     path = __temp__
     dirs, files = xbmcvfs.listdir(path)
+    if ('__MACOSX') in dirs:
+        dirs.remove('__MACOSX')
     if len(dirs) > 0:
         path = os.path.join(__temp__, dirs[0].decode('utf-8'))
         dirs, files = xbmcvfs.listdir(path)
@@ -150,7 +152,8 @@ def Download(id,lang):
         sel = xbmcgui.Dialog().select('请选择压缩包中的字幕', list)
         if sel == -1:
             sel = 0
-        subtitle_list.append(os.path.join(path, list[sel]))
+        if len(list):
+            subtitle_list.append(os.path.join(path, list[sel]))
 
     return subtitle_list
 
