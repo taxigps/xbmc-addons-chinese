@@ -47,3 +47,7 @@ msgstr "最高"
 msgctxt "#30007"
 msgid "auto play next"
 msgstr "自动连播"
+
+msgctxt "#30008"
+msgid "handle redirect"
+msgstr "处理重定向"

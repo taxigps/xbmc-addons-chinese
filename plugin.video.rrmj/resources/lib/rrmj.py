@@ -1,9 +1,9 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 import urllib
 import json
 import time
 from common import *
+import xbmc
 import xbmcvfs
 import xbmcgui
 import xbmcaddon
@@ -15,7 +15,7 @@ FAKE_HEADERS = {
     "a": "cf2ecd4d-dea3-40ca-814f-3f0462623b1c",
     "b": "",
     "clientType": "android_%E5%B0%8F%E7%B1%B3",
-    "clientVersion": "2.0.7.3",
+    "clientVersion": "99.99",
     "c": "5a1fb134-9384-4fc8-a5ae-6e711e24afc1",
     "d": "",
     "e": "d4dd075d894dd2b8c81f96062dbe7dcbf7d467fd"
@@ -69,9 +69,8 @@ class RenRenMeiJu(object):
         headers.update(b=url)
         s = json.loads(GetHttpData(url, data=data, headers=headers))
         if pretty:
-            print headers
-            print json.dumps(s, sort_keys=True,
-                             indent=4, separators=(',', ': '))
+            xbmc.log(json.dumps(s, sort_keys=True,
+                     indent=4, separators=(',', ': ')))
         return s
 
     def get_ticket(self):
@@ -117,6 +116,11 @@ class RenRenMeiJu(object):
         return self.get_json(SERVER + API)
 
 
+class SmartRedirectHandler(urllib2.HTTPRedirectHandler):
+    def http_error_302(self, req, fp, code, msg, headers):
+        return headers.get("Location")
+
+
 class RRMJResolver(RenRenMeiJu):
 
     def get_by_sid(self, **kwargs):
@@ -134,6 +138,11 @@ class RRMJResolver(RenRenMeiJu):
                 print real_url
                 return real_url["V"][0]["U"], current_quality
             else:
+                if __ADDON__.getSetting("handle_redirect") == 'true' and "letvyun/letvmmsid.php" in m3u8["url"]:
+                    request = urllib2.Request(m3u8["url"])
+                    opener = urllib2.build_opener(SmartRedirectHandler)
+                    location = opener.open(request)
+                    return location, current_quality
                 return m3u8["url"], current_quality
 
 

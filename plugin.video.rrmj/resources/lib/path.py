@@ -3,6 +3,8 @@
 from xbmcswift2 import Plugin, CLI_MODE, xbmcaddon, ListItem, xbmc, xbmcgui, xbmcplugin
 import os
 import sys
+from rrmj import *
+from common import *
 
 try:
     from ChineseKeyboard import Keyboard
@@ -19,9 +21,7 @@ ADDON_NAME = ADDON.getAddonInfo('name')
 ADDON_PATH = ADDON.getAddonInfo('path').decode("utf-8")
 ADDON_VERSION = ADDON.getAddonInfo('version')
 ADDON_DATA_PATH = xbmc.translatePath("special://profile/addon_data/%s" % ADDON_ID).decode("utf-8")
-sys.path.append(os.path.join(ADDON_PATH, 'resources', 'lib'))
-from rrmj import *
-from common import *
+
 
 plugin = Plugin()
 Meiju = RenRenMeiJu()
@@ -158,6 +158,7 @@ def search(page, **kwargs):
                                 "rating ": float(one["score"]),
                                 "genre": one["cat"],
                                 "season": one["seasonNo"]})
+        item._listitem.setArt({"poster": one["cover"]})
         item.set_is_playable(False)
         yield item
     plugin.set_content('TVShows')
@@ -177,6 +178,7 @@ def get_album(albumId):
                                 "rating ": float(one["score"]),
                                 "genre": one["cat"],
                                 "season": one["seasonNo"]})
+        item._listitem.setArt({"poster": one["cover"]})
         item.set_is_playable(False)
         yield item
     plugin.set_content('TVShows')
@@ -202,10 +204,11 @@ def video_detail(seasonId):
             'label': label,
             'path': plugin.url_for("play_season", seasonId=seasonId, index=episode["episode"], Esid=episode["sid"]),
         })
-        item.set_info("video", {"plot": episode["text"],
-                                "TVShowTitle": episode["text"],
+        item.set_info("video", {"plot": episode["text"] if episode["text"] != "" else detail["data"]["seasonDetail"]["brief"],
+                                "TVShowTitle": title,
                                 "episode": int(episode["episode"]),
                                 "season": 0})
+        item._listitem.setArt({"poster": detail["data"]["seasonDetail"]["cover"]})
         item.set_is_playable(True)
         yield item
     plugin.set_content('episodes')
@@ -220,7 +223,7 @@ def play(seasonId="", index="", Esid=""):
     play_url, _ = rs.get_play(seasonId, episode_sid, plugin.get_setting("quality"))
     if play_url is not None:
         add_history(seasonId, index, Esid, title)
-        li = ListItem(title, path=play_url)
+        li = ListItem(title+index, path=play_url)
         plugin.set_resolved_url(li)
 
 

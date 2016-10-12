@@ -47,3 +47,7 @@ msgstr ""
 msgctxt "#30007"
 msgid "auto play next"
 msgstr ""
+
+msgctxt "#30008"
+msgid "handle redirect"
+msgstr ""

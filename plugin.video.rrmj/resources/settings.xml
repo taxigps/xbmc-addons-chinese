@@ -6,4 +6,7 @@
       <setting id="auto_next" type="bool" label="30007" default="true"/>
       <setting id="expired_time" type="text" label="expiredTime" visible="false"/>
     </category>
+    <category label="extra">
+      <setting id="handle_redirect" type="bool" label="30008" default="true"/>
+    </category>
 </settings>
