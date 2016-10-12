@@ -26,7 +26,6 @@ sys.path.append (__resource__)
 
 ZIMUKU_API = 'http://www.zimuku.net/search?q=%s'
 ZIMUKU_BASE = 'http://www.zimuku.net'
-FLAG_DICT = {'china':'简', 'hongkong':'繁', 'uk':'英', 'jollyroger':'双语'}
 
 def log(module, msg):
     xbmc.log((u"%s::%s - %s" % (__scriptname__,module,msg,)).encode('utf-8'),level=xbmc.LOGDEBUG )
@@ -51,7 +50,7 @@ def Search( item ):
         soup = BeautifulSoup(data)
     except:
         return
-    results = soup.find_all("div", class_="item clearfix")
+    results = soup.find_all("div", class_="item prel clearfix")
     for it in results:
         moviename = it.find("div", class_="title").a.text.encode('utf-8')
         movieurl = '%s%s' % (ZIMUKU_BASE, it.find("div", class_="title").a.get('href').encode('utf-8'))
@@ -59,20 +58,24 @@ def Search( item ):
             socket = urllib.urlopen(movieurl)
             data = socket.read()
             socket.close()
-            soup = BeautifulSoup(data).find("div", class_="sublist")
+            soup = BeautifulSoup(data).find("div", class_="subs box clearfix")
         except:
             return
-        subs = soup.find_all("tr")
+        subs = soup.tbody.find_all("tr")
         for sub in subs:
-            version = sub.a.text.encode('utf-8')
-            flag = sub.img.get('src').split('/')[-1].split('.')[0].encode('utf-8')
-            lang = FLAG_DICT[flag]
             link = '%s%s' % (ZIMUKU_BASE, sub.a.get('href').encode('utf-8'))
-            name = '%s (%s)' % (version, lang)
-            if lang == '英':
-                subtitles_list.append({"language_name":"English", "filename":name, "link":link, "language_flag":'en', "rating":"0", "lang":lang})
+            version = sub.a.text.encode('utf-8')
+            try:
+                td = sub.find("td", class_="tac lang")
+                r2 = td.find_all("img")
+                langs = [x.get('title').encode('utf-8') for x in r2]
+            except:
+                langs = '未知'
+            name = '%s (%s)' % (version, ",".join(langs))
+            if ('English' in langs) and not(('简体中文' in langs) or ('繁體中文' in langs)):
+                subtitles_list.append({"language_name":"English", "filename":name, "link":link, "language_flag":'en', "rating":"0", "lang":langs})
             else:
-                subtitles_list.append({"language_name":"Chinese", "filename":name, "link":link, "language_flag":'zh', "rating":"0", "lang":lang})
+                subtitles_list.append({"language_name":"Chinese", "filename":name, "link":link, "language_flag":'zh', "rating":"0", "lang":langs})
 
     if subtitles_list:
         for it in subtitles_list:
