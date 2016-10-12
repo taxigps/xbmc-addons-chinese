@@ -1,7 +1,0 @@
-1.0.0	2015-08-18
-	URL http://8.37.234.13/v.cctv.com/live_back/nettv_cctv1/cctv1-2015-08-28-08-004.mp4?wsiphost=local 
-        streams a five munites segment of cctv1's replay. I have no idea how old the replay.
-	The plugin will play the five minutes segment and the next until it was navigated to another channel.
-        I borrowed icons for channels from plugin-cntv-real. Many thanks to the authors
-	Please contact me at sun_kang@hotmail.com
-

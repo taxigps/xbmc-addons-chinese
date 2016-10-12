@@ -1,6 +1,0 @@
-1.0.0	2015-08-28
-        http://fms.cntv.lxdns.com/live/flv/channel<num> streams an Asian TV station.
-        Linux script UpdateChannels.sh will scan avaiable channels from 1 to 1000
-	I have tried match the numbers to names of TV stations as much as possible.
-	You are welcome to modify this plugin but please update me at sun_kang@hotmail.com
-

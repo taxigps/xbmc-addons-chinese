@@ -1,4 +1,0 @@
-﻿<?xml version="1.0" encoding="utf8" standalone="yes"?>
-<settings>
-	<setting id="resolution" type="enum" label="点播视频清晰度" values="每次询问|4K|1080P|720P|超清|标清|流畅|极速" default="0"/>
-</settings>

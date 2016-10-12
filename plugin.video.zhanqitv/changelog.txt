@@ -1,5 +1,0 @@
-1.0.4 Fix parse
-1.0.3 Change to rtmp
-1.0.2 Change to flv
-1.0.1 Bug Fix
-1.0.0 Initial Release

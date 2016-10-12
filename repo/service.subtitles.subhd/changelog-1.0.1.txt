@@ -1,5 +1,0 @@
-﻿1.0.1
-- fixed can't download sub due to site changed
-
-1.0.0
-- initial
