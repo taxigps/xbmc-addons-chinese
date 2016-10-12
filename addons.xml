@@ -475,7 +475,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.rrmj"
        name="人人美剧"
-       version="0.1.6"
+       version="0.1.7"
        provider-name="jindaxia">
   <requires>
     <import addon="script.module.xbmcswift2" version="2.4.0"/>
@@ -486,7 +486,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
   </extension>
   <extension point="xbmc.addon.metadata">
     <summary lang="zh-CN">由人人影视转型后专门为美剧迷们打造的高质量讨论交流社区</summary>
-    <description lang="en"></description>
+    <description>由人人影视转型后专门为美剧迷们打造的高质量讨论交流社区</description>
     <platform>all</platform>
     <website><![CDATA[https://github.com/jindaxia/plugin.video.rrmj]]></website>
     <forum></forum>
