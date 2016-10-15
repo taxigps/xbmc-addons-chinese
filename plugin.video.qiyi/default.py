@@ -4,6 +4,7 @@ from uuid import uuid4
 from random import random,randint
 from math import floor
 import hashlib
+import time
 import simplejson
 
 # Plugin constants 
@@ -15,6 +16,7 @@ CHANNEL_LIST = [['电影','1'], ['电视剧','2'], ['纪录片','3'], ['动漫',
 ORDER_LIST = [['4','更新时间'], ['11','热门']]
 PAYTYPE_LIST = [['','全部影片'], ['0','免费影片'], ['1','会员免费'], ['2','付费点播']]
 
+'''
 class QYPlayer(xbmc.Player):
     def __init__(self):
         xbmc.Player.__init__(self)
@@ -72,6 +74,7 @@ class QYPlayer(xbmc.Player):
         self.is_active = False
 
 qyplayer = QYPlayer()
+'''
 
 def GetHttpData(url):
     print "getHttpData: " + url
@@ -158,7 +161,7 @@ def getyearList(listpage, id, year):
 def rootList():
     for name, id in CHANNEL_LIST:
         li = xbmcgui.ListItem(name)
-        u = sys.argv[0]+"?mode=1&name="+urllib.quote_plus(name)+"&id="+urllib.quote_plus(id)+"&cat="+urllib.quote_plus("")+"&area="+urllib.quote_plus("")+"&year="+urllib.quote_plus("")+"&order="+urllib.quote_plus("4")+"&page="+urllib.quote_plus("1")+"&paytype="+urllib.quote_plus("0")
+        u = sys.argv[0]+"?mode=1&name="+urllib.quote_plus(name)+"&id="+urllib.quote_plus(id)+"&cat="+urllib.quote_plus("")+"&area="+urllib.quote_plus("")+"&year="+urllib.quote_plus("")+"&order="+urllib.quote_plus("11")+"&page="+urllib.quote_plus("1")+"&paytype="+urllib.quote_plus("0")
         xbmcplugin.addDirectoryItem(int(sys.argv[1]),u,li,True)
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -252,11 +255,11 @@ def progList(name,id,page,cat,area,year,order,paytype):
             p_episode = re.compile('data-qidanadd-episode="(\d)"').search(match[i]).group(1) == '1'
         except:
             p_episode = False
-        match1 = re.compile('<p rseat="dsjt7" class="textOverflow">([^<]+)</p>').search(match[i])
+        match1 = re.compile('<span class="icon-vInfo">([^<]+)</span>').search(match[i])
         if match1:
             msg = match1.group(1).strip()
             p_name1 = p_name + '（' + msg + '）'
-            if (msg.find('更新至第') == 0) or (msg.find('共') == 0):
+            if (msg.find('更新至') == 0) or (msg.find('共') == 0):
                 p_episode = True
         else:
             p_name1 =  p_name
@@ -294,6 +297,7 @@ def progList(name,id,page,cat,area,year,order,paytype):
         else:
             p_plot = ''
         li = xbmcgui.ListItem(str(i + 1) + '.' + p_name1, iconImage = '', thumbnailImage = p_thumb)
+        li.setArt({ 'poster': p_thumb })
         u = sys.argv[0]+"?mode="+str(mode)+"&name="+urllib.quote_plus(p_name)+"&id="+urllib.quote_plus(p_id)+"&thumb="+urllib.quote_plus(p_thumb)
         li.setInfo(type = "Video", infoLabels = {"Title":p_name, "Director":p_director, "Genre":p_genre, "Plot":p_plot, "Cast":p_cast, "Rating":p_rating})
         xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, isdir, totalItems)
@@ -364,6 +368,7 @@ def seriesList(name,id,thumb,page):
             if item['vt']:
                 p_name = '%s %s' % (p_name, item['vt'].encode('utf-8'))
             li = xbmcgui.ListItem(p_name, iconImage = '', thumbnailImage = p_thumb)
+            li.setArt({ 'poster': thumb })
             li.setInfo(type = "Video", infoLabels = {"Title":p_name, "Director":p_director, "Cast":p_cast, "Plot":p_plot, "Year":p_year})
             u = sys.argv[0] + "?mode=3&name=" + urllib.quote_plus(p_name) + "&id=" + urllib.quote_plus(p_id)+ "&thumb=" + urllib.quote_plus(p_thumb)
             xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, False, totalItems)
@@ -386,9 +391,9 @@ def selResolution(items):
         if items[i] == 1: ratelist.append([6, '流畅', i])
         if items[i] == 2: ratelist.append([5, '标清', i])
         if items[i] == 3: ratelist.append([4, '超清', i])
-        if items[i] == 4: ratelist.append([3, '720P', i])
-        if items[i] == 5: ratelist.append([2, '1080P', i])
-        if items[i] == 10: ratelist.append([1, '4K', i])
+        if items[i] == 4 or items[i] == 17: ratelist.append([3, '720P', i])
+        if items[i] == 5 or items[i] == 18: ratelist.append([2, '1080P', i])
+        if items[i] == 10 or items[i] == 19: ratelist.append([1, '4K', i])
     ratelist.sort()
     if len(ratelist) > 1:
         resolution = int(__addon__.getSetting('resolution'))
@@ -405,6 +410,7 @@ def selResolution(items):
         sel = 0
     return ratelist[sel][2]
 
+'''
 def getVRSXORCode(arg1,arg2):
     loc3=arg2 %3
     if loc3 == 1:
@@ -450,6 +456,16 @@ def getDispathKey(rid):
     time=simplejson.loads(GetHttpData("http://data.video.qiyi.com/t?tn="+str(random())))["t"]
     t=str(int(floor(int(time)/(10*60.0))))
     return hashlib.md5(t+tp+rid).hexdigest()
+'''
+
+def getVMS(tvid, vid):
+    t = int(time.time() * 1000)
+    src = '76f90cbd92f94a2e925d83e8ccd22cb7'
+    key = 'd5fb4bd9d50c4be6948c97edd7254b0e'
+    sc = hashlib.md5(str(t) + key  + vid).hexdigest()
+    vmsreq = 'http://cache.m.iqiyi.com/tmts/{0}/{1}/?t={2}&sc={3}&src={4}'.format(tvid,vid,t,sc,src)
+    print vmsreq
+    return simplejson.loads(GetHttpData(vmsreq))
 
 def PlayVideo(name,id,thumb):
     id = id.split(',')
@@ -474,49 +490,22 @@ def PlayVideo(name,id,thumb):
          tvId = id[0]
          videoId = id[1]
  
-    gen_uid = uuid4().hex
-    info = getVMS(tvId, videoId, gen_uid)
-    if info["code"] != "A000000":
+    info = getVMS(tvId, videoId)
+    if info["code"] != "A00000":
         dialog = xbmcgui.Dialog()
-        ok = dialog.ok(__addonname__, '密钥过期，需升级插件')
+        ok = dialog.ok(__addonname__, '无法播放此视频')
         return
     
-    vs = info["data"]["vp"]["tkl"][0]["vs"]
-    #print [(x['bid'],x['scrsz']) for x in vs]
-    sel = selResolution([x['bid'] for x in vs])
+    vs = info["data"]["vidl"]
+    sel = selResolution([x['vd'] for x in vs])
     if sel == -1:
         return
 
-    video_links = vs[sel]["fs"] #now in i["flvs"] not in i["fs"]
-    if not vs[sel]["fs"][0]["l"].startswith("/"):
-        tmp = getVrsEncodeCode(vs[sel]["fs"][0]["l"])
-        if tmp.endswith('mp4'):
-             video_links = vs[sel]["flvs"]
+    video_links = vs[sel]["m3u"]
 
-    # New method to avoid url expired
-    qyplayer.play(name, thumb, info["data"]["vp"]["du"], video_links, gen_uid)
-    while qyplayer.is_active:
-        xbmc.sleep(100)
-
-    # Old method
-    #urls = []
-    #size = 0
-    #for i in video_links:
-    #    vlink = i["l"]
-    #    if not vlink.startswith("/"):
-    #        #vlink is encode
-    #        vlink=getVrsEncodeCode(vlink)
-    #    key=getDispathKey(vlink.split("/")[-1].split(".")[0])
-    #    size+=i["b"]
-    #    baseurl=info["data"]["vp"]["du"].split("/")
-    #    baseurl.insert(-1,key)
-    #    url="/".join(baseurl)+vlink+'?su='+gen_uid+'&qyid='+uuid4().hex+'&client=&z=&bt=&ct=&tn='+str(randint(10000,20000))
-    #    urls.append(simplejson.loads(GetHttpData(url))["l"])
-
-    #stackurl = 'stack://' + ' , '.join(urls)
-    #listitem = xbmcgui.ListItem(name,thumbnailImage=thumb)
-    #listitem.setInfo(type="Video",infoLabels={"Title":name})
-    #xbmc.Player().play(stackurl, listitem)
+    listitem = xbmcgui.ListItem(name,thumbnailImage=thumb)
+    listitem.setInfo(type="Video",infoLabels={"Title":name})
+    xbmc.Player().play(video_links, listitem)
 
 def performChanges(name,id,listpage,cat,area,year,order,paytype):
     change = False
