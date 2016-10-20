@@ -610,7 +610,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
     </extension>
 </addon>
 
-<addon id="repository.xbmc-addons-chinese" name="Chinese Add-ons" version="1.2.0" provider-name="Taxigps">
+<addon id="repository.xbmc-addons-chinese" name="Chinese Add-ons" version="1.2.1" provider-name="Taxigps">
     <extension point="xbmc.addon.repository" name="Chinese Add-ons">
         <info compressed="true">https://github.com/taxigps/xbmc-addons-chinese/raw/master/addons.xml</info>
         <checksum>https://github.com/taxigps/xbmc-addons-chinese/raw/master/addons.xml.md5</checksum>
