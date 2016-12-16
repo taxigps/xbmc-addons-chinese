@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.dnvodPlayer"
+  name="多瑙影院播放器(dnvodPlayer)"
+  version="1.0.0"
+  provider-name="Cameron">
+  <requires>
+    <import addon="script.module.requests" version="1.1.0"/>
+    <import addon="xbmc.python" version="2.1.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="addon.py">
+  <provides>video</provides>
+  </extension>
+  
+  <extension point="xbmc.addon.metadata">
+    <platform>all</platform>
+    <summary>XBMC Player for dnvod</summary>
+    <summary lang="zh">多瑙影院XBMC插件</summary>
+    <description>Search and play all the movie on dnvod, not include Adult movies</description>
+    <description lang="zh">搜索并播放多瑙影院中的电影及电视剧，暂不包含成人内容</description>
+    <disclaimer>For personal use only</disclaimer>
+    <disclaimer lang="zh">仅供个人使用</disclaimer>
+  </extension>
+</addon>
