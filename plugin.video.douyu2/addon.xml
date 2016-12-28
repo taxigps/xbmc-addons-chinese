@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.douyutv2"
+    name="斗鱼TV(douyutv)"
+    version="2.2"
+    provider-name="Yangqian;Catro">
+    <requires>
+        <import addon="script.module.beautifulsoup4" version="4.3.2"/>
+        <import addon="script.module.requests" version="1.1.0"/>
+    </requires>
+    <extension
+        point="xbmc.python.pluginsource"
+        library="addon.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">douyu video plugin</summary>
+        <summary lang="zh">斗鱼TV插件</summary>
+        <description lang="en">Online video from www.douyutv.com. https://github.com/catro/plugin.video.douyutv2</description>
+        <description lang="zh">斗鱼TV. 视频源和弹幕可以在设置里面改变. https://github.com/catro/plugin.video.douyutv2</description>
+        <platform>all</platform>
+    </extension>
+</addon>
