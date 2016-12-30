@@ -41,7 +41,7 @@ For proper Chinese text display on xbmc, do the following steps:
 * CNTV Live 中国网络电视台直播 - plugin.video.cntv-live - TV live channels from www.cntv.cn
 * 央视重播 CCTV Replay - plugin.video.cntv-replay - An other addon for TV live channels from www.cntv.cn
 * 多瑙影院播放器(dnvodPlayer) - plugin.video.dnvodPlayer - Search and play movie on www.dnvod.eu
-* 斗鱼TV(douyu.tv) - plugin.video.douyu2 - Online videos from www.douyutv.com
+* 斗鱼TV(douyutv) - plugin.video.douyutv2 - Online videos from www.douyutv.com
 * 风行视频(Funshion) - plugin.video.funshion - Online videos from www.funshion.com
 * 酷6云中剧场(Ku6) - plugin.video.ku6 - Online video from www.juchang.com
 * 乐视网(LeTV) - plugin.video.letv - Online video from www.letv.com.cn
