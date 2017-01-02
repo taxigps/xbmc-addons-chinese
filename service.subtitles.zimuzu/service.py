@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 import re
 import os
@@ -75,9 +75,7 @@ def Search( item ):
     results = soup.find_all("div", class_="search-item")
     for it in results:
         link = ZIMUZU_BASE + it.find("div", class_="fl-info").a.get('href').encode('utf-8')
-    
         title = it.find("div", class_="f14").text.encode('utf-8')
-    
         subtitles_list.append({"language_name":"Chinese", "filename":title, "link":link, "language_flag":'zh', "rating":"0"})
 
     if subtitles_list:
@@ -92,8 +90,8 @@ def Search( item ):
             listitem.setProperty( "hearing_imp", "false" )
 
             url = "plugin://%s/?action=download&link=%s" % (__scriptid__,
-                                                                        it["link"]
-                                                                        )
+                                                            it["link"]
+                                                            )
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
 
 def rmtree(path):
