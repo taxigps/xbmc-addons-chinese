@@ -25,8 +25,8 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 
 sys.path.append (__resource__)
 
-SUBHD_API  = 'http://www.subhd.com/search/%s'
-SUBHD_BASE = 'http://www.subhd.com'
+SUBHD_API  = 'http://subhd.com/search/%s'
+SUBHD_BASE = 'http://subhd.com'
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
 def log(module, msg):
@@ -75,19 +75,21 @@ def Search( item ):
     results = soup.find_all("div", class_="box")
     for it in results:
         link = SUBHD_BASE + it.find("div", class_="d_title").a.get('href').encode('utf-8')
-        #version = it.find(text=re.compile('(字幕翻译|听译版本|机翻版本|官方译本)'.decode('utf-8'))).parent.get('title').encode('utf-8')
-        version = it.find_all("span", class_=re.compile("label"))[-1].get('title').encode('utf-8')
-        if version:
-            if version.find('本字幕按 ') == 0:
-                version = version.split()[1]
-        else:
-            version = '未知版本'
+        try:
+            group = it.find("div", class_="d_zu").text.encode('utf-8')
+            if group.isspace():
+                group = ''
+        except:
+            group = ''
+        title = it.find("div", class_="d_title").text.encode('utf-8')
+        if group and (title.find(group) == -1):
+            title += ' / ' + group
         try:
             r2 = it.find_all("span", class_="label")
             langs = [x.text.encode('utf-8') for x in r2][:-1]
         except:
             langs = '未知'
-        name = '%s (%s)' % (version, ",".join(langs))
+        name = '%s (%s)' % (title, ",".join(langs))
         if ('英文' in langs) and not(('简体' in langs) or ('繁体' in langs)):
             subtitles_list.append({"language_name":"English", "filename":name, "link":link, "language_flag":'en', "rating":"0", "lang":langs})
         else:
@@ -105,9 +107,9 @@ def Search( item ):
             listitem.setProperty( "hearing_imp", "false" )
 
             url = "plugin://%s/?action=download&link=%s&lang=%s" % (__scriptid__,
-                                                                        it["link"],
-                                                                        it["lang"]
-                                                                        )
+                                                                    it["link"],
+                                                                    it["lang"]
+                                                                    )
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
 
 def rmtree(path):
