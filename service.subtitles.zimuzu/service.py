@@ -25,8 +25,8 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 
 sys.path.append (__resource__)
 
-SUBHD_API  = 'http://subhd.com/search/%s'
-SUBHD_BASE = 'http://subhd.com'
+ZIMUZU_API = 'http://www.zimuzu.tv/search?keyword=%s&type=subtitle'
+ZIMUZU_BASE = 'http://www.zimuzu.tv'
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
 def log(module, msg):
@@ -66,34 +66,17 @@ def Search( item ):
                                            int(item['episode']),)
     else:
         search_string = item['title']
-    url = SUBHD_API % (urllib.quote(search_string))
+    url = ZIMUZU_API % (urllib.quote(search_string))
     data = GetHttpData(url)
     try:
         soup = BeautifulSoup(data)
     except:
         return
-    results = soup.find_all("div", class_="box")
+    results = soup.find_all("div", class_="search-item")
     for it in results:
-        link = SUBHD_BASE + it.find("div", class_="d_title").a.get('href').encode('utf-8')
-        try:
-            group = it.find("div", class_="d_zu").text.encode('utf-8')
-            if group.isspace():
-                group = ''
-        except:
-            group = ''
-        title = it.find("div", class_="d_title").text.encode('utf-8')
-        if group and (title.find(group) == -1):
-            title += ' / ' + group
-        try:
-            r2 = it.find_all("span", class_="label")
-            langs = [x.text.encode('utf-8') for x in r2][:-1]
-        except:
-            langs = '未知'
-        name = '%s (%s)' % (title, ",".join(langs))
-        if ('英文' in langs) and not(('简体' in langs) or ('繁体' in langs)):
-            subtitles_list.append({"language_name":"English", "filename":name, "link":link, "language_flag":'en', "rating":"0", "lang":langs})
-        else:
-            subtitles_list.append({"language_name":"Chinese", "filename":name, "link":link, "language_flag":'zh', "rating":"0", "lang":langs})
+        link = ZIMUZU_BASE + it.find("div", class_="fl-info").a.get('href').encode('utf-8')
+        title = it.find("div", class_="f14").text.encode('utf-8')
+        subtitles_list.append({"language_name":"Chinese", "filename":title, "link":link, "language_flag":'zh', "rating":"0"})
 
     if subtitles_list:
         for it in subtitles_list:
@@ -106,10 +89,9 @@ def Search( item ):
             listitem.setProperty( "sync", "false" )
             listitem.setProperty( "hearing_imp", "false" )
 
-            url = "plugin://%s/?action=download&link=%s&lang=%s" % (__scriptid__,
-                                                                    it["link"],
-                                                                    it["lang"]
-                                                                    )
+            url = "plugin://%s/?action=download&link=%s" % (__scriptid__,
+                                                            it["link"]
+                                                            )
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
 
 def rmtree(path):
@@ -122,7 +104,7 @@ def rmtree(path):
         xbmcvfs.delete(os.path.join(path, file))
     xbmcvfs.rmdir(path) 
 
-def Download(url,lang):
+def Download(url):
     try: rmtree(__temp__)
     except: pass
     try: os.makedirs(__temp__)
@@ -133,15 +115,7 @@ def Download(url,lang):
     try:
         data = GetHttpData(url)
         soup = BeautifulSoup(data)
-        id = soup.find("button", class_="btn btn-danger btn-sm").get("sid").encode('utf-8')
-        url = "http://subhd.com/ajax/down_ajax"
-        values = {'sub_id':id}
-        para = urllib.urlencode(values)
-        data = GetHttpData(url, para)
-        match = re.compile('"url":"([^"]+)"').search(data)
-        url = match.group(1).replace(r'\/','/').decode("unicode-escape").encode('utf-8')
-        if url[:4] <> 'http':
-            url = 'http://subhd.com%s' % (url)
+        url = soup.find("div", class_="subtitle-links").a.get('href').encode('utf-8')
         data = GetHttpData(url)
     except:
         return []
@@ -239,7 +213,7 @@ if params['action'] == 'search' or params['action'] == 'manualsearch':
     Search(item)
 
 elif params['action'] == 'download':
-    subs = Download(params["link"], params["lang"])
+    subs = Download(params["link"])
     for sub in subs:
         listitem = xbmcgui.ListItem(label=sub)
         xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=sub,listitem=listitem,isFolder=False)
