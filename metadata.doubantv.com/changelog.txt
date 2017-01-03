@@ -1,3 +1,5 @@
+[B]1.2.1[/B]
+- Fix the title bug
 [B]1.2.0[/B]
 - Fix api bug
 [B]1.1.0[/B]
