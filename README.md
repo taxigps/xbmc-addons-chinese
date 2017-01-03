@@ -12,7 +12,7 @@ Note: Chinese repository is also applicable to Kodi (new releases - formerly kno
 
 ## Install Repository
 
-To install the repository, you need to download the latest repository zip file [repository.xbmc-addons-chinese-1.2.0.zip][3]. And then:
+To install the repository, you need to download the latest repository zip file [repository.xbmc-addons-chinese-1.2.1.zip][3]. And then:
 * Launch XBMC
 * Navigate to System | Settings | Add-ons
 * Select Install from zip file
@@ -101,6 +101,6 @@ If for reasons that you need to manually install a specific plugin, you can down
 
 [1]: http://bbs.htpc1.com/forum-225-1.html
 [2]: http://xbmc.org/forum/showthread.php?t=64250
-[3]: https://github.com/taxigps/xbmc-addons-chinese/raw/master/repo/repository.xbmc-addons-chinese/repository.xbmc-addons-chinese-1.2.0.zip
+[3]: https://github.com/taxigps/xbmc-addons-chinese/raw/master/repo/repository.xbmc-addons-chinese/repository.xbmc-addons-chinese-1.2.1.zip
 
 
