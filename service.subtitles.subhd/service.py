@@ -25,8 +25,8 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 
 sys.path.append (__resource__)
 
-SUBHD_API  = 'http://www.subhd.com/search/%s'
-SUBHD_BASE = 'http://www.subhd.com'
+SUBHD_API  = 'http://subhd.com/search/%s'
+SUBHD_BASE = 'http://subhd.com'
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
 def log(module, msg):
@@ -81,7 +81,15 @@ def Search( item ):
             if version.find('本字幕按 ') == 0:
                 version = version.split()[1]
         else:
-            version = '未知版本'
+            version = it.find("div", class_="d_title").text.encode('utf-8') # use title instead
+        try:
+            group = it.find("div", class_="d_zu").text.encode('utf-8')
+            if group.isspace():
+                group = ''
+        except:
+            group = ''
+        if group and (version.find(group) == -1):
+            version += '/' + group
         try:
             r2 = it.find_all("span", class_="label")
             langs = [x.text.encode('utf-8') for x in r2][:-1]
@@ -105,9 +113,9 @@ def Search( item ):
             listitem.setProperty( "hearing_imp", "false" )
 
             url = "plugin://%s/?action=download&link=%s&lang=%s" % (__scriptid__,
-                                                                        it["link"],
-                                                                        it["lang"]
-                                                                        )
+                                                                    it["link"],
+                                                                    it["lang"]
+                                                                    )
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
 
 def rmtree(path):
