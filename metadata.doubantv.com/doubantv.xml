@@ -99,9 +99,9 @@
       <RegExp input="$$1" output="&lt;premiered&gt;\1&lt;/premiered&gt;" dest="6+">
         <expression noclean="1">首播:&lt;/span&gt;.*?&gt;(.*?)&lt;/span&gt;</expression>
       </RegExp>
-	  <RegExp input="$$1" output="&lt;plot&gt;\1&lt;/plot&gt;" dest="6+">
-		<expression noclean="1">property=&quot;v:summary&quot;[^&gt;]*&gt;(.+?)&lt;/span&gt;</expression>
-	  </RegExp>
+	  <!-- <RegExp input="$$1" output="&lt;plot&gt;\1&lt;/plot&gt;" dest="6+"> -->
+	  <!--   <expression noclean="1">property=&quot;v:summary&quot;[^&gt;]*&gt;(.+?)&lt;/span&gt;</expression> -->
+	  <!-- </RegExp> -->
       <expression noclean="1"/>
     </RegExp>
   </GetDetailsFromHTML>
@@ -147,7 +147,7 @@
         <expression trim="1,2">&lt;title&gt;(.*?)&lt;/title&gt;</expression>
       </RegExp>
       <RegExp input="$$1" output="&lt;plot&gt;\1&lt;/plot&gt;" dest="5+">
-        <expression trim="1,2">&lt;p id=&quot;link-report&quot;&gt;.*?&lt;span class=&quot;all&quot;&gt;(.*?)&lt;/span&gt;</expression>
+        <expression trim="1,2">&lt;meta name=&quot;description&quot; content=&quot;(.*?)&quot;&gt;</expression>
       </RegExp>
       <expression noclean="1"/>
     </RegExp>
