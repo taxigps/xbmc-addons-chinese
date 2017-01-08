@@ -75,7 +75,7 @@ def Search( item ):
     results = soup.find_all("div", class_="search-item")
     for it in results:
         link = ZIMUZU_BASE + it.find("div", class_="fl-info").a.get('href').encode('utf-8')
-        title = it.find("div", class_="f14").text.encode('utf-8')
+        title = it.find("strong", class_="list_title").text.encode('utf-8')
         subtitles_list.append({"language_name":"Chinese", "filename":title, "link":link, "language_flag":'zh', "rating":"0"})
 
     if subtitles_list:
