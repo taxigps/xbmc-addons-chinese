@@ -82,7 +82,7 @@ def Search( item ):
             if version.find('本字幕按 ') == 0:
                 version = version.split()[1]
             # if version information is too short, we will append it to the title to give user more information
-            if (len(re.findall(r"[\w']+", version)) < 4) and (title.find(version) == -1):
+            if (len(re.findall(r"[\w']+", version)) < 5) and (title.find(version) == -1):
                 version = title + ' ' + version
         else:
             version = title
