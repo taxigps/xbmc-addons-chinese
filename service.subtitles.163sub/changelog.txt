@@ -1,4 +1,8 @@
-﻿1.0.4
+﻿1.0.5
+- updated title name and language
+- added group information
+
+1.0.4
 - fixed no subtitles in the list. thanks generalmilk!
 
 1.0.3
