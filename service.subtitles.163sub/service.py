@@ -66,6 +66,11 @@ def Search( item ):
         version = sub['mkvName'].encode('utf-8')
         if version[-4:] in ('.rar', '.zip'):
             version = version[:-4]
+        title = sub['enName'].encode('utf-8')
+        if version and (len(re.findall(r"[\w']+", version)) < 5) and (title.find(version) == -1):
+            version = title + ' ' + version
+        else:
+        	  version = title
         info = sub['otherName2'].encode('utf-8')
         langs = []
         lang_list = ['双语', '简体', '繁体', '英文']
