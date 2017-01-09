@@ -41,8 +41,8 @@ def Search( item ):
         search_str = item['mansearchstr']
     elif len(item['tvshow']) > 0:
         search_str = "%s S%.2dE%.2d" % (item['tvshow'],
-                                           int(item['season']),
-                                           int(item['episode']),)
+                                        int(item['season']),
+                                        int(item['episode']),)
     else:
         search_str = item['title']
     log( __name__ ,"Search for [%s] with [%s]" % (os.path.basename( item['file_original_path'] ),search_str.decode('utf-8')))
@@ -63,34 +63,52 @@ def Search( item ):
     except:
         return
     for sub in results:
-        version = sub['fileName'].encode('utf-8').replace('&amp;','&')
-        version = version[:-4]
+        version = sub['mkvName'].encode('utf-8')
         if version[-4:] in ('.rar', '.zip'):
             version = version[:-4]
-        langs = sub['language'].encode('utf-8')
-        id = sub['ID'].encode('utf-8')
-        ext = sub['sext'].encode('utf-8')
-        name = '[%s]%s (%s)' % (ext, version, langs)
-        if ('简' in langs) or ('繁' in langs) or ('中' in langs) or ('双' in langs):
-            subtitles_list.append({"language_name":"Chinese", "filename":name, "link":id, "language_flag":'zh', "rating":"0", "lang":langs})
+        title = sub['enName'].encode('utf-8')
+        if version and (len(re.findall(r"[\w']+", version)) < 5) and (title.find(version) == -1):
+            version = title + ' ' + version
         else:
-            subtitles_list.append({"language_name":"English", "filename":name, "link":id, "language_flag":'en', "rating":"0", "lang":langs})
+            version = title
+        info = sub['otherName2'].encode('utf-8')
+        langs = []
+        lang_list = ['双语', '简体', '繁体', '英文']
+        for x in lang_list:
+            if (info.find(x) != -1):
+                langs.append(x)
+        if (len(langs) == 0):
+            langs.append('未知语言')
+            lang_name = 'Chinese'
+            lang_flag = 'zh'
+        elif (len(langs) == 1) and (langs[0] == '英文'):
+            lang_name = 'English'
+            lang_flag = 'en'
+        else:
+            lang_name = 'Chinese'
+            lang_flag = 'zh'
+        id = sub['ID'].encode('utf-8')
+        group = sub['subFrom'].encode('utf-8')
+        if group and (group != '转载/未知/其他') and (version.find(group) == -1):
+            version += ' ' + group
+        name = '%s (%s)' % (version, ",".join(langs))
+        subtitles_list.append({"language_name":lang_name, "filename":name, "link":id, "language_flag":lang_flag, "rating":"0", "lang":langs})
 
     if subtitles_list:
         for it in subtitles_list:
             listitem = xbmcgui.ListItem(label=it["language_name"],
-                                  label2=it["filename"],
-                                  iconImage=it["rating"],
-                                  thumbnailImage=it["language_flag"]
-                                  )
+                                        label2=it["filename"],
+                                        iconImage=it["rating"],
+                                        thumbnailImage=it["language_flag"]
+                                       )
 
             listitem.setProperty( "sync", "false" )
             listitem.setProperty( "hearing_imp", "false" )
 
             url = "plugin://%s/?action=download&link=%s&lang=%s" % (__scriptid__,
-                                                                        it["link"],
-                                                                        it["lang"]
-                                                                        )
+                                                                    it["link"],
+                                                                    it["lang"]
+                                                                    )
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
 
 def rmtree(path):
@@ -115,6 +133,7 @@ def Download(id,lang):
     try:
         socket = urllib.urlopen( url )
         data = socket.read()
+        socket.close()
         soup = BeautifulSoup(data)
         url = soup.find("a", class_="down_ink download_link").get('href').encode('utf-8')
         socket = urllib.urlopen( url )
