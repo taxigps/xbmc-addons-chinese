@@ -1,4 +1,7 @@
-﻿1.0.8
+﻿1.0.9
+- subtitle name minor tweak
+
+1.0.8
 - updated subtitle name for unknown title version
 - added group information
 - updated API address to eliminate URL redirect

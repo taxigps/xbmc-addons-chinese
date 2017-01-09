@@ -75,13 +75,17 @@ def Search( item ):
     results = soup.find_all("div", class_="box")
     for it in results:
         link = SUBHD_BASE + it.find("div", class_="d_title").a.get('href').encode('utf-8')
+        title = it.find("div", class_="d_title").text.encode('utf-8')
         #version = it.find(text=re.compile('(字幕翻译|听译版本|机翻版本|官方译本)'.decode('utf-8'))).parent.get('title').encode('utf-8')
         version = it.find_all("span", class_=re.compile("label"))[-1].get('title').encode('utf-8')
         if version:
             if version.find('本字幕按 ') == 0:
                 version = version.split()[1]
+            # if version information is too short, we will append it to the title to give user more information
+            if (len(re.findall(r"[\w']+", version)) < 5) and (title.find(version) == -1):
+                version = title + ' ' + version
         else:
-            version = it.find("div", class_="d_title").text.encode('utf-8') # use title instead
+            version = title
         try:
             group = it.find("div", class_="d_zu").text.encode('utf-8')
             if group.isspace():
@@ -89,7 +93,7 @@ def Search( item ):
         except:
             group = ''
         if group and (version.find(group) == -1):
-            version += '/' + group
+            version += ' ' + group
         try:
             r2 = it.find_all("span", class_="label")
             langs = [x.text.encode('utf-8') for x in r2][:-1]
