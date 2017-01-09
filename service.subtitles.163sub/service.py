@@ -70,7 +70,7 @@ def Search( item ):
         if version and (len(re.findall(r"[\w']+", version)) < 5) and (title.find(version) == -1):
             version = title + ' ' + version
         else:
-        	  version = title
+            version = title
         info = sub['otherName2'].encode('utf-8')
         langs = []
         lang_list = ['双语', '简体', '繁体', '英文']
