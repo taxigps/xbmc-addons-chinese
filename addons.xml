@@ -814,7 +814,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="service.subtitles.zimuzu"
        name="ZiMuZu"
-       version="1.0.0"
+       version="1.0.1"
        provider-name="xodidox">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
@@ -823,8 +823,8 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
   <extension point="xbmc.subtitle.module"
              library="service.py" />
   <extension point="xbmc.addon.metadata">
-    <summary lang="en">ZiMuZu subtitle</summary>
-    <summary lang="zh">字幕组 字幕</summary>
+    <summary lang="en">YYeTs ZiMuZu subtitle</summary>
+    <summary lang="zh">人人影视字幕组 字幕</summary>
     <description lang="en">Search and download subtitles from zimuzu.tv</description>
     <description lang="zh">从 zimuzu.tv 下载字幕</description>
   </extension>
