@@ -1,0 +1,18 @@
+﻿1.0.5
+- updated title name and language
+- added group information
+
+1.0.4
+- fixed no subtitles in the list. thanks generalmilk!
+
+1.0.3
+- fixed subtitle file download failed
+
+1.0.2
+- fixed can't remove temp dir under android
+
+1.0.1
+- support search subtitles for tv shows in library
+
+1.0.0
+- initial
