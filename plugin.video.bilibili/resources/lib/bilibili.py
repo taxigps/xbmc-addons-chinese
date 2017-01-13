@@ -24,7 +24,7 @@ class Bili():
         self.LIST_TYPE = LIST_TYPE                                  # 列表类型
         self.INTERFACE_URL = INTERFACE_URL                          # 视频地址请求页面地址
         self.INTERFACE_PARAMS = INTERFACE_PARAMS                    # 视频地址请求参数
-        self.INTERFACE_ASKEY = INTERFACE_ASKEY
+        self.SECRETKEY_MINILOADER = SECRETKEY_MINILOADER
         self.COMMENT_URL = COMMENT_URL                              # 评论页面地址
         self.URL_PARAMS = re.compile('cid=(\d+)&(?:bili-)?aid=\d+')           # 匹配视频请求ID(cid)
         self.URL_PARAMS2 = re.compile("cid:'(\d+)'")                # 匹配另一种页面上的视频请求ID(cid)
@@ -74,19 +74,17 @@ class Bili():
         interface_full_url = ''
         # 如果使用第一种正则匹配成功
         if url_params and len(url_params) == 1 and url_params[0]:
-            interface_full_params = self.INTERFACE_PARAMS.format(str(url_params[0]),str(time.time()))
             interface_hash = hashlib.md5()
-            interface_hash.update(interface_full_params + self.INTERFACE_ASKEY)
-            interface_full_url = self.INTERFACE_URL.format(interface_full_params,interface_hash.hexdigest())
+            interface_hash.update(self.INTERFACE_PARAMS.format(str(url_params[0]), self.SECRETKEY_MINILOADER))
+            interface_full_url = self.INTERFACE_URL.format(str(url_params[0]), interface_hash.hexdigest())
         # 如果匹配不成功则使用第二种正则匹配
         if not url_params:
             self._print_info('Parsing page by another regex')
             url_params = self.URL_PARAMS2.findall(page_content)
             if url_params and len(url_params) == 1 and url_params[0]:
-                interface_full_params = self.INTERFACE_PARAMS.format(str(url_params[0]),str(time.time()))
                 interface_hash = hashlib.md5()
-                interface_hash.update(interface_full_params + self.INTERFACE_ASKEY)
-                interface_full_url = self.INTERFACE_URL.format(interface_full_params,interface_hash.hexdigest())
+                interface_hash.update(self.INTERFACE_PARAMS.format(str(url_params[0]), self.SECRETKEY_MINILOADER))
+                interface_full_url = self.INTERFACE_URL.format(str(url_params[0]), interface_hash.hexdigest())
         if interface_full_url:
             self._print_info('Interface url: ' + interface_full_url)
             # 解析RSS页面
