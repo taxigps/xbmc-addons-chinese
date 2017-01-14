@@ -8,15 +8,10 @@ plugin = Plugin()
 @plugin.route('/play/<cid>')
 def play(cid):
     urls = bilibili.get_video_urls(cid)
-    playlist = xbmc.PlayList(1)
-    playlist.clear()
-    i = 1
-    for url in urls:
-        list_item = xbmcgui.ListItem(u'播放')
-        list_item.setInfo(type='video', infoLabels={"Title": "第"+str(i)+"/"+str(len(urls))+" 节"})
-        playlist.add(url, listitem=list_item)
-        i += 1
-    plugin.set_resolved_url(playlist)
+    if (len(urls) > 1):
+        plugin.set_resolved_url('stack://' + ' , '.join(urls))
+    else:
+        plugin.set_resolved_url(urls[0])
 
 @plugin.route('/av_list/<aid>')
 def av_list(aid):
@@ -47,7 +42,7 @@ def top():
 def top_zone(zone):
     items = [{
         'label': item['title'], 
-        'path': plugin.url_for('av_list', aid = item['aid'])
+        'path': plugin.url_for('av_list', aid = item['aid']),
         } for item in bilibili.get_top_list(zone)]
     return items 
 
