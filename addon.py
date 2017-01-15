@@ -15,12 +15,13 @@ def play(cid):
 
 @plugin.route('/av_list/<aid>')
 def av_list(aid):
-    items = [{
-        'label': item['title'], 
-        'path': plugin.url_for('play', cid = item['cid']), 
-        'is_playable': True,
-        } for item in bilibili.get_av_list(aid)]
-    return items 
+    items = bilibili.get_av_list(aid)
+    select = 0
+    if len(items) > 1:
+        select = xbmcgui.Dialog().select(u'选择播放文件', [item['title'] for item in items])
+        if select < 0:
+            return
+    plugin.redirect(plugin.url_for('play', cid = items[select]['cid']))
 
 @plugin.route('/search/')
 def search():
@@ -43,6 +44,7 @@ def top_zone(zone):
     items = [{
         'label': item['title'], 
         'path': plugin.url_for('av_list', aid = item['aid']),
+        'is_playable': True,
         } for item in bilibili.get_top_list(zone)]
     return items 
 
