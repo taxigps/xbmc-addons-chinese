@@ -9,76 +9,119 @@ import xml.dom.minidom as minidom
 
 CATEGORY = [
     {
-        'label': u'全部',
+        'title': u'全部',
         'name': 'douga',
-        'zone': 1,
+        'tid': 0,
     },
     {
-        'label': u'动画',
+        'title': u'动画',
         'name': 'douga',
-        'zone': 1,
+        'tid': 1,
     },
     {
-        'label': u'音乐',
+        'title': u'音乐',
         'name': 'music',
-        'zone': 3,
+        'tid': 3,
     },
     {
-        'label': u'番剧',
+        'title': u'番剧',
         'name': 'bangumi',
-        'zone': 13,
+        'tid': 13,
     },
     {
-        'label': u'舞蹈',
+        'title': u'舞蹈',
         'name': 'dance',
-        'zone': 129,
+        'tid': 129,
     },
     {
-        'label': u'游戏',
+        'title': u'游戏',
         'name': 'game',
-        'zone': 4,
+        'tid': 4,
     },
     {
-        'label': u'科技',
+        'title': u'科技',
         'name': 'technology',
-        'zone': 36,
+        'tid': 36,
     },
     {
-        'label': u'生活',
+        'title': u'生活',
         'name': 'life',
-        'zone': 160,
+        'tid': 160,
     },
     {
-        'label': u'鬼畜',
+        'title': u'鬼畜',
         'name': 'kichiku',
-        'zone': 119,
+        'tid': 119,
     },
     {
-        'label': u'娱乐',
+        'title': u'娱乐',
         'name': 'ent',
-        'zone': 5,
+        'tid': 5,
     },
     {
-        'label': u'电影',
+        'title': u'电影',
         'name': 'movie',
-        'zone': 23,
+        'tid': 23,
     },
     {
-        'label': u'电视剧',
+        'title': u'电视剧',
         'name': 'teleplay',
-        'zone': 11,
+        'tid': 11,
     },
     {
-        'label': u'时尚',
+        'title': u'时尚',
         'name': 'fashion',
-        'zone': 155,
+        'tid': 155,
     },
+]
+
+ORDER = [
+    {
+        'title': u'日排行榜',
+        'value': 'hot',
+        'days': 1,
+    },
+    {
+        'title': u'周排行榜',
+        'value': 'hot',
+        'days': 7,
+    },
+    {
+        'title': u'月排行榜',
+        'value': 'hot',
+        'days': 30,
+    },
+    {
+        'title': u'最新',
+        'value': 'default',
+        'days': 30,
+    },
+#    {
+#        'title': u'按新评论排序',
+#        'value': 'new'
+#    },
+#    {
+#        'title': u'按评论数从高至低排序',
+#        'value': 'review'
+#    },
+#    {
+#        'title': u'按弹幕数从高至低排序',
+#        'value': 'damku'
+#    },
+#    {
+#        'title': u'按推荐数从高至低排序',
+#        'value': 'comment'
+#    },
+#    {
+#        'title': u'按宣传数排序（硬币）',
+#        'value': 'default'
+#    },
 ]
 
 APPKEY = '19bf1f1192873efa'
 APPSECRET = '87677fc06b0afc08cb86e008183390e5'
-TOP_URL = 'http://www.bilibili.com/index/rank/all-0{0}-{1}.json'
 VIEW_URL = 'http://api.bilibili.cn/view?{0}'
+LIST_URL = 'http://api.bilibili.cn/list?{0}'
 INTERFACE_URL = r'http://interface.bilibili.com/playurl?cid={0}&from=miniplay&player=1&sign={1}'
 INTERFACE_PARAMS = r'cid={0}&from=miniplay&player=1{1}'
 SECRETKEY_MINILOADER = r'1c15888dc316e05a15fdd0a02ed6584f'
@@ -105,15 +148,23 @@ def api_sign(params, appkey, appsecret = None):
     return data + '&sign=' + m.hexdigest()
 
 def get_category():
-    return CATEGORY[1:]
-
-def get_top():
     return CATEGORY
 
-def get_top_list(zone, days = 3):
-    url = TOP_URL.format(str(days), str(zone))
+def get_order():
+    return ORDER
+
+def get_category_list(tid = 0, order = 'default', days = 30, page = 1, pagesize = 30, appkey = APPKEY, appsecret = APPSECRET):
+    params = {'tid': tid, 'order': order, 'days': days, 'page': page, 'pagesize': pagesize}
+    url = LIST_URL.format(api_sign(params, appkey, appsecret))
     result = json.loads(utils.get_page_content(url))
-    return result['rank']['list']
+    results = []
+    for i in range(pagesize):
+        if result['list'].has_key(str(i)):
+            results.append(result['list'][str(i)])
+        else:
+            break
+
+    return results
 
 def get_av_list(aid, page = 1, fav = 0, appkey = APPKEY, appsecret = APPSECRET):
     params = {'id': aid, 'page': page}
@@ -140,4 +191,4 @@ def get_video_urls(cid):
 
 
 if __name__ == '__main__':
-    print (get_video_urls(13095037))
+    print (get_category_list(order='hot'))

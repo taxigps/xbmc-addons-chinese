@@ -5,6 +5,17 @@ import resources.lib.bilibili as bilibili
 
 plugin = Plugin()
 
+def previous_page(endpoint, page, **kwargs):
+    if int(page) > 1:
+        page = str(int(page) - 1)
+        return [{'label': u'第{0}页'.format(page), 'path': plugin.url_for(endpoint, page = page, **kwargs)}]
+    else:
+        return []
+
+def next_page(endpoint, page, **kwargs):
+    page = str(int(page) + 1)
+    return [{'label': u'第{0}页'.format(page), 'path': plugin.url_for(endpoint, page = page, **kwargs)}]
+
 @plugin.route('/play/<cid>')
 def play(cid):
     urls = bilibili.get_video_urls(cid)
@@ -31,48 +42,39 @@ def search():
 def mine():
     return []
 
-@plugin.route('/top/')
-def top():
-    items = [{
-        'label': item['label'], 
-        'path': plugin.url_for('top_zone', zone = item['zone'])
-        } for item in bilibili.get_top()]
-    return items
-
-@plugin.route('/top/<zone>/')
-def top_zone(zone):
-    items = [{
-        'label': item['title'], 
-        'path': plugin.url_for('av_list', aid = item['aid']),
-        'is_playable': True,
-        } for item in bilibili.get_top_list(zone)]
-    return items 
-
 @plugin.route('/timeline/')
 def timeline():
     return []
 
-@plugin.route('/category/')
-def category():
+@plugin.route('/category/<order>/<days>')
+def category(order, days):
     items = [{
-        'label': item['label'], 
-        'path': plugin.url_for('category_zone', zone = item['zone'])
+        'label': item['title'], 
+        'path': plugin.url_for('category_list', page = '1', order = order, tid = item['tid'], days = days)
         } for item in bilibili.get_category()]
     return items
 
-@plugin.route('/category/<zone>/')
-def category_zone(zone):
-    return []
+@plugin.route('/category_list/<page>/<order>/<tid>/<days>/')
+def category_list(order, tid, page, days):
+    items = previous_page('category_list', page, order = order, tid = tid, days = days)
+    items += [{
+        'label': item['title'], 
+        'path': plugin.url_for('av_list', aid = item['aid'])
+        } for item in bilibili.get_category_list(tid = tid, order = order, page = page, days = days)]
+    items += next_page('category_list', page, order = order, tid = tid, days = days)
+    return items
 
 @plugin.route('/')
 def root():
     items = [
-        {'label': u'搜索', 'path': plugin.url_for('search')},
-        {'label': u'我的', 'path': plugin.url_for('mine')},
-        {'label': u'排行榜', 'path': plugin.url_for('top')},
-        {'label': u'分类', 'path': plugin.url_for('category')},
-        {'label': u'放送表', 'path': plugin.url_for('timeline')},
+        {'label': u'搜索(暂不支持)', 'path': plugin.url_for('search')},
+        {'label': u'我的(暂不支持)', 'path': plugin.url_for('mine')},
+        {'label': u'放送表(暂不支持)', 'path': plugin.url_for('timeline')},
     ]
+    items += [{
+        'label': item['title'],
+        'path': plugin.url_for('category', order = item['value'], days = item['days'])
+        } for item in bilibili.get_order()]
     return items
 
 
