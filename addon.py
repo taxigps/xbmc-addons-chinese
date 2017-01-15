@@ -1,9 +1,10 @@
 #coding=utf-8
 from xbmcswift2 import Plugin, xbmc, xbmcgui
-import resources.lib.bilibili as bilibili
+from resources.lib.bilibili import Bilibili
 
 
 plugin = Plugin()
+bilibili = Bilibili()
 
 def previous_page(endpoint, page, **kwargs):
     if int(page) > 1:

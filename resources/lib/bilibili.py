@@ -126,69 +126,74 @@ INTERFACE_URL = r'http://interface.bilibili.com/playurl?cid={0}&from=miniplay&pl
 INTERFACE_PARAMS = r'cid={0}&from=miniplay&player=1{1}'
 SECRETKEY_MINILOADER = r'1c15888dc316e05a15fdd0a02ed6584f'
 
-def api_sign(params, appkey, appsecret = None):
-    """
-    获取新版API的签名，不然会返回-3错误
-    """
-    params['appkey']=appkey
-    data = ""
-    keys = params.keys()
-    keys.sort()
-    for key in keys:
-        if data != "":
-            data += "&"
-        value = params[key]
-        if type(value) == int:
-            value = str(value)
-        data += key + "=" + str(urllib.quote(value))
-    if appsecret == None:
-        return data
-    m = hashlib.md5()
-    m.update(data + appsecret)
-    return data + '&sign=' + m.hexdigest()
+class Bilibili():
+    def __init__(self, appkey = APPKEY, appsecret = APPSECRET):
+        self.appkey = appkey
+        self.appsecret = appsecret
 
-def get_category():
-    return CATEGORY
+    def api_sign(self, params):
+        """
+        获取新版API的签名，不然会返回-3错误
+        """
+        params['appkey']=self.appkey
+        data = ""
+        keys = params.keys()
+        keys.sort()
+        for key in keys:
+            if data != "":
+                data += "&"
+            value = params[key]
+            if type(value) == int:
+                value = str(value)
+            data += key + "=" + str(urllib.quote(value))
+        if self.appsecret == None:
+            return data
+        m = hashlib.md5()
+        m.update(data + self.appsecret)
+        return data + '&sign=' + m.hexdigest()
 
-def get_order():
-    return ORDER
+    def get_category(self):
+        return CATEGORY
 
-def get_category_list(tid = 0, order = 'default', days = 30, page = 1, pagesize = 30, appkey = APPKEY, appsecret = APPSECRET):
-    params = {'tid': tid, 'order': order, 'days': days, 'page': page, 'pagesize': pagesize}
-    url = LIST_URL.format(api_sign(params, appkey, appsecret))
-    result = json.loads(utils.get_page_content(url))
-    results = []
-    for i in range(pagesize):
-        if result['list'].has_key(str(i)):
-            results.append(result['list'][str(i)])
-        else:
-            break
+    def get_order(self):
+        return ORDER
 
-    return results
+    def get_category_list(self, tid = 0, order = 'default', days = 30, page = 1, pagesize = 30):
+        params = {'tid': tid, 'order': order, 'days': days, 'page': page, 'pagesize': pagesize}
+        url = LIST_URL.format(self.api_sign(params))
+        result = json.loads(utils.get_page_content(url))
+        results = []
+        for i in range(pagesize):
+            if result['list'].has_key(str(i)):
+                results.append(result['list'][str(i)])
+            else:
+                break
 
-def get_av_list(aid, page = 1, fav = 0, appkey = APPKEY, appsecret = APPSECRET):
-    params = {'id': aid, 'page': page}
-    if fav != 0:
-        params['fav'] = fav
-    url = VIEW_URL.format(api_sign(params, appkey, appsecret))
-    result = json.loads(utils.get_page_content(url))
-    results = [result]
-    if (page < result['pages']):
-        results += get_av_list(aid, page + 1, fav, appkey, appsecret)
-    return results
+        return results
 
-def get_video_urls(cid):
-    m = hashlib.md5()
-    m.update(INTERFACE_PARAMS.format(str(cid), SECRETKEY_MINILOADER))
-    url = INTERFACE_URL.format(str(cid), m.hexdigest())
-    doc = minidom.parseString(utils.get_page_content(url))
-    urls = [durl.getElementsByTagName('url')[0].firstChild.nodeValue for durl in doc.getElementsByTagName('durl')]
-    urls = [url 
-            if not re.match(r'.*\.qqvideo\.tc\.qq\.com', url)
-            else re.sub(r'.*\.qqvideo\.tc\.qq\.com', 'http://vsrc.store.qq.com', url)
-            for url in urls]
-    return urls
+    def get_av_list(self, aid, page = 1, fav = 0):
+        params = {'id': aid, 'page': page}
+        if fav != 0:
+            params['fav'] = fav
+        url = VIEW_URL.format(self.api_sign(params))
+        result = json.loads(utils.get_page_content(url))
+        results = [result]
+        if (page < result['pages']):
+            results += self.get_av_list(aid, page + 1, fav)
+        return results
+
+    def get_video_urls(self, cid):
+        m = hashlib.md5()
+        m.update(INTERFACE_PARAMS.format(str(cid), SECRETKEY_MINILOADER))
+        url = INTERFACE_URL.format(str(cid), m.hexdigest())
+        doc = minidom.parseString(utils.get_page_content(url))
+        urls = [durl.getElementsByTagName('url')[0].firstChild.nodeValue for durl in doc.getElementsByTagName('durl')]
+        urls = [url 
+                if not re.match(r'.*\.qqvideo\.tc\.qq\.com', url)
+                else re.sub(r'.*\.qqvideo\.tc\.qq\.com', 'http://vsrc.store.qq.com', url)
+                for url in urls]
+        return urls
 
 
 if __name__ == '__main__':
-    print (get_category_list(order='hot'))
+    print (Bilibili().get_category_list(order='hot'))
