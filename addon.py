@@ -59,7 +59,8 @@ def category_list(order, tid, page, days):
     items = previous_page('category_list', page, order = order, tid = tid, days = days)
     items += [{
         'label': item['title'], 
-        'path': plugin.url_for('av_list', aid = item['aid'])
+        'path': plugin.url_for('av_list', aid = item['aid']),
+        'is_playable': True,
         } for item in bilibili.get_category_list(tid = tid, order = order, page = page, days = days)]
     items += next_page('category_list', page, order = order, tid = tid, days = days)
     return items
