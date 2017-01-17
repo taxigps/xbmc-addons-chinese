@@ -1,11 +1,16 @@
 #coding=utf-8
 
+import base64
 import utils
 import json
 import hashlib
-import urllib
+import urllib, urllib2
 import re
+import os
+import tempfile
 import xml.dom.minidom as minidom
+from cookielib import LWPCookieJar
+import requests
 
 CATEGORY = [
     {
@@ -120,8 +125,20 @@ ORDER = [
 
 APPKEY = '19bf1f1192873efa'
 APPSECRET = '87677fc06b0afc08cb86e008183390e5'
-VIEW_URL = 'http://api.bilibili.cn/view?{0}'
-LIST_URL = 'http://api.bilibili.cn/list?{0}'
+API_URL = 'http://api.bilibili.com'
+BANGUMI_URL = 'http://space.bilibili.com/ajax/Bangumi/getList?mid={0}&page={1}'
+VIEW_URL = API_URL + '/view?{0}'
+LIST_URL = API_URL + '/list?{0}'
+DYNAMIC_URL = API_URL + '/x/feed/pull?type=0&ps={0}&pn={1}'
+LOGIN_URL = 'http://passport.bilibili.com/ajax/miniLogin/login'
+LOGIN_CAPTCHA_URL = 'https://passport.bilibili.com/captcha'
+LOGIN_HASH_URL = 'http://passport.bilibili.com/login?act=getkey'
+HISTORY_URL = 'http://space.bilibili.com/ajax/viewhistory/gethistory'
+FAV_BOX_URL = 'http://space.bilibili.com/ajax/fav/getBoxList?mid={0}'
+FAV_URL = 'http://space.bilibili.com/ajax/fav/getList?mid={0}&pagesize={1}&fid={2}'
+TIMELINE_URL = 'http://bangumi.bilibili.com/jsonp/timeline_v2.ver?callback=timeline'
+MY_INFO_URL = 'http://space.bilibili.com/ajax/member/MyInfo'
+AV_URL = 'http://www.bilibili.com/widget/getPageList?aid={0}'
 INTERFACE_URL = r'http://interface.bilibili.com/playurl?cid={0}&from=miniplay&player=1&sign={1}'
 INTERFACE_PARAMS = r'cid={0}&from=miniplay&player=1{1}'
 SECRETKEY_MINILOADER = r'1c15888dc316e05a15fdd0a02ed6584f'
@@ -130,6 +147,34 @@ class Bilibili():
     def __init__(self, appkey = APPKEY, appsecret = APPSECRET):
         self.appkey = appkey
         self.appsecret = appsecret
+        cookie_path = os.path.dirname(os.path.abspath(__file__)) + '/.cookie'
+        self.cj = LWPCookieJar(cookie_path)
+        if os.path.isfile(cookie_path):
+            self.cj.load()
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cj))
+        urllib2.install_opener(opener)
+
+    def get_captcha(self):
+        result = utils.get_page_content(LOGIN_CAPTCHA_URL, 
+                                        headers = {'Referer':'https://passport.bilibili.com/ajax/miniLogin/minilogin'})
+        path = tempfile.gettempdir() + '/captcha.jpg'
+        with open(path, 'w+') as f:
+            f.write(result)
+        captcha = raw_input('Captcha: ')
+        return captcha
+
+    def get_encryped_pwd(self, pwd):
+        import rsa
+        result = json.loads(utils.get_page_content(LOGIN_HASH_URL, 
+                                                   headers={'Referer':'https://passport.bilibili.com/ajax/miniLogin/minilogin'}))
+        pwd = result['hash'] + pwd
+        key = result['key']
+        pub_key = rsa.PublicKey.load_pkcs1_openssl_pem(key)
+        pwd = rsa.encrypt(pwd.encode('utf-8'), pub_key)
+        pwd = base64.b64encode(pwd)
+        pwd = urllib.quote(pwd)
+        return pwd
+
 
     def api_sign(self, params):
         """
@@ -168,19 +213,68 @@ class Bilibili():
                 results.append(result['list'][str(i)])
             else:
                 break
-
         return results
 
-    def get_av_list(self, aid, page = 1, fav = 0):
-        params = {'id': aid, 'page': page}
-        if fav != 0:
-            params['fav'] = fav
-        url = VIEW_URL.format(self.api_sign(params))
+    def get_my_info(self):
+        if not requests.utils.dict_from_cookiejar(self.cj).has_key('DedeUserID'):
+            return []
+        result = json.loads(utils.get_page_content(MY_INFO_URL))
+        return result['data']
+
+    def get_dynamic(self, page = 1, pagesize = 30):
+        if not requests.utils.dict_from_cookiejar(self.cj).has_key('DedeUserID'):
+            return []
+        url = DYNAMIC_URL.format(pagesize, page)
         result = json.loads(utils.get_page_content(url))
-        results = [result]
-        if (page < result['pages']):
-            results += self.get_av_list(aid, page + 1, fav)
-        return results
+        return result['data']['feeds']
+
+    def get_fav_box(self):
+        cookie_dict = requests.utils.dict_from_cookiejar(self.cj)
+        if not cookie_dict.has_key('DedeUserID'):
+            return []
+        url = FAV_BOX_URL.format(str(cookie_dict['DedeUserID']))
+        result = json.loads(utils.get_page_content(url))
+        return result['data']['list']
+
+    def get_fav(self, fav_box, pagesize = 30):
+        cookie_dict = requests.utils.dict_from_cookiejar(self.cj)
+        if not cookie_dict.has_key('DedeUserID'):
+            return []
+        url = FAV_URL.format(str(cookie_dict['DedeUserID']), pagesize, fav_box)
+        result = json.loads(utils.get_page_content(url))
+        return result['data']['vlist']
+
+    def login(self, userid, pwd):
+        #utils.get_page_content('http://www.bilibili.com')
+        if requests.utils.dict_from_cookiejar(self.cj).has_key('DedeUserID'):
+            return True
+        utils.get_page_content('https://passport.bilibili.com/login')
+        captcha = self.get_captcha()
+        pwd = self.get_encryped_pwd(pwd)
+        data = 'userid={0}&pwd={1}&keep=1&captcha={2}'.format(userid, pwd, captcha)
+        result = utils.get_page_content(LOGIN_URL, data, 
+                                        {'Origin':'https://passport.bilibili.com', 
+                                         'Referer':'https://passport.bilibili.com/ajax/miniLogin/minilogin'})
+        if not requests.utils.dict_from_cookiejar(self.cj).has_key('DedeUserID'):
+            return False
+        self.cj.save()
+        return True
+
+    #def get_av_list(self, aid, page = 1, fav = 0):
+        #params = {'id': aid, 'page': page}
+        #if fav != 0:
+        #    params['fav'] = fav
+        #url = VIEW_URL.format(self.api_sign(params))
+        #result = json.loads(utils.get_page_content(url))
+        #results = [result]
+        #if (page < result['pages']):
+        #    results += self.get_av_list(aid, page + 1, fav)
+        #return results
+
+    def get_av_list(self, aid):
+        url = AV_URL.format(aid)
+        result = json.loads(utils.get_page_content(url))
+        return result
 
     def get_video_urls(self, cid):
         m = hashlib.md5()
@@ -196,4 +290,6 @@ class Bilibili():
 
 
 if __name__ == '__main__':
-    print (Bilibili().get_category_list(order='hot'))
+    b = Bilibili()
+    b.login(u'catro@foxmail.com', u'')
+    print b.get_my_info()

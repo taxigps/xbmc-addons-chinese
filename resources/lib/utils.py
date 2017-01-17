@@ -12,9 +12,11 @@ def _get_zlib_content(content):
     page_content = zlib.decompress(content)
     return page_content
 
-def get_page_content(page_full_url):
+def get_page_content(page_full_url, data = None, headers = {}):
     try:
-        req = urllib2.Request(page_full_url, headers={ 'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:6.0.2) Gecko/20100101 Firefox/6.0.2' })
+        ua = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:6.0.2) Gecko/20100101 Firefox/6.0.2'}
+        ua.update(headers)
+        req = urllib2.Request(page_full_url, headers=ua, data = data)
         response = urllib2.urlopen(req)
         if response.headers.get('content-encoding', '') == 'gzip':
             return _get_gzip_content(response.read())

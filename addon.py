@@ -17,23 +17,20 @@ def next_page(endpoint, page, **kwargs):
     page = str(int(page) + 1)
     return [{'label': u'第{0}页'.format(page), 'path': plugin.url_for(endpoint, page = page, **kwargs)}]
 
-@plugin.route('/play/<cid>')
-def play(cid):
+@plugin.route('/play/<aid>')
+def play(aid):
+    items = bilibili.get_av_list(aid)
+    select = 0
+    if len(items) > 1:
+        select = xbmcgui.Dialog().select(u'选择播放文件', [item['pagename'] for item in items])
+        if select < 0:
+            return
+    cid = items[select]['cid']
     urls = bilibili.get_video_urls(cid)
     if (len(urls) > 1):
         plugin.set_resolved_url('stack://' + ' , '.join(urls))
     else:
         plugin.set_resolved_url(urls[0])
-
-@plugin.route('/av_list/<aid>')
-def av_list(aid):
-    items = bilibili.get_av_list(aid)
-    select = 0
-    if len(items) > 1:
-        select = xbmcgui.Dialog().select(u'选择播放文件', [item['title'] for item in items])
-        if select < 0:
-            return
-    plugin.redirect(plugin.url_for('play', cid = items[select]['cid']))
 
 @plugin.route('/search/')
 def search():
@@ -60,7 +57,7 @@ def category_list(order, tid, page, days):
     items = previous_page('category_list', page, order = order, tid = tid, days = days)
     items += [{
         'label': item['title'], 
-        'path': plugin.url_for('av_list', aid = item['aid']),
+        'path': plugin.url_for('play', aid = item['aid']),
         'is_playable': True,
         } for item in bilibili.get_category_list(tid = tid, order = order, page = page, days = days)]
     items += next_page('category_list', page, order = order, tid = tid, days = days)
