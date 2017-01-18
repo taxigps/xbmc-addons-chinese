@@ -135,7 +135,7 @@ LOGIN_CAPTCHA_URL = 'https://passport.bilibili.com/captcha'
 LOGIN_HASH_URL = 'http://passport.bilibili.com/login?act=getkey'
 HISTORY_URL = 'http://space.bilibili.com/ajax/viewhistory/gethistory'
 FAV_BOX_URL = 'http://space.bilibili.com/ajax/fav/getBoxList?mid={0}'
-FAV_URL = 'http://space.bilibili.com/ajax/fav/getList?mid={0}&pagesize={1}&fid={2}'
+FAV_URL = 'http://space.bilibili.com/ajax/fav/getList?mid={0}&page={1}&pagesize={2}&fid={3}'
 TIMELINE_URL = 'http://bangumi.bilibili.com/jsonp/timeline_v2.ver?callback=timeline'
 MY_INFO_URL = 'http://space.bilibili.com/ajax/member/MyInfo'
 AV_URL = 'http://www.bilibili.com/widget/getPageList?aid={0}'
@@ -147,21 +147,25 @@ class Bilibili():
     def __init__(self, appkey = APPKEY, appsecret = APPSECRET):
         self.appkey = appkey
         self.appsecret = appsecret
+        self.is_login = False
         cookie_path = os.path.dirname(os.path.abspath(__file__)) + '/.cookie'
         self.cj = LWPCookieJar(cookie_path)
         if os.path.isfile(cookie_path):
             self.cj.load()
+            if requests.utils.dict_from_cookiejar(self.cj).has_key('DedeUserID'):
+                self.is_login = True
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cj))
         urllib2.install_opener(opener)
 
-    def get_captcha(self):
+    def get_captcha(self, path = None):
+        utils.get_page_content('https://passport.bilibili.com/login')
         result = utils.get_page_content(LOGIN_CAPTCHA_URL, 
                                         headers = {'Referer':'https://passport.bilibili.com/ajax/miniLogin/minilogin'})
-        path = tempfile.gettempdir() + '/captcha.jpg'
-        with open(path, 'w+') as f:
+        if path == None:
+            path = tempfile.gettempdir() + '/captcha.jpg'
+        with open(path, 'wb') as f:
             f.write(result)
-        captcha = raw_input('Captcha: ')
-        return captcha
+        return path
 
     def get_encryped_pwd(self, pwd):
         import rsa
@@ -174,7 +178,6 @@ class Bilibili():
         pwd = base64.b64encode(pwd)
         pwd = urllib.quote(pwd)
         return pwd
-
 
     def api_sign(self, params):
         """
@@ -216,40 +219,38 @@ class Bilibili():
         return results
 
     def get_my_info(self):
-        if not requests.utils.dict_from_cookiejar(self.cj).has_key('DedeUserID'):
+        if self.is_login == False:
             return []
         result = json.loads(utils.get_page_content(MY_INFO_URL))
         return result['data']
 
     def get_dynamic(self, page = 1, pagesize = 30):
-        if not requests.utils.dict_from_cookiejar(self.cj).has_key('DedeUserID'):
+        if self.is_login == False:
             return []
         url = DYNAMIC_URL.format(pagesize, page)
         result = json.loads(utils.get_page_content(url))
         return result['data']['feeds']
 
     def get_fav_box(self):
-        cookie_dict = requests.utils.dict_from_cookiejar(self.cj)
-        if not cookie_dict.has_key('DedeUserID'):
+        if self.is_login == False:
             return []
+        cookie_dict = requests.utils.dict_from_cookiejar(self.cj)
         url = FAV_BOX_URL.format(str(cookie_dict['DedeUserID']))
         result = json.loads(utils.get_page_content(url))
         return result['data']['list']
 
-    def get_fav(self, fav_box, pagesize = 30):
-        cookie_dict = requests.utils.dict_from_cookiejar(self.cj)
-        if not cookie_dict.has_key('DedeUserID'):
+    def get_fav(self, fav_box, page = 1, pagesize = 30):
+        if self.is_login == False:
             return []
-        url = FAV_URL.format(str(cookie_dict['DedeUserID']), pagesize, fav_box)
+        cookie_dict = requests.utils.dict_from_cookiejar(self.cj)
+        url = FAV_URL.format(str(cookie_dict['DedeUserID']), page, pagesize, fav_box)
         result = json.loads(utils.get_page_content(url))
         return result['data']['vlist']
 
-    def login(self, userid, pwd):
+    def login(self, userid, pwd, captcha):
         #utils.get_page_content('http://www.bilibili.com')
-        if requests.utils.dict_from_cookiejar(self.cj).has_key('DedeUserID'):
+        if self.is_login == True:
             return True
-        utils.get_page_content('https://passport.bilibili.com/login')
-        captcha = self.get_captcha()
         pwd = self.get_encryped_pwd(pwd)
         data = 'userid={0}&pwd={1}&keep=1&captcha={2}'.format(userid, pwd, captcha)
         result = utils.get_page_content(LOGIN_URL, data, 
@@ -258,6 +259,7 @@ class Bilibili():
         if not requests.utils.dict_from_cookiejar(self.cj).has_key('DedeUserID'):
             return False
         self.cj.save()
+        self.is_login = True
         return True
 
     #def get_av_list(self, aid, page = 1, fav = 0):
@@ -291,5 +293,10 @@ class Bilibili():
 
 if __name__ == '__main__':
     b = Bilibili()
-    b.login(u'catro@foxmail.com', u'')
-    print b.get_my_info()
+    #if b.is_login == False:
+    #    b.get_captcha()
+    #    captcha = raw_input('Captcha: ')
+    #    print b.login(u'catro@foxmail.com', u'123456', captcha)
+    #print b.get_fav(49890104)
+    #print b.get_av_list(8043705)
+    print b.get_video_urls(13219653)
