@@ -82,9 +82,19 @@ CATEGORY = [
 
 ORDER = [
     {
+        'title': u'推荐',
+        'value': 'comment',
+        'days': 7,
+    },
+    {
         'title': u'日排行榜',
         'value': 'hot',
         'days': 1,
+    },
+    {
+        'title': u'三日排行榜',
+        'value': 'hot',
+        'days': 3,
     },
     {
         'title': u'周排行榜',
@@ -92,19 +102,15 @@ ORDER = [
         'days': 7,
     },
     {
-        'title': u'月排行榜',
-        'value': 'hot',
+        'title': u'最新动态',
+        'value': 'new',
         'days': 30,
     },
     {
-        'title': u'最新',
+        'title': u'最新投稿',
         'value': 'default',
         'days': 30,
     },
-#    {
-#        'title': u'按新评论排序',
-#        'value': 'new'
-#    },
 #    {
 #        'title': u'按评论数从高至低排序',
 #        'value': 'review'
@@ -206,7 +212,7 @@ class Bilibili():
     def get_order(self):
         return ORDER
 
-    def get_category_list(self, tid = 0, order = 'default', days = 30, page = 1, pagesize = 30):
+    def get_category_list(self, tid = 0, order = 'default', days = 30, page = 1, pagesize = 10):
         params = {'tid': tid, 'order': order, 'days': days, 'page': page, 'pagesize': pagesize}
         url = LIST_URL.format(self.api_sign(params))
         result = json.loads(utils.get_page_content(url))
@@ -224,7 +230,7 @@ class Bilibili():
         result = json.loads(utils.get_page_content(MY_INFO_URL))
         return result['data']
 
-    def get_dynamic(self, page = 1, pagesize = 30):
+    def get_dynamic(self, page = 1, pagesize = 10):
         if self.is_login == False:
             return []
         url = DYNAMIC_URL.format(pagesize, page)
@@ -239,7 +245,7 @@ class Bilibili():
         result = json.loads(utils.get_page_content(url))
         return result['data']['list']
 
-    def get_fav(self, fav_box, page = 1, pagesize = 30):
+    def get_fav(self, fav_box, page = 1, pagesize = 10):
         if self.is_login == False:
             return []
         cookie_dict = requests.utils.dict_from_cookiejar(self.cj)
@@ -261,6 +267,11 @@ class Bilibili():
         self.cj.save()
         self.is_login = True
         return True
+
+    def logout(self):
+        self.cj.clear()
+        self.cj.save()
+        self.is_login = False
 
     #def get_av_list(self, aid, page = 1, fav = 0):
         #params = {'id': aid, 'page': page}
@@ -298,5 +309,7 @@ if __name__ == '__main__':
     #    captcha = raw_input('Captcha: ')
     #    print b.login(u'catro@foxmail.com', u'123456', captcha)
     #print b.get_fav(49890104)
-    #print b.get_av_list(8043705)
-    print b.get_video_urls(13219653)
+    #print b.get_av_list(7541863)
+    #print b.get_video_urls(12821893)
+    #print b.get_category_list()
+    print b.get_dynamic()

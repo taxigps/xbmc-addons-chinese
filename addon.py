@@ -45,9 +45,12 @@ def search():
 @plugin.route('/dynamic/<page>')
 def dynamic(page):
     items = previous_page('dynamic', page)
+    items = []
     items += [{
         'label': item['addition']['title'], 
         'path': plugin.url_for('play', aid = item['addition']['aid']),
+        'thumbnail': item['addition']['pic'],
+        'info': ('video ', {'plot': 'test'}),
         'is_playable': True,
         } for item in bilibili.get_dynamic()]
     items += next_page('dynamic', page)
@@ -59,7 +62,10 @@ def fav_box():
         'label': item['name'], 
         'path': plugin.url_for('fav', fav_box = item['fav_box'])
         } for item in bilibili.get_fav_box()]
-    return items
+    if len(items) == 1:
+        plugin.redirect(items[0]['path'])
+    else:
+        return items
 
 @plugin.route('/bangumi/')
 def bangumi():
@@ -74,26 +80,28 @@ def fav(fav_box):
         } for item in bilibili.get_fav(fav_box)]
     return items
 
-@plugin.route('/mine/')
-def mine():
+@plugin.route('/login/')
+def login():
     if bilibili.is_login == False:
         username=plugin.addon.getSetting('username')
         password=plugin.addon.getSetting('password')
         if username=='' or password=='':
             plugin.notify('请设置用户名密码', delay=2000)
             plugin.addon.openSettings()
-            return
+            username=plugin.addon.getSetting('username')
+            password=plugin.addon.getSetting('password')
+            if username=='' or password=='':
+                plugin.notify('用户名或密码为空', delay=2000)
+                return
         captcha = LoginDialog(captcha = bilibili.get_captcha()).get()
-        if bilibili.login(username, password, captcha) == False:
+        if bilibili.login(username, password, captcha) == True:
+            plugin.notify('登陆成功', delay=2000)
+        else:
             plugin.notify('登陆失败', delay=2000)
-            return
-    items = [
-        {'label': u'动态', 'path': plugin.url_for('dynamic', page = '1')},
-        {'label': u'收藏', 'path': plugin.url_for('fav_box')},
-        {'label': u'追番(暂不支持)', 'path': plugin.url_for('bangumi')},
-        {'label': u'历史(暂不支持)', 'path': plugin.url_for('history')},
-    ]
-    return items
+
+@plugin.route('/logout/')
+def logout():
+    bilibili.logout()
 
 @plugin.route('/history/')
 def history():
@@ -103,20 +111,30 @@ def history():
 def timeline():
     return []
 
-@plugin.route('/category/<order>/<days>')
-def category(order, days):
+@plugin.route('/category/')
+def category():
     items = [{
         'label': item['title'], 
-        'path': plugin.url_for('category_list', page = '1', order = order, tid = item['tid'], days = days)
+        'path': plugin.url_for('category_order', tid = item['tid'])
         } for item in bilibili.get_category()]
+    return items
+
+@plugin.route('/category_order/<tid>')
+def category_order(tid):
+    items = [{
+        'label': item['title'], 
+        'path': plugin.url_for('category_list', page = '1', order = item['value'], tid = tid, days = item['days'])
+        } for item in bilibili.get_order()]
     return items
 
 @plugin.route('/category_list/<page>/<order>/<tid>/<days>/')
 def category_list(order, tid, page, days):
     items = previous_page('category_list', page, order = order, tid = tid, days = days)
+    items = []
     items += [{
         'label': item['title'], 
         'path': plugin.url_for('play', aid = item['aid']),
+        'thumbnail': item['pic'],
         'is_playable': True,
         } for item in bilibili.get_category_list(tid = tid, order = order, page = page, days = days)]
     items += next_page('category_list', page, order = order, tid = tid, days = days)
@@ -126,13 +144,21 @@ def category_list(order, tid, page, days):
 def root():
     items = [
         {'label': u'搜索(暂不支持)', 'path': plugin.url_for('search')},
-        {'label': u'我的', 'path': plugin.url_for('mine')},
         {'label': u'放送表(暂不支持)', 'path': plugin.url_for('timeline')},
+        {'label': u'分类', 'path': plugin.url_for('category')},
     ]
-    items += [{
-        'label': item['title'],
-        'path': plugin.url_for('category', order = item['value'], days = item['days'])
-        } for item in bilibili.get_order()]
+    if bilibili.is_login:
+        items += [
+            {'label': u'我的动态', 'path': plugin.url_for('dynamic', page = '1')},
+            {'label': u'我的收藏', 'path': plugin.url_for('fav_box')},
+            {'label': u'我的追番(暂不支持)', 'path': plugin.url_for('bangumi')},
+            {'label': u'我的历史(暂不支持)', 'path': plugin.url_for('history')},
+            {'label': u'退出登陆', 'path': plugin.url_for('logout')},
+            ]
+    else:
+        items += [
+            {'label': u'登陆账号', 'path': plugin.url_for('login')},
+            ]
     return items
 
 
