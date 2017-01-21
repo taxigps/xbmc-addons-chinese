@@ -82,11 +82,6 @@ CATEGORY = [
 
 ORDER = [
     {
-        'title': u'推荐',
-        'value': 'comment',
-        'days': 7,
-    },
-    {
         'title': u'日排行榜',
         'value': 'hot',
         'days': 1,
@@ -110,6 +105,11 @@ ORDER = [
         'title': u'最新投稿',
         'value': 'default',
         'days': 30,
+    },
+    {
+        'title': u'推荐',
+        'value': 'comment',
+        'days': 7,
     },
 #    {
 #        'title': u'按评论数从高至低排序',
@@ -222,7 +222,7 @@ class Bilibili():
                 results.append(result['list'][str(i)])
             else:
                 break
-        return results
+        return results, result['pages']
 
     def get_my_info(self):
         if self.is_login == False:
@@ -235,7 +235,8 @@ class Bilibili():
             return []
         url = DYNAMIC_URL.format(pagesize, page)
         result = json.loads(utils.get_page_content(url))
-        return result['data']['feeds']
+        total_page = int((result['data']['page']['count'] + pagesize - 1) / pagesize)
+        return result['data']['feeds'], total_page
 
     def get_fav_box(self):
         if self.is_login == False:
@@ -251,7 +252,7 @@ class Bilibili():
         cookie_dict = requests.utils.dict_from_cookiejar(self.cj)
         url = FAV_URL.format(str(cookie_dict['DedeUserID']), page, pagesize, fav_box)
         result = json.loads(utils.get_page_content(url))
-        return result['data']['vlist']
+        return result['data']['vlist'], result['data']['pages']
 
     def login(self, userid, pwd, captcha):
         #utils.get_page_content('http://www.bilibili.com')
@@ -308,8 +309,8 @@ if __name__ == '__main__':
     #    b.get_captcha()
     #    captcha = raw_input('Captcha: ')
     #    print b.login(u'catro@foxmail.com', u'123456', captcha)
-    #print b.get_fav(49890104)
+    print b.get_fav(49890104)
     #print b.get_av_list(7541863)
     #print b.get_video_urls(12821893)
-    #print b.get_category_list()
-    print b.get_dynamic()
+    #print b.get_category_list()[0][0]
+    #print b.get_dynamic('2')[1]

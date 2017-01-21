@@ -1,6 +1,7 @@
 #coding=utf-8
 from xbmcswift2 import Plugin, xbmc, xbmcgui
 from resources.lib.bilibili import Bilibili
+import time
 try:
     from resources.lib.login_dialog import LoginDialog
 except:
@@ -11,16 +12,19 @@ except:
 plugin = Plugin()
 bilibili = Bilibili()
 
-def previous_page(endpoint, page, **kwargs):
+def previous_page(endpoint, page, total_page, **kwargs):
     if int(page) > 1:
         page = str(int(page) - 1)
-        return [{'label': u'第{0}页'.format(page), 'path': plugin.url_for(endpoint, page = page, **kwargs)}]
+        return [{'label': u'上一页 - {0}/{1}'.format(page, str(total_page)), 'path': plugin.url_for(endpoint, page = page, **kwargs)}]
     else:
         return []
 
-def next_page(endpoint, page, **kwargs):
-    page = str(int(page) + 1)
-    return [{'label': u'第{0}页'.format(page), 'path': plugin.url_for(endpoint, page = page, **kwargs)}]
+def next_page(endpoint, page, total_page, **kwargs):
+    if int(page) < int(total_page):
+        page = str(int(page) + 1)
+        return [{'label': u'下一页 - {0}/{1}'.format(page, str(total_page)), 'path': plugin.url_for(endpoint, page = page, **kwargs)}]
+    else:
+        return []
 
 @plugin.route('/play/<aid>')
 def play(aid):
@@ -42,43 +46,70 @@ def play(aid):
 def search():
     return []
 
-@plugin.route('/dynamic/<page>')
+@plugin.route('/dynamic/<page>/')
 def dynamic(page):
-    items = previous_page('dynamic', page)
+    plugin.set_content('videos')
+    result, total_page = bilibili.get_dynamic(page)
+    items = previous_page('dynamic', page, total_page)
     items = []
-    items += [{
-        'label': item['addition']['title'], 
-        'path': plugin.url_for('play', aid = item['addition']['aid']),
-        'thumbnail': item['addition']['pic'],
-        'info': ('video ', {'plot': 'test'}),
-        'is_playable': True,
-        } for item in bilibili.get_dynamic()]
-    items += next_page('dynamic', page)
+    for item in result:
+        duration = 0
+        for t in item['addition']['duration'].split(':'):
+            duration = duration * 60 + int(t)
+        items.append({
+            'label': item['addition']['title'], 
+            'path': plugin.url_for('play', aid = item['addition']['aid']),
+            'thumbnail': item['addition']['pic'],
+            'is_playable': True,
+            'info': {
+                'genre': item['addition']['typename'],
+                'year': int(item['addition']['create'][:4]),
+                'writer': item['addition']['author'],
+                'plot': item['addition']['description'],
+                'duration': duration,
+                }})
+
+    if int(page) < total_page:
+        items += next_page('dynamic', page, total_page)
     return items
 
 @plugin.route('/fav_box/')
 def fav_box():
     items = [{
         'label': item['name'], 
-        'path': plugin.url_for('fav', fav_box = item['fav_box'])
+        'path': plugin.url_for('fav', fav_box = item['fav_box'], page = '1')
         } for item in bilibili.get_fav_box()]
     if len(items) == 1:
         plugin.redirect(items[0]['path'])
     else:
         return items
 
+@plugin.route('/fav/<fav_box>/<page>/')
+def fav(fav_box, page):
+    plugin.set_content('videos')
+    result, total_page = bilibili.get_fav(fav_box, page)
+    items = previous_page('fav', page, total_page, fav_box = fav_box)
+    items = []
+    for item in result:
+        items.append({
+            'label': item['title'], 
+            'path': plugin.url_for('play', aid = item['aid']),
+            'thumbnail': item['pic'],
+            'is_playable': True,
+            'info': {
+                'genre': item['tname'],
+                'year': int(time.strftime('%Y',time.localtime(item['ctime']))),
+                'writer': item['owner']['name'],
+                'plot': item['desc'],
+                'duration': item['duration'],
+                }})
+    if int(page) < total_page:
+        items += next_page('fav', page, total_page, fav_box = fav_box)
+    return items
+
 @plugin.route('/bangumi/')
 def bangumi():
     return []
-
-@plugin.route('/fav/<fav_box>/')
-def fav(fav_box):
-    items = [{
-        'label': item['title'], 
-        'path': plugin.url_for('play', aid = item['aid']),
-        'is_playable': True,
-        } for item in bilibili.get_fav(fav_box)]
-    return items
 
 @plugin.route('/login/')
 def login():
@@ -129,15 +160,27 @@ def category_order(tid):
 
 @plugin.route('/category_list/<page>/<order>/<tid>/<days>/')
 def category_list(order, tid, page, days):
-    items = previous_page('category_list', page, order = order, tid = tid, days = days)
+    plugin.set_content('videos')
+    result, total_page = bilibili.get_category_list(tid = tid, order = order, page = page, days = days)
+    items = previous_page('category_list', page, total_page, order = order, tid = tid, days = days)
     items = []
-    items += [{
-        'label': item['title'], 
-        'path': plugin.url_for('play', aid = item['aid']),
-        'thumbnail': item['pic'],
-        'is_playable': True,
-        } for item in bilibili.get_category_list(tid = tid, order = order, page = page, days = days)]
-    items += next_page('category_list', page, order = order, tid = tid, days = days)
+    for item in result:
+        duration = 0
+        for t in item['duration'].split(':'):
+            duration = duration * 60 + int(t)
+        items.append({
+            'label': item['title'], 
+            'path': plugin.url_for('play', aid = item['aid']),
+            'thumbnail': item['pic'],
+            'is_playable': True,
+            'info': {
+                'genre': item['typename'],
+                'year': int(item['create'][:4]),
+                'writer': item['author'],
+                'plot': item['description'],
+                'duration': duration,
+                }})
+    items += next_page('category_list', page, total_page, order = order, tid = tid, days = days)
     return items
 
 @plugin.route('/')
