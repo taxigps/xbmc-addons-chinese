@@ -7,6 +7,7 @@ import xbmc
 import urllib
 import urllib2
 import xbmcvfs
+import requests
 import xbmcaddon
 import xbmcgui,xbmcplugin
 from bs4 import BeautifulSoup
@@ -25,8 +26,12 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 
 sys.path.append (__resource__)
 
-ZIMUZU_API = 'http://www.zimuzu.tv/search?keyword=%s&type=subtitle'
-ZIMUZU_BASE = 'http://www.zimuzu.tv'
+try:
+    ZIMUZU_BASE = requests.get('http://www.zimuzu.tv', allow_redirects=False).headers['Location'].rstrip('/')
+except:
+    ZIMUZU_BASE = 'http://www.zimuzu.tv'
+
+ZIMUZU_API = ZIMUZU_BASE + '/search?keyword=%s&type=subtitle'
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
 def log(module, msg):
@@ -102,7 +107,7 @@ def rmtree(path):
         rmtree(os.path.join(path, dir))
     for file in files:
         xbmcvfs.delete(os.path.join(path, file))
-    xbmcvfs.rmdir(path) 
+    xbmcvfs.rmdir(path)
 
 def Download(url):
     try: rmtree(__temp__)
