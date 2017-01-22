@@ -1,4 +1,7 @@
-﻿1.0.10
+﻿1.0.11
+- minor fix for TV Shows
+
+1.0.10
 - minor fix
 
 1.0.9
