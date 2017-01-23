@@ -2,6 +2,8 @@
 from xbmcswift2 import Plugin, xbmc, xbmcgui
 from resources.lib.bilibili import Bilibili
 import time
+import string, random, os
+import tempfile
 try:
     from resources.lib.login_dialog import LoginDialog
 except:
@@ -181,7 +183,9 @@ def login():
             if username=='' or password=='':
                 plugin.notify('用户名或密码为空', delay=2000)
                 return
-        captcha = LoginDialog(captcha = bilibili.get_captcha()).get()
+        filename = tempfile.gettempdir() + '/' + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) + '.jpg'
+        captcha = LoginDialog(captcha = bilibili.get_captcha(filename)).get()
+        os.remove(filename)
         if bilibili.login(username, password, captcha) == True:
             plugin.notify('登陆成功', delay=2000)
         else:
@@ -276,7 +280,7 @@ def category_list(order, tid, page, days):
 @plugin.route('/')
 def root():
     items = [
-        {'label': u'搜索(暂不支持)', 'path': plugin.url_for('search')},
+        #{'label': u'搜索(暂不支持)', 'path': plugin.url_for('search')},
         {'label': u'视频分类', 'path': plugin.url_for('category', tid = '0')},
     ]
     if bilibili.is_login:
