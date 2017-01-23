@@ -25,6 +25,7 @@ class Bilibili():
             self.cj.load()
             if requests.utils.dict_from_cookiejar(self.cj).has_key('DedeUserID'):
                 self.is_login = True
+                self.mid = str(requests.utils.dict_from_cookiejar(self.cj)['DedeUserID'])
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cj))
         urllib2.install_opener(opener)
 
@@ -134,6 +135,34 @@ class Bilibili():
         result = json.loads(utils.get_page_content(MY_INFO_URL))
         return result['data']
 
+    def get_bangumi_chase(self, page = 1, pagesize = 10):
+        if self.is_login == False:
+            return []
+        url = BANGUMI_CHASE_URL.format(self.mid, page, pagesize)
+        result = json.loads(utils.get_page_content(url))
+        return result['data']['result'], result['data']['pages']
+
+    def get_bangumi_detail(self, season_id):
+        url = BANGUMI_SEASON_URL.format(season_id)
+        result = utils.get_page_content(url)
+        if result[0] != '{':
+            start = result.find('(') + 1
+            end = result.find(');')
+            result = result[start:end]
+        result = json.loads(result)
+        return result['result']
+
+    def get_history(self, page = 1, pagesize = 10):
+        if self.is_login == False:
+            return []
+        url = HISTORY_URL.format(page, pagesize)
+        result = json.loads(utils.get_page_content(url))
+        if len(result['data']) >= int(pagesize):
+            total_page = int(page) + 1
+        else:
+            total_page = int(page)
+        return result['data'], total_page
+
     def get_dynamic(self, page = 1, pagesize = 10):
         if self.is_login == False:
             return []
@@ -145,16 +174,14 @@ class Bilibili():
     def get_fav_box(self):
         if self.is_login == False:
             return []
-        cookie_dict = requests.utils.dict_from_cookiejar(self.cj)
-        url = FAV_BOX_URL.format(str(cookie_dict['DedeUserID']))
+        url = FAV_BOX_URL.format(self.mid)
         result = json.loads(utils.get_page_content(url))
         return result['data']['list']
 
     def get_fav(self, fav_box, page = 1, pagesize = 10):
         if self.is_login == False:
             return []
-        cookie_dict = requests.utils.dict_from_cookiejar(self.cj)
-        url = FAV_URL.format(str(cookie_dict['DedeUserID']), page, pagesize, fav_box)
+        url = FAV_URL.format(self.mid, page, pagesize, fav_box)
         result = json.loads(utils.get_page_content(url))
         return result['data']['vlist'], result['data']['pages']
 
@@ -171,6 +198,7 @@ class Bilibili():
             return False
         self.cj.save()
         self.is_login = True
+        self.mid = str(requests.utils.dict_from_cookiejar(self.cj)['DedeUserID'])
         return True
 
     def logout(self):
@@ -206,6 +234,10 @@ class Bilibili():
                 for url in urls]
         return urls
 
+    def add_history(self, aid, cid):
+        url = ADD_HISTORY_URL.format(str(cid), str(aid))
+        utils.get_page_content(url)
+
 
 if __name__ == '__main__':
     b = Bilibili()
@@ -214,11 +246,16 @@ if __name__ == '__main__':
     #    captcha = raw_input('Captcha: ')
     #    print b.login(u'catro@foxmail.com', u'123456', captcha)
     #print b.get_fav(49890104)
-    #print b.get_av_list(7541863)
+    #print b.get_av_list(8163111)
+    print b.add_history(8163111, 13425238)
     #print b.get_video_urls(12821893)
-    #print b.get_category_list('23')
+    #print b.get_category_list('32')
     #print b.get_dynamic('2')[1]
     #print b.get_category()
+    #print b.get_bangumi_chase()
+    #print json.dumps(b.get_bangumi_detail('5800'), indent=4, ensure_ascii=False)
+    #print b.get_bangumi_detail('5800')
+    #print b.get_history(1)
     #with open('bilibili_config.py', 'a') as f:
     #    f.write('\nCATEGORY = ')
     #    f.write(json.dumps(b.get_category_from_web_page(), indent=4, ensure_ascii=False).encode('utf8'))

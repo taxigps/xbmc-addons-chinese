@@ -5,21 +5,25 @@ APPSECRET = '87677fc06b0afc08cb86e008183390e5'
 
 API_URL = 'http://api.bilibili.com'
 HOME_URL = 'http://www.bilibili.com'
-VIEW_URL = API_URL + '/view?{0}'
-LIST_URL = API_URL + '/list?{0}'
-DYNAMIC_URL = API_URL + '/x/feed/pull?type=0&ps={0}&pn={1}'
+VIEW_URL = API_URL + '/view?{}'
+LIST_URL = API_URL + '/list?{}'
+DYNAMIC_URL = API_URL + '/x/feed/pull?type=0&ps={}&pn={}'
+SP_URL = API_URL + '/sp'
 LOGIN_URL = 'http://passport.bilibili.com/ajax/miniLogin/login'
 LOGIN_CAPTCHA_URL = 'https://passport.bilibili.com/captcha'
 LOGIN_HASH_URL = 'http://passport.bilibili.com/login?act=getkey'
-HISTORY_URL = 'http://space.bilibili.com/ajax/viewhistory/gethistory'
-FAV_BOX_URL = 'http://space.bilibili.com/ajax/fav/getBoxList?mid={0}'
-FAV_URL = 'http://space.bilibili.com/ajax/fav/getList?mid={0}&page={1}&pagesize={2}&fid={3}'
+HISTORY_URL = API_URL + '/x/v2/history?pn={}&ps={}'
+FAV_BOX_URL = 'http://space.bilibili.com/ajax/fav/getBoxList?mid={}'
+FAV_URL = 'http://space.bilibili.com/ajax/fav/getList?mid={}&page={}&pagesize={}&fid={}'
 TIMELINE_URL = 'http://bangumi.bilibili.com/jsonp/timeline_v2.ver?callback=timeline'
 MY_INFO_URL = 'http://space.bilibili.com/ajax/member/MyInfo'
-AV_URL = 'http://www.bilibili.com/widget/getPageList?aid={0}'
+AV_URL = 'http://www.bilibili.com/widget/getPageList?aid={}'
+BANGUMI_CHASE_URL = 'http://space.bilibili.com/ajax/Bangumi/getList?mid={}&page={}&pagesize={}'
+BANGUMI_SEASON_URL = 'http://bangumi.bilibili.com/jsonp/seasoninfo/{}.ver'
+ADD_HISTORY_URL = 'http://interface.bilibili.com/player?id=cid:{}&aid={}'
 
-INTERFACE_URL = r'http://interface.bilibili.com/playurl?cid={0}&from=miniplay&player=1&sign={1}'
-INTERFACE_PARAMS = r'cid={0}&from=miniplay&player=1{1}'
+INTERFACE_URL = r'http://interface.bilibili.com/playurl?cid={}&from=miniplay&player=1&sign={}'
+INTERFACE_PARAMS = r'cid={}&from=miniplay&player=1{}'
 SECRETKEY_MINILOADER = r'1c15888dc316e05a15fdd0a02ed6584f'
 
 
@@ -48,11 +52,6 @@ ORDER = [
         'title': u'最新投稿',
         'value': 'default',
         'days': 30,
-    },
-    {
-        'title': u'推荐',
-        'value': 'comment',
-        'days': 7,
     },
 #    {
 #        'title': u'按评论数从高至低排序',

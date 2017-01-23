@@ -35,8 +35,8 @@ def play(aid):
         if select < 0:
             return
     cid = items[select]['cid']
+    bilibili.add_history(aid, cid)
     urls = bilibili.get_video_urls(cid)
-    print urls
     if (len(urls) > 1):
         plugin.set_resolved_url('stack://' + ' , '.join(urls))
     else:
@@ -74,8 +74,7 @@ def dynamic(page):
             'info': info
             })
 
-    if int(page) < total_page:
-        items += next_page('dynamic', page, total_page)
+    items += next_page('dynamic', page, total_page)
     return items
 
 @plugin.route('/fav_box/')
@@ -113,13 +112,61 @@ def fav(fav_box, page):
             'is_playable': True,
             'info': info,
             })
-    if int(page) < total_page:
-        items += next_page('fav', page, total_page, fav_box = fav_box)
+    items += next_page('fav', page, total_page, fav_box = fav_box)
     return items
 
-@plugin.route('/bangumi/')
-def bangumi():
-    return []
+@plugin.route('/season/<season_id>/')
+def season(season_id):
+    plugin.set_content('videos')
+    result = bilibili.get_bangumi_detail(season_id)
+    items = []
+    bangumi_info = {
+        'genre': '|'.join([tag['tag_name'] for tag in result['tags']]),
+        'episode': len(result['episodes']),
+        'castandrole': [u'{}|{}'.format(actor['actor'], actor['role']) for actor in result['actor']],
+        'director': result['staff'],
+        'plot': result['evaluate'],
+        }
+    for item in result['episodes']:
+        info = dict(bangumi_info)
+        try:
+            info['year'] = int(item['update_time'][:4])
+        except:
+            pass
+        title = u'【第{}话】'.format(item['index'])
+        title += item['index_title']
+        if item.get('is_new', '0') == '1':
+            title += u'【新】'
+        items.append({
+            'label': title, 
+            'path': plugin.url_for('play', aid = item['av_id']),
+            'thumbnail': item['cover'],
+            'is_playable': True,
+            'info': info,
+            })
+    return items
+
+@plugin.route('/bangumi_chase/<page>/')
+def bangumi_chase(page):
+    plugin.set_content('videos')
+    result, total_page = bilibili.get_bangumi_chase(page)
+    items = []
+    for item in result:
+        info = {
+            'plot': item['brief'],  
+            }
+        title = item['title']
+        if item['is_finish'] == 0:
+            title += u'【更新至第{0}集】'.format(item['newest_ep_index'])
+        else:
+            title += u'【已完结】'
+        items.append({
+            'label': title,
+            'path': plugin.url_for('season', season_id = item['season_id']),
+            'thumbnail': item['cover'],
+            'info': info,
+            })
+    return items
 
 @plugin.route('/login/')
 def login():
@@ -144,9 +191,31 @@ def login():
 def logout():
     bilibili.logout()
 
-@plugin.route('/history/')
-def history():
-    return []
+@plugin.route('/history/<page>/')
+def history(page):
+    plugin.set_content('videos')
+    result, total_page = bilibili.get_history(page)
+    items = []
+    for item in result:
+        info = {
+            'genre': item['tname'],
+            'writer': item['owner']['name'],
+            'plot': item['desc'],
+            'duration': item['duration']
+            }
+        try:
+            info['year'] = int(time.strftime('%Y',time.localtime(item['ctime'])))
+        except:
+            pass
+        items.append({
+            'label': item['title'], 
+            'path': plugin.url_for('play', aid = item['aid']),
+            'thumbnail': item['pic'],
+            'is_playable': True,
+            'info': info,
+            })
+    items += next_page('history', page, total_page)
+    return items
 
 @plugin.route('/timeline/')
 def timeline():
@@ -158,7 +227,6 @@ def category(tid):
     for data in bilibili.get_category(tid):
         tid = data.keys()[0]
         value = data.values()[0]
-        print tid
         if len(value['subs']) == 0:
             path = plugin.url_for('category_order', tid = tid)
         else:
@@ -209,15 +277,14 @@ def category_list(order, tid, page, days):
 def root():
     items = [
         {'label': u'搜索(暂不支持)', 'path': plugin.url_for('search')},
-        {'label': u'放送表(暂不支持)', 'path': plugin.url_for('timeline')},
-        {'label': u'分类', 'path': plugin.url_for('category', tid = '0')},
+        {'label': u'视频分类', 'path': plugin.url_for('category', tid = '0')},
     ]
     if bilibili.is_login:
         items += [
             {'label': u'我的动态', 'path': plugin.url_for('dynamic', page = '1')},
             {'label': u'我的收藏', 'path': plugin.url_for('fav_box')},
-            {'label': u'我的追番(暂不支持)', 'path': plugin.url_for('bangumi')},
-            {'label': u'我的历史(暂不支持)', 'path': plugin.url_for('history')},
+            {'label': u'我的追番', 'path': plugin.url_for('bangumi_chase', page = '1')},
+            {'label': u'我的历史', 'path': plugin.url_for('history', page = '1')},
             {'label': u'退出登陆', 'path': plugin.url_for('logout')},
             ]
     else:
