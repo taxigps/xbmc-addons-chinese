@@ -11,143 +11,8 @@ import tempfile
 import xml.dom.minidom as minidom
 from cookielib import LWPCookieJar
 import requests
-
-CATEGORY = [
-    {
-        'title': u'全部',
-        'name': 'douga',
-        'tid': 0,
-    },
-    {
-        'title': u'动画',
-        'name': 'douga',
-        'tid': 1,
-    },
-    {
-        'title': u'音乐',
-        'name': 'music',
-        'tid': 3,
-    },
-    {
-        'title': u'番剧',
-        'name': 'bangumi',
-        'tid': 13,
-    },
-    {
-        'title': u'舞蹈',
-        'name': 'dance',
-        'tid': 129,
-    },
-    {
-        'title': u'游戏',
-        'name': 'game',
-        'tid': 4,
-    },
-    {
-        'title': u'科技',
-        'name': 'technology',
-        'tid': 36,
-    },
-    {
-        'title': u'生活',
-        'name': 'life',
-        'tid': 160,
-    },
-    {
-        'title': u'鬼畜',
-        'name': 'kichiku',
-        'tid': 119,
-    },
-    {
-        'title': u'娱乐',
-        'name': 'ent',
-        'tid': 5,
-    },
-    {
-        'title': u'电影',
-        'name': 'movie',
-        'tid': 23,
-    },
-    {
-        'title': u'电视剧',
-        'name': 'teleplay',
-        'tid': 11,
-    },
-    {
-        'title': u'时尚',
-        'name': 'fashion',
-        'tid': 155,
-    },
-]
-
-ORDER = [
-    {
-        'title': u'日排行榜',
-        'value': 'hot',
-        'days': 1,
-    },
-    {
-        'title': u'三日排行榜',
-        'value': 'hot',
-        'days': 3,
-    },
-    {
-        'title': u'周排行榜',
-        'value': 'hot',
-        'days': 7,
-    },
-    {
-        'title': u'最新动态',
-        'value': 'new',
-        'days': 30,
-    },
-    {
-        'title': u'最新投稿',
-        'value': 'default',
-        'days': 30,
-    },
-    {
-        'title': u'推荐',
-        'value': 'comment',
-        'days': 7,
-    },
-#    {
-#        'title': u'按评论数从高至低排序',
-#        'value': 'review'
-#    },
-#    {
-#        'title': u'按弹幕数从高至低排序',
-#        'value': 'damku'
-#    },
-#    {
-#        'title': u'按推荐数从高至低排序',
-#        'value': 'comment'
-#    },
-#    {
-#        'title': u'按宣传数排序（硬币）',
-#        'value': 'default'
-#    },
-]
-
-APPKEY = '19bf1f1192873efa'
-APPSECRET = '87677fc06b0afc08cb86e008183390e5'
-API_URL = 'http://api.bilibili.com'
-BANGUMI_URL = 'http://space.bilibili.com/ajax/Bangumi/getList?mid={0}&page={1}'
-VIEW_URL = API_URL + '/view?{0}'
-LIST_URL = API_URL + '/list?{0}'
-DYNAMIC_URL = API_URL + '/x/feed/pull?type=0&ps={0}&pn={1}'
-LOGIN_URL = 'http://passport.bilibili.com/ajax/miniLogin/login'
-LOGIN_CAPTCHA_URL = 'https://passport.bilibili.com/captcha'
-LOGIN_HASH_URL = 'http://passport.bilibili.com/login?act=getkey'
-HISTORY_URL = 'http://space.bilibili.com/ajax/viewhistory/gethistory'
-FAV_BOX_URL = 'http://space.bilibili.com/ajax/fav/getBoxList?mid={0}'
-FAV_URL = 'http://space.bilibili.com/ajax/fav/getList?mid={0}&page={1}&pagesize={2}&fid={3}'
-TIMELINE_URL = 'http://bangumi.bilibili.com/jsonp/timeline_v2.ver?callback=timeline'
-MY_INFO_URL = 'http://space.bilibili.com/ajax/member/MyInfo'
-AV_URL = 'http://www.bilibili.com/widget/getPageList?aid={0}'
-INTERFACE_URL = r'http://interface.bilibili.com/playurl?cid={0}&from=miniplay&player=1&sign={1}'
-INTERFACE_PARAMS = r'cid={0}&from=miniplay&player=1{1}'
-SECRETKEY_MINILOADER = r'1c15888dc316e05a15fdd0a02ed6584f'
+from bs4 import BeautifulSoup
+from bilibili_config import *
 
 class Bilibili():
     def __init__(self, appkey = APPKEY, appsecret = APPSECRET):
@@ -186,9 +51,6 @@ class Bilibili():
         return pwd
 
     def api_sign(self, params):
-        """
-        获取新版API的签名，不然会返回-3错误
-        """
         params['appkey']=self.appkey
         data = ""
         keys = params.keys()
@@ -206,8 +68,50 @@ class Bilibili():
         m.update(data + self.appsecret)
         return data + '&sign=' + m.hexdigest()
 
-    def get_category(self):
-        return CATEGORY
+    def get_category_from_web_page(self):
+        category_dict = {'0': {'title': u'全部', 'url': HOME_URL, 'subs':[]}}
+        node = category_dict['0']
+        url = node['url']
+        result = BeautifulSoup(utils.get_page_content(url), "html.parser").findAll('li', {'class': 'm-i'})
+        for item in result:
+            if len(item['class']) != 1:
+                continue
+            tid = item['data-tid']
+            title = item.em.contents[0]
+            url = 'http:' + item.a['href']
+            category_dict[tid] = {'title': title, 'url': url, 'subs':[]}
+            node['subs'].append(tid)
+        for sub in category_dict['0']['subs']:
+            node = category_dict[sub]
+            url = node['url']
+            result = BeautifulSoup(utils.get_page_content(url), "html.parser").select('ul.n_num li')
+            for item in result[1:]:
+                if not item.has_attr('tid'):
+                    continue
+                if not hasattr(item, 'a'):
+                    continue
+                if item.has_attr('class'):
+                    continue
+                tid = item['tid']
+                title = item.a.contents[0]
+                url = HOME_URL + item.a['href']
+                category_dict[tid] = {'title': title, 'url': url, 'subs':[]}
+                node['subs'].append(tid)
+
+        #Fix video and movie
+        if '11' not in category_dict['0']['subs']:
+            category_dict['0']['subs'].append('11')
+        if '23' not in category_dict['0']['subs']:
+            category_dict['0']['subs'].append('23')
+        category_dict['11'] = {'title': u'电视剧', 'url': 'http://bangumi.bilibili.com/tv/', 'subs': []}
+        category_dict['23'] = {'title': u'电影', 'url': 'http://bangumi.bilibili.com/movie/', 'subs': []}
+        return category_dict
+
+    def get_category(self, tid = '0'):
+        items = [{tid: {'title': '全部', 'url': CATEGORY[tid]['url'], 'subs': []}}]
+        for sub in CATEGORY[tid]['subs']:
+            items.append({sub: CATEGORY[sub]})
+        return items
 
     def get_order(self):
         return ORDER
@@ -309,8 +213,12 @@ if __name__ == '__main__':
     #    b.get_captcha()
     #    captcha = raw_input('Captcha: ')
     #    print b.login(u'catro@foxmail.com', u'123456', captcha)
-    print b.get_fav(49890104)
+    #print b.get_fav(49890104)
     #print b.get_av_list(7541863)
     #print b.get_video_urls(12821893)
-    #print b.get_category_list()[0][0]
+    #print b.get_category_list('23')
     #print b.get_dynamic('2')[1]
+    #print b.get_category()
+    #with open('bilibili_config.py', 'a') as f:
+    #    f.write('\nCATEGORY = ')
+    #    f.write(json.dumps(b.get_category_from_web_page(), indent=4, ensure_ascii=False).encode('utf8'))

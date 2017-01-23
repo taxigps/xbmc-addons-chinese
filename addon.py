@@ -56,18 +56,23 @@ def dynamic(page):
         duration = 0
         for t in item['addition']['duration'].split(':'):
             duration = duration * 60 + int(t)
+        info = {
+            'genre': item['addition']['typename'],
+            'writer': item['addition']['author'],
+            'plot': item['addition']['description'],
+            'duration': duration,
+            }
+        try:
+            info['year'] = int(item['addition']['create'][:4])
+        except:
+            pass
         items.append({
             'label': item['addition']['title'], 
             'path': plugin.url_for('play', aid = item['addition']['aid']),
             'thumbnail': item['addition']['pic'],
             'is_playable': True,
-            'info': {
-                'genre': item['addition']['typename'],
-                'year': int(item['addition']['create'][:4]),
-                'writer': item['addition']['author'],
-                'plot': item['addition']['description'],
-                'duration': duration,
-                }})
+            'info': info
+            })
 
     if int(page) < total_page:
         items += next_page('dynamic', page, total_page)
@@ -91,18 +96,23 @@ def fav(fav_box, page):
     items = previous_page('fav', page, total_page, fav_box = fav_box)
     items = []
     for item in result:
+        info = {
+            'genre': item['tname'],
+            'writer': item['owner']['name'],
+            'plot': item['desc'],
+            'duration': item['duration']
+            }
+        try:
+            info['year'] = int(time.strftime('%Y',time.localtime(item['ctime'])))
+        except:
+            pass
         items.append({
             'label': item['title'], 
             'path': plugin.url_for('play', aid = item['aid']),
             'thumbnail': item['pic'],
             'is_playable': True,
-            'info': {
-                'genre': item['tname'],
-                'year': int(time.strftime('%Y',time.localtime(item['ctime']))),
-                'writer': item['owner']['name'],
-                'plot': item['desc'],
-                'duration': item['duration'],
-                }})
+            'info': info,
+            })
     if int(page) < total_page:
         items += next_page('fav', page, total_page, fav_box = fav_box)
     return items
@@ -142,12 +152,18 @@ def history():
 def timeline():
     return []
 
-@plugin.route('/category/')
-def category():
-    items = [{
-        'label': item['title'], 
-        'path': plugin.url_for('category_order', tid = item['tid'])
-        } for item in bilibili.get_category()]
+@plugin.route('/category/<tid>/')
+def category(tid):
+    items = []
+    for data in bilibili.get_category(tid):
+        tid = data.keys()[0]
+        value = data.values()[0]
+        print tid
+        if len(value['subs']) == 0:
+            path = plugin.url_for('category_order', tid = tid)
+        else:
+            path = plugin.url_for('category', tid = tid)
+        items.append({'label': value['title'].decode('utf-8'), 'path': path})
     return items
 
 @plugin.route('/category_order/<tid>')
@@ -168,18 +184,24 @@ def category_list(order, tid, page, days):
         duration = 0
         for t in item['duration'].split(':'):
             duration = duration * 60 + int(t)
+        info = {
+            'genre': item['typename'],
+            'writer': item['author'],
+            'plot': item['description'],
+            'duration': duration,
+            }
+        try:
+            info['year'] = int(item['create'][:4])
+        except:
+            pass
+
         items.append({
             'label': item['title'], 
             'path': plugin.url_for('play', aid = item['aid']),
             'thumbnail': item['pic'],
             'is_playable': True,
-            'info': {
-                'genre': item['typename'],
-                'year': int(item['create'][:4]),
-                'writer': item['author'],
-                'plot': item['description'],
-                'duration': duration,
-                }})
+            'info': info,
+            })
     items += next_page('category_list', page, total_page, order = order, tid = tid, days = days)
     return items
 
@@ -188,7 +210,7 @@ def root():
     items = [
         {'label': u'搜索(暂不支持)', 'path': plugin.url_for('search')},
         {'label': u'放送表(暂不支持)', 'path': plugin.url_for('timeline')},
-        {'label': u'分类', 'path': plugin.url_for('category')},
+        {'label': u'分类', 'path': plugin.url_for('category', tid = '0')},
     ]
     if bilibili.is_login:
         items += [
