@@ -24,6 +24,8 @@ Use with care.
 
 """
 
+import sys
+sys.path.append(__path__[0] + '/..')
 from rsa.key import newkeys, PrivateKey, PublicKey
 from rsa.pkcs1 import encrypt, decrypt, sign, verify, DecryptionError, \
     VerificationError
