@@ -114,6 +114,9 @@ class Bilibili():
             items.append({sub: CATEGORY[sub]})
         return items
 
+    def get_category_name(self, tid):
+        return CATEGORY[str(tid)]['title']
+
     def get_order(self):
         return ORDER
 
@@ -170,6 +173,34 @@ class Bilibili():
         result = json.loads(utils.get_page_content(url))
         total_page = int((result['data']['page']['count'] + pagesize - 1) / pagesize)
         return result['data']['feeds'], total_page
+
+    def get_attention(self, page = 1, pagesize = 10):
+        if self.is_login == False:
+            return []
+        url = ATTENTION_URL.format(self.mid, page, pagesize)
+        result = json.loads(utils.get_page_content(url))
+        return result['data']['list'], result['data']['pages']
+
+    def get_attention_video(self, mid, tid = 0, page = 1, pagesize = 10):
+        if self.is_login == False:
+            return []
+        url = ATTENTION_VIDEO_URL.format(mid, page, pagesize, tid)
+        result = json.loads(utils.get_page_content(url))
+        return result['data'], result['data']['pages']
+
+    def get_attention_channel(self, mid):
+        if self.is_login == False:
+            return []
+        url = ATTENTION_CHANNEL_URL.format(mid)
+        result = json.loads(utils.get_page_content(url))
+        return result['data']['list']
+
+    def get_attention_channel_list(self, mid, cid, page = 1, pagesize = 10):
+        if self.is_login == False:
+            return []
+        url = ATTENTION_CHANNEL_LIST_URL.format(mid, cid, page, pagesize)
+        result = json.loads(utils.get_page_content(url))
+        return result['data']['list'], result['data']['total']
 
     def get_fav_box(self):
         if self.is_login == False:
@@ -253,6 +284,9 @@ if __name__ == '__main__':
     #print b.get_dynamic('2')[1]
     #print b.get_category()
     #print b.get_bangumi_chase()
+    #print b.get_attention()
+    #print b.get_attention_video('7349', 0, 1, 1)
+    print b.get_attention_channel('7349')
     #print json.dumps(b.get_bangumi_detail('5800'), indent=4, ensure_ascii=False)
     #print b.get_bangumi_detail('5800')
     #print b.get_history(1)

@@ -168,6 +168,111 @@ def bangumi_chase(page):
             'thumbnail': item['cover'],
             'info': info,
             })
+    items += next_page('bangumi_chase', page, total_page)
+    return items
+
+@plugin.route('/attention_video/<mid>/<tid>/<page>/')
+def attention_video(mid, tid, page):
+    plugin.set_content('videos')
+    result, total_page = bilibili.get_attention_video(mid, tid, page)
+    items = []
+    for item in result['vlist']:
+        duration = 0
+        for t in item['length'].split(':'):
+            duration = duration * 60 + int(t)
+        try:
+            genre = bilibili.get_category_name(item['typeid'])
+        except:
+            genre = result['tlist'][tid]['name']
+        info = {
+            'genre': genre,
+            'writer': item['author'],
+            'plot': item['description'],
+            'duration': duration,
+            }
+        try:
+            info['year'] = int(time.strftime('%Y',time.localtime(item['created'])))
+        except:
+            pass
+        items.append({
+            'label': item['title'],
+            'path': plugin.url_for('play', aid = item['aid']),
+            'thumbnail': item['pic'],
+            'is_playable': True,
+            'info': info,
+            })
+    items += next_page('attention_video', page, total_page, mid = mid, tid = tid)
+    return items 
+
+@plugin.route('/attention_channel_list/<mid>/<cid>/<page>/')
+def attention_channel_list(mid, cid, page):
+    plugin.set_content('videos')
+    result, total_page = bilibili.get_attention_channel_list(mid, cid, page)
+    items = []
+    for item in result:
+        info = {
+            'genre': item['info']['tname'],
+            'plot': item['info']['desc'],
+            'duration': item['info']['duration'],
+            }
+        try:
+            info['year'] = int(time.strftime('%Y',time.localtime(item['info']['ctime'])))
+        except:
+            pass
+        items.append({
+            'label': item['info']['title'],
+            'path': plugin.url_for('play', aid = item['info']['aid']),
+            'thumbnail': item['info']['pic'],
+            'is_playable': True,
+            'info': info,
+            })
+    items += next_page('attention_channel_list', page, total_page, mid = mid, cid = cid)
+    return items 
+
+@plugin.route('/attention_channel/<mid>/')
+def attention_channel(mid):
+    result = bilibili.get_attention_channel(mid)
+    items = []
+    for item in result:
+        title = u'{} ({})'.format(item['name'], str(item['count']))
+        items.append({
+            'label': title,
+            'path': plugin.url_for('attention_channel_list', mid = mid, cid = item['id'], page = '1'),
+            })
+    return items
+
+@plugin.route('/user_info/<mid>/')
+def user_info(mid):
+    result, total_page = bilibili.get_attention_video(mid, 0, 1, 1)
+    items = []
+    items.append({
+        'label': u'频道',
+        'path': plugin.url_for('attention_channel', mid = mid),
+        })
+    title = u'{} ({})'.format(u'全部', str(result['count']))
+    items.append({
+        'label': title,
+        'path': plugin.url_for('attention_video', mid = mid, tid = '0', page = '1'),
+        })
+    for item in result['tlist'].values():
+        title = u'{} ({})'.format(item['name'], str(item['count']))
+        items.append({
+            'label': title,
+            'path': plugin.url_for('attention_video', mid = mid, tid = item['tid'], page = '1'),
+            })
+    return items
+
+@plugin.route('/attention/<page>/')
+def attention(page):
+    result, total_page = bilibili.get_attention(page)
+    items = []
+    for item in result:
+        items.append({
+            'label': item['uname'],
+            'path': plugin.url_for('user_info', mid = item['fid']),
+            'thumbnail': item['face'],
+            })
+    items += next_page('attention', page, total_page)
     return items
 
 @plugin.route('/login/')
@@ -286,9 +391,10 @@ def root():
     if bilibili.is_login:
         items += [
             {'label': u'我的动态', 'path': plugin.url_for('dynamic', page = '1')},
+            {'label': u'我的历史', 'path': plugin.url_for('history', page = '1')},
             {'label': u'我的收藏', 'path': plugin.url_for('fav_box')},
             {'label': u'我的追番', 'path': plugin.url_for('bangumi_chase', page = '1')},
-            {'label': u'我的历史', 'path': plugin.url_for('history', page = '1')},
+            {'label': u'我的关注', 'path': plugin.url_for('attention', page = '1')},
             {'label': u'退出登陆', 'path': plugin.url_for('logout')},
             ]
     else:
