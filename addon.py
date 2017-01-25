@@ -180,18 +180,17 @@ def attention_video(mid, tid, page):
         duration = 0
         for t in item['length'].split(':'):
             duration = duration * 60 + int(t)
-        try:
-            genre = bilibili.get_category_name(item['typeid'])
-        except:
-            genre = result['tlist'][tid]['name']
         info = {
-            'genre': genre,
             'writer': item['author'],
             'plot': item['description'],
             'duration': duration,
             }
         try:
             info['year'] = int(time.strftime('%Y',time.localtime(item['created'])))
+        except:
+            pass
+        try:
+            info['genre'] = bilibili.get_category_name(item['typeid'])
         except:
             pass
         items.append({
