@@ -63,7 +63,7 @@ def Search( item ):
     elif len(item['tvshow']) > 0:
         search_string = "%s S%.2dE%.2d" % (item['tvshow'],
                                            int(item['season']),
-                                           int(item['episode']),)
+                                           int(item['episode']))
     else:
         search_string = item['title']
     url = SUBHD_API % (urllib.quote(search_string))
@@ -72,7 +72,20 @@ def Search( item ):
         soup = BeautifulSoup(data)
     except:
         return
+
     results = soup.find_all("div", class_="box")
+
+    # if can't find subtitle for the specified episode, try the whole season instead
+    if (len(results) == 0) and (len(item['tvshow']) > 0):
+        search_string = "%s S%.2d" % (item['tvshow'], int(item['season']))
+        url = SUBHD_API % (urllib.quote(search_string))
+        data = GetHttpData(url)
+        try:
+            soup = BeautifulSoup(data)
+        except:
+            return
+        results = soup.find_all("div", class_="box")
+
     for it in results:
         link = SUBHD_BASE + it.find("div", class_="d_title").a.get('href').encode('utf-8')
         title = it.find("div", class_="d_title").text.encode('utf-8')
@@ -111,10 +124,10 @@ def Search( item ):
     if subtitles_list:
         for it in subtitles_list:
             listitem = xbmcgui.ListItem(label=it["language_name"],
-                                  label2=it["filename"],
-                                  iconImage=it["rating"],
-                                  thumbnailImage=it["language_flag"]
-                                  )
+                                        label2=it["filename"],
+                                        iconImage=it["rating"],
+                                        thumbnailImage=it["language_flag"]
+                                       )
 
             listitem.setProperty( "sync", "false" )
             listitem.setProperty( "hearing_imp", "false" )
