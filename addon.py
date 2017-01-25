@@ -233,7 +233,7 @@ def attention_channel(mid):
     result = bilibili.get_attention_channel(mid)
     items = []
     for item in result:
-        title = u'{} ({})'.format(item['name'], str(item['count']))
+        title = u'{} ({}个视频) ({}更新)'.format(item['name'], str(item['count']), item['modify_time'][:10])
         items.append({
             'label': title,
             'path': plugin.url_for('attention_channel_list', mid = mid, cid = item['id'], page = '1'),
@@ -248,13 +248,13 @@ def user_info(mid):
         'label': u'频道',
         'path': plugin.url_for('attention_channel', mid = mid),
         })
-    title = u'{} ({})'.format(u'全部', str(result['count']))
+    title = u'{} ({}个视频)'.format(u'全部', str(result['count']))
     items.append({
         'label': title,
         'path': plugin.url_for('attention_video', mid = mid, tid = '0', page = '1'),
         })
     for item in result['tlist'].values():
-        title = u'{} ({})'.format(item['name'], str(item['count']))
+        title = u'{} ({}个视频)'.format(item['name'], str(item['count']))
         items.append({
             'label': title,
             'path': plugin.url_for('attention_video', mid = mid, tid = item['tid'], page = '1'),
