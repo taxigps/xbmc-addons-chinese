@@ -219,34 +219,34 @@ class Bilibili():
     def login(self, userid, pwd, captcha):
         #utils.get_page_content('http://www.bilibili.com')
         if self.is_login == True:
-            return True
+            return True, ''
         pwd = self.get_encryped_pwd(pwd)
         data = 'userid={0}&pwd={1}&keep=1&captcha={2}'.format(userid, pwd, captcha)
         result = utils.get_page_content(LOGIN_URL, data, 
                                         {'Origin':'https://passport.bilibili.com', 
                                          'Referer':'https://passport.bilibili.com/ajax/miniLogin/minilogin'})
         if not requests.utils.dict_from_cookiejar(self.cj).has_key('DedeUserID'):
-            return False
+            return False, LOGIN_ERROR_MAP[json.loads(result)['message']['code']]
         self.cj.save()
         self.is_login = True
         self.mid = str(requests.utils.dict_from_cookiejar(self.cj)['DedeUserID'])
-        return True
+        return True, ''
 
     def logout(self):
         self.cj.clear()
         self.cj.save()
         self.is_login = False
 
-    #def get_av_list(self, aid, page = 1, fav = 0):
-        #params = {'id': aid, 'page': page}
-        #if fav != 0:
-        #    params['fav'] = fav
-        #url = VIEW_URL.format(self.api_sign(params))
-        #result = json.loads(utils.get_page_content(url))
-        #results = [result]
-        #if (page < result['pages']):
-        #    results += self.get_av_list(aid, page + 1, fav)
-        #return results
+    def get_av_list_detail(self, aid, page = 1, fav = 0, pagesize = 10):
+        params = {'id': aid, 'page': page}
+        if fav != 0:
+            params['fav'] = fav
+        url = VIEW_URL.format(self.api_sign(params))
+        result = json.loads(utils.get_page_content(url))
+        results = [result]
+        if (int(page) < result['pages']) and (pagesize > 1):
+            results += self.get_av_list_detail(aid, int(page) + 1, fav, pagesize = pagesize - 1)[0]
+        return results, result['pages']
 
     def get_av_list(self, aid):
         url = AV_URL.format(aid)
@@ -278,7 +278,7 @@ if __name__ == '__main__':
     #    print b.login(u'catro@foxmail.com', u'123456', captcha)
     #print b.get_fav(49890104)
     #print b.get_av_list(8163111)
-    print b.add_history(8163111, 13425238)
+    #print b.add_history(8163111, 13425238)
     #print b.get_video_urls(12821893)
     #print b.get_category_list('32')
     #print b.get_dynamic('2')[1]
@@ -286,7 +286,7 @@ if __name__ == '__main__':
     #print b.get_bangumi_chase()
     #print b.get_attention()
     #print b.get_attention_video('7349', 0, 1, 1)
-    print b.get_attention_channel('7349')
+    #print b.get_attention_channel('7349')
     #print json.dumps(b.get_bangumi_detail('5800'), indent=4, ensure_ascii=False)
     #print b.get_bangumi_detail('5800')
     #print b.get_history(1)

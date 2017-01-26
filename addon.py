@@ -28,21 +28,36 @@ def next_page(endpoint, page, total_page, **kwargs):
     else:
         return []
 
-@plugin.route('/play/<aid>')
-def play(aid):
-    items = bilibili.get_av_list(aid)
-    select = 0
-    if len(items) > 1:
-        select = xbmcgui.Dialog().select(u'选择播放文件', [item['pagename'] for item in items])
-        if select < 0:
-            return
-    cid = items[select]['cid']
-    bilibili.add_history(aid, cid)
+def get_av_item(aid, **kwargs):
+    result = bilibili.get_av_list(aid)
+    item = dict(**kwargs)
+    if len(result) == 1:
+        item['is_playable'] = True
+        item['path'] = plugin.url_for('play', cid = result[0]['cid'])
+    else:
+        item['path'] = plugin.url_for('list_video', aid = aid)
+    return item
+
+@plugin.route('/play/<cid>/')
+def play(cid):
     urls = bilibili.get_video_urls(cid)
     if (len(urls) > 1):
         plugin.set_resolved_url('stack://' + ' , '.join(urls))
     else:
         plugin.set_resolved_url(urls[0])
+
+@plugin.route('/list_video/<aid>/')
+def list_video(aid):
+    plugin.set_content('videos')
+    result = bilibili.get_av_list(aid)
+    items = []
+    for  item in result:
+        items.append({
+            'label': item['pagename'], 
+            'path': plugin.url_for('play', cid = item['cid']),
+            'is_playable': True,
+            })
+    return items
 
 @plugin.route('/search/')
 def search():
@@ -68,13 +83,7 @@ def dynamic(page):
             info['year'] = int(item['addition']['create'][:4])
         except:
             pass
-        items.append({
-            'label': item['addition']['title'], 
-            'path': plugin.url_for('play', aid = item['addition']['aid']),
-            'thumbnail': item['addition']['pic'],
-            'is_playable': True,
-            'info': info
-            })
+        items.append(get_av_item(item['addition']['aid'], label = item['addition']['title'], thumbnail = item['addition']['pic'], info = info))
 
     items += next_page('dynamic', page, total_page)
     return items
@@ -107,13 +116,7 @@ def fav(fav_box, page):
             info['year'] = int(time.strftime('%Y',time.localtime(item['ctime'])))
         except:
             pass
-        items.append({
-            'label': item['title'], 
-            'path': plugin.url_for('play', aid = item['aid']),
-            'thumbnail': item['pic'],
-            'is_playable': True,
-            'info': info,
-            })
+        items.append(get_av_item( item['aid'], label = item['title'], thumbnail = item['pic'], info = info))
     items += next_page('fav', page, total_page, fav_box = fav_box)
     return items
 
@@ -139,13 +142,7 @@ def season(season_id):
         title += item['index_title']
         if item.get('is_new', '0') == '1':
             title += u'【新】'
-        items.append({
-            'label': title, 
-            'path': plugin.url_for('play', aid = item['av_id']),
-            'thumbnail': item['cover'],
-            'is_playable': True,
-            'info': info,
-            })
+        items.append(get_av_item(item['av_id'], label = title, thumbnail = item['cover'], info = info))
     return items
 
 @plugin.route('/bangumi_chase/<page>/')
@@ -193,13 +190,7 @@ def attention_video(mid, tid, page):
             info['genre'] = bilibili.get_category_name(item['typeid'])
         except:
             pass
-        items.append({
-            'label': item['title'],
-            'path': plugin.url_for('play', aid = item['aid']),
-            'thumbnail': item['pic'],
-            'is_playable': True,
-            'info': info,
-            })
+        items.append(get_av_item(item['aid'], label = item['title'], thumbnail = item['pic'], info = info))
     items += next_page('attention_video', page, total_page, mid = mid, tid = tid)
     return items 
 
@@ -218,13 +209,7 @@ def attention_channel_list(mid, cid, page):
             info['year'] = int(time.strftime('%Y',time.localtime(item['info']['ctime'])))
         except:
             pass
-        items.append({
-            'label': item['info']['title'],
-            'path': plugin.url_for('play', aid = item['info']['aid']),
-            'thumbnail': item['info']['pic'],
-            'is_playable': True,
-            'info': info,
-            })
+        items.append(get_av_item(item['info']['aid'], label = item['info']['title'], thumbnail = item['info']['pic'], info = info))
     items += next_page('attention_channel_list', page, total_page, mid = mid, cid = cid)
     return items 
 
@@ -290,10 +275,11 @@ def login():
         filename = tempfile.gettempdir() + '/' + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) + '.jpg'
         captcha = LoginDialog(captcha = bilibili.get_captcha(filename)).get()
         os.remove(filename)
-        if bilibili.login(username, password, captcha) == True:
+        result, msg = bilibili.login(username, password, captcha)
+        if result == True:
             plugin.notify('登陆成功', delay=2000)
         else:
-            plugin.notify('登陆失败', delay=2000)
+            plugin.notify(msg, delay=2000)
 
 @plugin.route('/logout/')
 def logout():
@@ -315,13 +301,7 @@ def history(page):
             info['year'] = int(time.strftime('%Y',time.localtime(item['ctime'])))
         except:
             pass
-        items.append({
-            'label': item['title'], 
-            'path': plugin.url_for('play', aid = item['aid']),
-            'thumbnail': item['pic'],
-            'is_playable': True,
-            'info': info,
-            })
+        items.append(get_av_item(item['aid'], label = item['title'], thumbnail = item['pic'], info = info))
     items += next_page('history', page, total_page)
     return items
 
@@ -371,13 +351,7 @@ def category_list(order, tid, page, days):
         except:
             pass
 
-        items.append({
-            'label': item['title'], 
-            'path': plugin.url_for('play', aid = item['aid']),
-            'thumbnail': item['pic'],
-            'is_playable': True,
-            'info': info,
-            })
+        items.append(get_av_item(item['aid'], label = item['title'], thumbnail = item['pic'], info = info))
     items += next_page('category_list', page, total_page, order = order, tid = tid, days = days)
     return items
 
