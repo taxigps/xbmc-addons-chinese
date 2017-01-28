@@ -12,7 +12,7 @@ Note: Chinese repository is also applicable to Kodi (new releases - formerly kno
 
 ## Install Repository
 
-To install the repository, you need to download the latest repository zip file [repository.xbmc-addons-chinese-1.2.0.zip][3]. And then:
+To install the repository, you need to download the latest repository zip file [repository.xbmc-addons-chinese-1.2.1.zip][3]. And then:
 * Launch XBMC
 * Navigate to System | Settings | Add-ons
 * Select Install from zip file
@@ -37,9 +37,12 @@ For proper Chinese text display on xbmc, do the following steps:
 
 * 5ivdo(5ivdo) - plugin.video.5ivdo - Online video from www.5ivdo.com
 * 亚洲电视 - plugin.video.asia-tv - Live TV channels, include Mainland China, Hong Kong and Taiwan
+* 百度云(BaiDuYun) - plugin.video.bdyun - Personal Cloud Storage from yun.baidu.com
 * 哔哩哔哩(bilibili) - plugin.video.bilibili - Online video from www.bilibili.com
 * CNTV Live 中国网络电视台直播 - plugin.video.cntv-live - TV live channels from www.cntv.cn
 * 央视重播 CCTV Replay - plugin.video.cntv-replay - An other addon for TV live channels from www.cntv.cn
+* 多瑙影院播放器(dnvodPlayer) - plugin.video.dnvodPlayer - Search and play movie on www.dnvod.eu
+* 斗鱼TV(douyutv) - plugin.video.douyutv2 - Online videos from www.douyutv.com
 * 风行视频(Funshion) - plugin.video.funshion - Online videos from www.funshion.com
 * 酷6云中剧场(Ku6) - plugin.video.ku6 - Online video from www.juchang.com
 * 乐视网(LeTV) - plugin.video.letv - Online video from www.letv.com.cn
@@ -54,7 +57,6 @@ For proper Chinese text display on xbmc, do the following steps:
 * 优酷视频2(YouKu2) - plugin.video.youku2 - Online tv and movies from www.youku.com
 * YouKu TV - plugin.video.youkutv - Online tv and movies from www.youku.com, with wonderful GUI
 * 战旗TV(ZhanqiTV) - plugin.video.zhanqitv - Online video from www.zhanqi.tv
-* 百度云(BaiDuYun) - plugin.video.bdyun - Personal Cloud Storage from yun.baidu.com
 
 Note: PPS影音(PPS.tv) and PPS网络电视(PPStream)
 
@@ -81,11 +83,12 @@ PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStre
 
 ## Subtitle Add-ons
 
+* 163sub - service.subtitles.163sub - Search and download subtitles from [www.163sub.com](http://www.163sub.com)
+* Shooter(Fake) - service.subtitles.makedie - Search and download subtitles from [sub.makedie.me](http://sub.makedie.me)
 * Sub HD - service.subtitles.subhd - Search and download subtitles from [subhd.com](http://subhd.com)
 * subom - service.subtitles.subom - Search and download subtitles from [subom.net](http://subom.net/)
-* Shooter(Fake) - service.subtitles.makedie - Search and download subtitles from [sub.makedie.me](http://sub.makedie.me)
 * zimuku - service.subtitles.zimuku - Search and download subtitles from [zimuku.net](http://www.zimuku.net)
-* 163sub - service.subtitles.163sub - Search and download subtitles from [www.163sub.com](http://www.163sub.com)
+* ZiMuZu - service.subtitles.zimuzu - Search and download subtitles from [zimuzu.tv](http://www.zimuzu.tv)
 
 ## TV Scraper Add-ons
 
@@ -99,6 +102,6 @@ If for reasons that you need to manually install a specific plugin, you can down
 
 [1]: http://bbs.htpc1.com/forum-225-1.html
 [2]: http://xbmc.org/forum/showthread.php?t=64250
-[3]: https://github.com/taxigps/xbmc-addons-chinese/raw/master/repo/repository.xbmc-addons-chinese/repository.xbmc-addons-chinese-1.2.0.zip
+[3]: https://github.com/taxigps/xbmc-addons-chinese/raw/master/repo/repository.xbmc-addons-chinese/repository.xbmc-addons-chinese-1.2.1.zip
 
 

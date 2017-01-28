@@ -25,8 +25,8 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 
 sys.path.append (__resource__)
 
-SUBHD_API  = 'http://www.subhd.com/search/%s'
-SUBHD_BASE = 'http://www.subhd.com'
+SUBHD_API  = 'http://subhd.com/search/%s'
+SUBHD_BASE = 'http://subhd.com'
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
 def log(module, msg):
@@ -63,7 +63,7 @@ def Search( item ):
     elif len(item['tvshow']) > 0:
         search_string = "%s S%.2dE%.2d" % (item['tvshow'],
                                            int(item['season']),
-                                           int(item['episode']),)
+                                           int(item['episode']))
     else:
         search_string = item['title']
     url = SUBHD_API % (urllib.quote(search_string))
@@ -72,16 +72,44 @@ def Search( item ):
         soup = BeautifulSoup(data)
     except:
         return
+
     results = soup.find_all("div", class_="box")
+
+    # if can't find subtitle for the specified episode, try the whole season instead
+    if (len(results) == 0) and (len(item['tvshow']) > 0):
+        search_string = "%s S%.2d" % (item['tvshow'], int(item['season']))
+        url = SUBHD_API % (urllib.quote(search_string))
+        data = GetHttpData(url)
+        try:
+            soup = BeautifulSoup(data)
+        except:
+            return
+        results = soup.find_all("div", class_="box")
+
     for it in results:
         link = SUBHD_BASE + it.find("div", class_="d_title").a.get('href').encode('utf-8')
+        title = it.find("div", class_="d_title").text.encode('utf-8')
         #version = it.find(text=re.compile('(字幕翻译|听译版本|机翻版本|官方译本)'.decode('utf-8'))).parent.get('title').encode('utf-8')
         version = it.find_all("span", class_=re.compile("label"))[-1].get('title').encode('utf-8')
         if version:
             if version.find('本字幕按 ') == 0:
                 version = version.split()[1]
+            # if version information is too short, we will append it to the title to give user more information
+            if (len(re.findall(r"[\w']+", version)) < 5):
+                if (title.find(version) == -1):
+                    version = title + ' ' + version
+                else:
+                    version = title
         else:
-            version = '未知版本'
+            version = title
+        try:
+            group = it.find("div", class_="d_zu").text.encode('utf-8')
+            if group.isspace():
+                group = ''
+        except:
+            group = ''
+        if group and (version.find(group) == -1):
+            version += ' ' + group
         try:
             r2 = it.find_all("span", class_="label")
             langs = [x.text.encode('utf-8') for x in r2][:-1]
@@ -96,18 +124,18 @@ def Search( item ):
     if subtitles_list:
         for it in subtitles_list:
             listitem = xbmcgui.ListItem(label=it["language_name"],
-                                  label2=it["filename"],
-                                  iconImage=it["rating"],
-                                  thumbnailImage=it["language_flag"]
-                                  )
+                                        label2=it["filename"],
+                                        iconImage=it["rating"],
+                                        thumbnailImage=it["language_flag"]
+                                       )
 
             listitem.setProperty( "sync", "false" )
             listitem.setProperty( "hearing_imp", "false" )
 
             url = "plugin://%s/?action=download&link=%s&lang=%s" % (__scriptid__,
-                                                                        it["link"],
-                                                                        it["lang"]
-                                                                        )
+                                                                    it["link"],
+                                                                    it["lang"]
+                                                                    )
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
 
 def rmtree(path):

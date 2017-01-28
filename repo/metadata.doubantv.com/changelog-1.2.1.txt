@@ -1,5 +1,3 @@
-[B]1.2.2[/B]
-- Get full plot
 [B]1.2.1[/B]
 - Fix the title bug
 [B]1.2.0[/B]

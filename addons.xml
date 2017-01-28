@@ -2,7 +2,7 @@
 <addons>
 <addon id="metadata.doubantv.com"
        name="doubantv"
-       version="1.2.0"
+       version="1.2.2"
        provider-name="janplus">
   <requires>
     <import addon="xbmc.metadata" version="1.0"/>
@@ -228,7 +228,7 @@
 	</extension>
 </addon>
 
-<addon id="plugin.video.bilibili" name="哔哩哔哩(bilibili)" version="0.2.7" provider-name="Syndim">
+<addon id="plugin.video.bilibili" name="哔哩哔哩(bilibili)" version="0.2.8" provider-name="Syndim">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
         <import addon="script.module.xbmcswift2" version="2.4.0"/>
@@ -290,6 +290,51 @@
 	<language>en</language>
 	<email>sun_kang@hotmail.com</email>
   </extension>
+</addon>
+
+<addon id="plugin.video.dnvodPlayer"
+  name="多瑙影院播放器(dnvodPlayer)"
+  version="1.0.0"
+  provider-name="Cameron">
+  <requires>
+    <import addon="script.module.requests" version="1.1.0"/>
+    <import addon="xbmc.python" version="2.1.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="addon.py">
+  <provides>video</provides>
+  </extension>
+
+  <extension point="xbmc.addon.metadata">
+    <platform>all</platform>
+    <summary>XBMC Player for dnvod</summary>
+    <summary lang="zh">多瑙影院XBMC插件</summary>
+    <description>Search and play all the movie on dnvod, not include Adult movies</description>
+    <description lang="zh">搜索并播放多瑙影院中的电影及电视剧，暂不包含成人内容</description>
+    <disclaimer>For personal use only</disclaimer>
+    <disclaimer lang="zh">仅供个人使用</disclaimer>
+  </extension>
+</addon>
+
+<addon id="plugin.video.douyutv2"
+    name="斗鱼TV(douyutv)"
+    version="2.2"
+    provider-name="Yangqian;Catro">
+    <requires>
+        <import addon="script.module.beautifulsoup4" version="4.3.2"/>
+        <import addon="script.module.requests" version="1.1.0"/>
+    </requires>
+    <extension
+        point="xbmc.python.pluginsource"
+        library="addon.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">douyu video plugin</summary>
+        <summary lang="zh">斗鱼TV插件</summary>
+        <description lang="en">Online video from www.douyutv.com. https://github.com/catro/plugin.video.douyutv2</description>
+        <description lang="zh">斗鱼TV. 视频源和弹幕可以在设置里面改变. https://github.com/catro/plugin.video.douyutv2</description>
+        <platform>all</platform>
+    </extension>
 </addon>
 
 <addon id="plugin.video.funshion"
@@ -668,7 +713,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="service.subtitles.163sub"
        name="163sub"
-       version="1.0.4"
+       version="1.0.5"
        provider-name="taxigps">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
@@ -715,7 +760,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="service.subtitles.subhd"
        name="Sub HD"
-       version="1.0.7"
+       version="1.0.11"
        provider-name="taxigps">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
@@ -764,6 +809,25 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
     <summary lang="zh">字幕库</summary>
     <description lang="en">Search and download subtitles from www.zimuku.net</description>
     <description lang="zh">从 www.zimuku.net 下载字幕</description>
+  </extension>
+</addon>
+
+<addon id="service.subtitles.zimuzu"
+       name="ZiMuZu"
+       version="1.0.2"
+       provider-name="xodidox">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+    <import addon="script.module.requests" version="1.1.0"/>
+    <import addon="script.module.beautifulsoup4" version="4.3.2"/>
+  </requires>
+  <extension point="xbmc.subtitle.module"
+             library="service.py" />
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">YYeTs ZiMuZu subtitle</summary>
+    <summary lang="zh">人人影视字幕组 字幕</summary>
+    <description lang="en">Search and download subtitles from zimuzu.tv</description>
+    <description lang="zh">从 zimuzu.tv 下载字幕</description>
   </extension>
 </addon>
 </addons>

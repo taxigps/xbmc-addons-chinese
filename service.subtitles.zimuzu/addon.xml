@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="service.subtitles.zimuzu"
+       name="ZiMuZu"
+       version="1.0.2"
+       provider-name="xodidox">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+    <import addon="script.module.requests" version="1.1.0"/>
+    <import addon="script.module.beautifulsoup4" version="4.3.2"/>
+  </requires>
+  <extension point="xbmc.subtitle.module"
+             library="service.py" />
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">YYeTs ZiMuZu subtitle</summary>
+    <summary lang="zh">人人影视字幕组 字幕</summary>
+    <description lang="en">Search and download subtitles from zimuzu.tv</description>
+    <description lang="zh">从 zimuzu.tv 下载字幕</description>
+  </extension>
+</addon>

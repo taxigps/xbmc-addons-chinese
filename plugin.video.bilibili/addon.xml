@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.bilibili" name="哔哩哔哩(bilibili)" version="0.2.7" provider-name="Syndim">
+<addon id="plugin.video.bilibili" name="哔哩哔哩(bilibili)" version="0.2.8" provider-name="Syndim">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
         <import addon="script.module.xbmcswift2" version="2.4.0"/>

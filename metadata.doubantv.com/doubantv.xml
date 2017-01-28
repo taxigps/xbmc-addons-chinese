@@ -31,12 +31,12 @@
 	  <RegExp input="$$2" output="&lt;id&gt;\1&lt;/id&gt;" dest="5">
 		<expression/>
 	  </RegExp>
-	  <!-- <RegExp input="$$1" output="&lt;title&gt;\1&lt;/title&gt;" dest="5+"> -->
-	  <!-- 	<expression noclean="1">&quot;title&quot;:&quot;(.+?)&quot;</expression> -->
-	  <!-- </RegExp> -->
-	  <!-- <RegExp input="$$1" output="&lt;originaltitle&gt;\1&lt;/originaltitle&gt;&lt;title&gt;\1&lt;/title&gt;" dest="5+"> -->
-	  <!-- 	<expression noclean="1">&quot;original_title&quot;:&quot;(.+?)&quot;</expression> -->
-	  <!-- </RegExp> -->
+	  <RegExp input="$$1" output="&lt;title&gt;\1&lt;/title&gt;" dest="5+">
+	  	<expression noclean="1" fixchars="1">&quot;title&quot;: &quot;(.+?)&quot;</expression>
+	  </RegExp>
+	  <RegExp input="$$1" output="&lt;originaltitle&gt;\1&lt;/originaltitle&gt;&lt;title&gt;\1&lt;/title&gt;" dest="5+">
+	  	<expression noclean="1" fixchars="1">&quot;original_title&quot;: &quot;(.+?)&quot;</expression>
+	  </RegExp>
 	  <RegExp input="$$1" output="&lt;year&gt;\1&lt;/year&gt;" dest="5+">
 		<expression noclean="1">&quot;year&quot;: &quot;(.+?)&quot;</expression>
 	  </RegExp>
@@ -46,39 +46,39 @@
 	  <RegExp input="$$1" output="&lt;rating&gt;\1&lt;/rating&gt;" dest="5+">
 		<expression noclean="1">&quot;average&quot;: ([\d\.]+)</expression>
 	  </RegExp>
-	  <!-- <RegExp input="$$1" output="\1" dest="8"> -->
-	  <!-- 	<expression noclean="1">&quot;genres&quot;:\[(.+?)\]</expression> -->
-	  <!-- </RegExp> -->
-	  <!-- <RegExp input="$$8" output="&lt;genre&gt;\1&lt;/genre&gt;" dest="5+"> -->
-	  <!-- 	<expression noclean="1" repeat="yes">&quot;(.+?)&quot;</expression> -->
-	  <!-- </RegExp> -->
-	  <!-- <RegExp input="$$1" output="\1" dest="8"> -->
-	  <!-- 	<expression noclean="1">&quot;countries&quot;:\[(.+?)\]</expression> -->
-	  <!-- </RegExp> -->
-	  <!-- <RegExp input="$$8" output="&lt;country&gt;\1&lt;/country&gt;" dest="5+"> -->
-	  <!-- 	<expression noclean="1" repeat="yes">&quot;(.+?)&quot;</expression> -->
-	  <!-- </RegExp> -->
-	  <!-- <RegExp input="$$1" output="&lt;plot&gt;\1&lt;/plot&gt;" dest="5+"> -->
-	  <!-- 	<expression noclean="1">&quot;summary&quot;:&quot;(.+?)&quot;</expression> -->
-	  <!-- </RegExp> -->
-	  <!-- <RegExp input="$$1" output="\1" dest="8"> -->
-	  <!-- 	<expression noclean="1" clear="yes">&quot;directors&quot;:\[(.+?)\]</expression> -->
-	  <!-- </RegExp> -->
-	  <!-- <RegExp input="$$8" output="&lt;director&gt;\1&lt;/director&gt;" dest="5+"> -->
-	  <!-- 	<expression noclean="1" repeat="yes">&quot;name&quot;:&quot;(.+?)&quot;</expression> -->
-	  <!-- </RegExp> -->
-	  <!-- <RegExp input="$$1" output="\1" dest="8"> -->
-	  <!-- 	<expression noclean="1" clear="yes">&quot;writers&quot;:\[(.+?)\]</expression> -->
-	  <!-- </RegExp> -->
-	  <!-- <RegExp input="$$8" output="&lt;credits&gt;\1&lt;/credits&gt;" dest="5+"> -->
-	  <!-- 	<expression noclean="1" repeat="yes">&quot;name&quot;:&quot;(.+?)&quot;</expression> -->
-	  <!-- </RegExp> -->
-	  <!-- <RegExp input="$$1" output="\1" dest="8"> -->
-	  <!-- 	<expression noclean="1" clear="yes">&quot;casts&quot;: \[(.+?)\]</expression> -->
-	  <!-- </RegExp> -->
-	  <!-- <RegExp input="$$8" output="&lt;actor&gt;&lt;thumb&gt;http://\2/img/celebrity/large/\3.jpg&lt;/thumb&gt;&lt;name&gt;\4&lt;/name&gt;&lt;/actor&gt;" dest="5+"> -->
-	  <!-- 	<expression noclean="1" repeat="yes">&quot;avatars&quot;:(null,|.*?&quot;large&quot;:&quot;http:\\/\\/(.+?)\\/img\\/celebrity\\/large\\/(.+?).jpg&quot;.*?)&quot;alt&quot;:.+?&quot;name&quot;:&quot;(.+?)&quot;</expression> -->
-	  <!-- </RegExp> -->
+	  <RegExp input="$$1" output="\1" dest="8">
+	  	<expression noclean="1">&quot;genres&quot;: \[(.+?)\]</expression>
+	  </RegExp>
+	  <RegExp input="$$8" output="&lt;genre&gt;\1&lt;/genre&gt;" dest="5+">
+	  	<expression noclean="1" fixchars="1" repeat="yes">&quot;(.+?)&quot;</expression>
+	  </RegExp>
+	  <RegExp input="$$1" output="\1" dest="8">
+	  	<expression noclean="1">&quot;countries&quot;: \[(.+?)\]</expression>
+	  </RegExp>
+	  <RegExp input="$$8" output="&lt;country&gt;\1&lt;/country&gt;" dest="5+">
+	  	<expression noclean="1" fixchars="1" repeat="yes">&quot;(.+?)&quot;</expression>
+	  </RegExp>
+	  <RegExp input="$$1" output="&lt;plot&gt;\1&lt;/plot&gt;" dest="5+">
+	  	<expression noclean="1" fixchars="1">&quot;summary&quot;: &quot;(.+?)&quot;</expression>
+	  </RegExp>
+	  <RegExp input="$$1" output="\1" dest="8">
+	  	<expression noclean="1" clear="yes">&quot;directors&quot;: \[(.+?)\]</expression>
+	  </RegExp>
+	  <RegExp input="$$8" output="&lt;director&gt;\1&lt;/director&gt;" dest="5+">
+	  	<expression noclean="1" fixchars="1" repeat="yes">&quot;name&quot;: &quot;(.+?)&quot;</expression>
+	  </RegExp>
+	  <RegExp input="$$1" output="\1" dest="8">
+	  	<expression noclean="1" clear="yes">&quot;writers&quot;: \[(.+?)\]</expression>
+	  </RegExp>
+	  <RegExp input="$$8" output="&lt;credits&gt;\1&lt;/credits&gt;" dest="5+">
+	  	<expression noclean="1" fixchars="1" repeat="yes">&quot;name&quot;: &quot;(.+?)&quot;</expression>
+	  </RegExp>
+	  <RegExp input="$$1" output="\1" dest="8">
+	  	<expression noclean="1" clear="yes">&quot;casts&quot;: \[(.+?)\]</expression>
+	  </RegExp>
+	  <RegExp input="$$8" output="&lt;actor&gt;&lt;name&gt;\1&lt;/name&gt;&lt;/actor&gt;" dest="5+">
+	  	<expression noclean="1" fixchars="1" repeat="yes">&quot;name&quot;: &quot;(.+?)&quot;</expression>
+	  </RegExp>
 	  <RegExp input="$$2" output="&lt;url cache=&quot;\1-poster.html&quot; function=&quot;GetPoster&quot;&gt;https://movie.douban.com/subject/\1/photos?type=R&lt;/url&gt;" dest="5+">
 		<expression/>
 	  </RegExp>
@@ -99,9 +99,9 @@
       <RegExp input="$$1" output="&lt;premiered&gt;\1&lt;/premiered&gt;" dest="6+">
         <expression noclean="1">首播:&lt;/span&gt;.*?&gt;(.*?)&lt;/span&gt;</expression>
       </RegExp>
-	  <RegExp input="$$1" output="&lt;plot&gt;\1&lt;/plot&gt;" dest="6+">
-		<expression noclean="1">property=&quot;v:summary&quot;[^&gt;]*&gt;(.+?)&lt;/span&gt;</expression>
-	  </RegExp>
+	  <!-- <RegExp input="$$1" output="&lt;plot&gt;\1&lt;/plot&gt;" dest="6+"> -->
+	  <!--   <expression noclean="1">property=&quot;v:summary&quot;[^&gt;]*&gt;(.+?)&lt;/span&gt;</expression> -->
+	  <!-- </RegExp> -->
       <expression noclean="1"/>
     </RegExp>
   </GetDetailsFromHTML>
@@ -147,7 +147,7 @@
         <expression trim="1,2">&lt;title&gt;(.*?)&lt;/title&gt;</expression>
       </RegExp>
       <RegExp input="$$1" output="&lt;plot&gt;\1&lt;/plot&gt;" dest="5+">
-        <expression trim="1,2">&lt;p id=&quot;link-report&quot;&gt;.*?&lt;span class=&quot;all&quot;&gt;(.*?)&lt;/span&gt;</expression>
+        <expression trim="1,2">&lt;meta name=&quot;description&quot; content=&quot;(.*?)&quot;&gt;</expression>
       </RegExp>
       <expression noclean="1"/>
     </RegExp>

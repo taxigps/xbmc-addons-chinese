@@ -1,10 +1,4 @@
-﻿1.0.11
-- minor fix for TV Shows
-
-1.0.10
-- minor fix
-
-1.0.9
+﻿1.0.9
 - subtitle name minor tweak
 
 1.0.8
