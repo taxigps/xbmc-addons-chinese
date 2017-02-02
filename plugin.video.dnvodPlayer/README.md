@@ -6,7 +6,12 @@ This plugin is for people who want to watch dnvod videos on Kodi(Xbmc). Only wor
 
 # Version 版本
 
-v1.0.1
+v1.0.2
+
+# Update 更新
+
+Update search function for the addon. It can sucessful running for the new search page now.
+更新了视频搜索的方法，使得插件可以在新的搜索界面中上运行。
 
 # How To Use 如何使用
 
@@ -32,7 +37,7 @@ Chinese keyboard module: https://github.com/taxigps/xbmc-addons-chinese/tree/mas
 
 ## Install plugin 安装插件
 
-To install the plugin, you need to download the latest plugin zip file [plugin.video.dnvodPlayer-v1.0.1.zip](https://github.com/cameron93lin/plugin.video.dnvodPlayer/raw/master/plugin.video.dnvodPlayer-v1.0.1.zip). And then:
+To install the plugin, you need to download the latest plugin zip file [plugin.video.dnvodPlayer-v1.0.2.zip](https://github.com/cameron93lin/plugin.video.dnvodPlayer/raw/master/plugin.video.dnvodPlayer-v1.0.2.zip). And then:
 * Launch XBMC
 * Navigate to System | Settings | Add-ons
 * Select Install from zip file
@@ -44,7 +49,7 @@ For proper Chinese text display on xbmc, do the following steps:
 * Navigate to System | Settings | Appearance | skin
 * Change skin-font to "Arial based"
 
-安装插件你需要先下载最新的zip文件 [plugin.video.dnvodPlayer-v1.0.1.zip](https://github.com/cameron93lin/plugin.video.dnvodPlayer/raw/master/plugin.video.dnvodPlayer-v1.0.1.zip)，然后：
+安装插件你需要先下载最新的zip文件 [plugin.video.dnvodPlayer-v1.0.2.zip](https://github.com/cameron93lin/plugin.video.dnvodPlayer/raw/master/plugin.video.dnvodPlayer-v1.0.2.zip)，然后：
 * 打开 Kodi（XBMC）
 * 前往系统 → 设置 → 插件
 * 选择从 zip 文件安装
