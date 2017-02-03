@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <setting id="username" type="text" label="用户名" values=""/>
+    <setting id="password" type="text" label="密码" values="" option="hidden"/>
+</settings>
