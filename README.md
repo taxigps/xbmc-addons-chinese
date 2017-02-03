@@ -39,6 +39,7 @@ For proper Chinese text display on xbmc, do the following steps:
 * 亚洲电视 - plugin.video.asia-tv - Live TV channels, include Mainland China, Hong Kong and Taiwan
 * 百度云(BaiDuYun) - plugin.video.bdyun - Personal Cloud Storage from yun.baidu.com
 * 哔哩哔哩(bilibili) - plugin.video.bilibili - Online video from www.bilibili.com
+* 哔哩哔哩(bilibili2) - plugin.video.bilibili2 - Another plugin for online video from www.bilibili.com
 * CNTV Live 中国网络电视台直播 - plugin.video.cntv-live - TV live channels from www.cntv.cn
 * 央视重播 CCTV Replay - plugin.video.cntv-replay - An other addon for TV live channels from www.cntv.cn
 * 多瑙影院播放器(dnvodPlayer) - plugin.video.dnvodPlayer - Search and play movie on www.dnvod.eu
