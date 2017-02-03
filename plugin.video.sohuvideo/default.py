@@ -29,6 +29,8 @@ UserAgent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2
 # - translate to utf8
 ##################################################################################
 def getHttpData(url):
+    if url[:2] == '//':
+        url = 'http:' + url
     print "getHttpData: " + url
     # setup proxy support
     proxy = __addon__.getSetting('http_proxy')
