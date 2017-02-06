@@ -566,7 +566,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="plugin.video.sohuvideo"
     name="搜狐视频(SoHu)"
-    version="2.4.9"
+    version="2.4.10"
     provider-name="Taxigps">
     <requires>
         <import addon="script.module.simplejson" version="3.3.0"/>

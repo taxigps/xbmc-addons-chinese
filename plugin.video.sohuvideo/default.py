@@ -638,7 +638,7 @@ def sohuSearchList(name, url, page):
     #########################################################################
     # Video listing for all found related episode title
     #########################################################################
-    matchp=re.compile('<div class="ssItem cfix">(.+?)<div class="alike">').findall(link)
+    matchp=re.compile('<div class="ssItem cfix">(.+?)<div class="right">').findall(link)
     totalItems = len(matchp)
     k = 0
     for i in range(0, len(matchp)):
