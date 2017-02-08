@@ -1,4 +1,7 @@
-﻿1.0.11
+﻿1.0.12
+- TV Shows tweak
+
+1.0.11
 - minor fix for TV Shows
 
 1.0.10

@@ -84,7 +84,7 @@ def Search( item ):
             soup = BeautifulSoup(data)
         except:
             return
-        results = soup.find_all("div", class_="box")
+        results = [x for x in soup.find_all("div", class_="box") if x.find('div', class_='tvlist')]
 
     for it in results:
         link = SUBHD_BASE + it.find("div", class_="d_title").a.get('href').encode('utf-8')
