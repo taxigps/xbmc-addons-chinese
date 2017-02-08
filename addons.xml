@@ -785,7 +785,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="service.subtitles.subhd"
        name="Sub HD"
-       version="1.0.11"
+       version="1.0.12"
        provider-name="taxigps">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>

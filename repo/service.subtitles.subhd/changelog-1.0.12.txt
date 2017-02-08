@@ -1,0 +1,42 @@
+﻿1.0.12
+- TV Shows tweak
+
+1.0.11
+- minor fix for TV Shows
+
+1.0.10
+- minor fix
+
+1.0.9
+- subtitle name minor tweak
+
+1.0.8
+- updated subtitle name for unknown title version
+- added group information
+- updated API address to eliminate URL redirect
+
+1.0.7
+- fixed no subtitles in the list. thanks generalmilk!
+
+1.0.6
+- fixed for download url structure changed
+
+1.0.5
+- fixed can't remove temp dir under android
+
+1.0.4
+- support search subtitles for tv shows in library
+
+1.0.3
+- fixed error when have 机翻版本|官方译本
+
+1.0.2
+- fixed can't search chinese word
+- fixed error when have 听译版本
+- fixed bug when get some sub version string
+
+1.0.1
+- fixed can't download sub due to site changed
+
+1.0.0
+- initial
