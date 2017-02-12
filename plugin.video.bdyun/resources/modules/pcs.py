@@ -37,44 +37,24 @@ default_headers = {
 }
 
 
-def get_user_uk(cookie, tokens):
-    '获取用户的uk'
-    url = 'http://yun.baidu.com'
+def get_quota(cookie, tokens):
+    '百度云用户容量接口'
+    url = 'http://yun.baidu.com/api/quota?bdstoken=' + tokens['bdstoken']
     headers_merged = default_headers.copy()
     req = requests.get(url, cookies=cookie, headers=headers_merged, timeout=50, verify=False)
     if req:
-        content = req.text
-        match = re.findall('\"uk\":(\d+)', content)
-        if len(match) == 1:
-            return match[0]
-    return None
+        return req.json()
+    else:
+        return None
 
 
-
-def get_user_info(tokens, uk):
-    '''获取用户的部分信息.
-
-    比如头像, 用户名, 自我介绍, 粉丝数等.
-    这个接口可用于查询任何用户的信息, 只要知道他/她的uk.
-    '''
-    url = 'http://yun.baidu.com/pcloud/user/getinfo'
-    url_params = {
-            'channel': 'chunlei',
-            'clienttype': '0',
-            'web': '1',
-            'bdstoken': tokens['bdstoken'],
-            'query_uk': uk,
-            't': timestamp,
-            }
-    headers_merged = default_headers.copy()
-    headers_merged['Referer'] = 'http://yun.baidu.com/share/home?uk=' + uk
-    headers_merged['Host'] = 'yun.baidu.com'
-    req = requests.get(url, headers=headers_merged, params=url_params, timeout=50, verify=False)
-    if req:
-        info = json.loads(req.text)
-        if info and info['errno'] == 0:
-            return info['user_info']
-    return None
+def token_validation(cookie, tokens):
+    '使用百度云容量接口检测token的有效性'
+    quota = get_quota(cookie, tokens)
+    if quota['errno'] == 0:
+        return True
+    else:
+        return False
 
 
 def get_pcs_info(cookie, tokens):

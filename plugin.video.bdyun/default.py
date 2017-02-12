@@ -27,47 +27,46 @@ def main_menu():
         'is_playable': False
         }]
     else:
-        user_pcs = plugin.get_storage('user_pcs', TTL=60*12)
-        PcsInfo = user_pcs.get('PcsInfo')
-        if PcsInfo is None:
-            user_pcs = plugin.get_storage('user_pcs', TTL=60*12)
-            pcs_info = pcs.get_pcs_info(user_info['cookie'], user_info['tokens'])
-            if pcs_info:
-                user_pcs['PcsInfo'] = pcs_info
-                avatar_url = pcs_info['avatar_url']
-            else:
-                avatar_url = ''
-                dialog.ok('Error', u'授权已过期,请重新登录')
-        else:
-            avatar_url = PcsInfo['avatar_url']
         items = [{
-        'label': u'## 管理当前帐号: %s' %user_info['username'],
-        'path': plugin.url_for('accout_setting'),
-        'is_playable': False,
-        'icon': avatar_url
+            'label': u'## 管理当前帐号: %s' %user_info['username'],
+            'path': plugin.url_for('accout_setting'),
+            'is_playable': False,
         },{
-        'label': u'## 搜索文件(文件夹/视频/音乐)',
-        'path': plugin.url_for('search'),
-        'is_playable': False
+            'label': u'## 搜索文件(文件夹/视频/音乐)',
+            'path': plugin.url_for('search'),
+            'is_playable': False
         },{
-        'label': u'## 刷新',
-        'path': plugin.url_for('refresh'),
-        'is_playable': False
+            'label': u'## 刷新',
+            'path': plugin.url_for('refresh'),
+            'is_playable': False
         }]
 
-        if avatar_url:
-            try:
-                homemenu = plugin.get_storage('homemenu')
-                if homemenu.get('item_list'):
-                    item_list = homemenu.get('item_list')
+        for loopTime in range(0, 5):
+            validation = pcs.token_validation(user_info['cookie'], user_info['tokens'])
+            if validation:
+                try:
+                    homemenu = plugin.get_storage('homemenu')
+                    if homemenu.get('item_list'):
+                        item_list = homemenu.get('item_list')
+                    else:
+                        item_list = menu_cache(user_info['cookie'], user_info['tokens'])
+                    items.extend(item_list)
+                    break
+                except (KeyError, TypeError, UnicodeError):
+                    dialog.ok('Error', u'请求参数错误', u'请点击登出再重新登录')
+                    items.extend([{'label': u'登出 && 重新登录', 'path': plugin.url_for('clear_cache')}])
+                    break
+            else:
+                cookie,tokens = get_auth.run(user_info['username'], user_info['password'])
+                if tokens['bdstoken']:
+                    save_user_info(user_info['username'], user_info['password'], cookie, tokens)
                 else:
-                    item_list = menu_cache(user_info['cookie'], user_info['tokens'])
-                items.extend(item_list)
-            except (KeyError, TypeError, UnicodeError):
-                dialog.ok('Error', u'请求参数错误', u'请点击登出再重新登录')
-                items.extend([{'label': u'登出 && 重新登录', 'path': plugin.url_for('clear_cache')}])
-        else:
-            items.extend([{'label': u'重新登录', 'path': plugin.url_for('relogin')}])
+                    items.extend([{'label': u'重新登录', 'path': plugin.url_for('relogin')}])
+                    break
+
+            if loopTime == 4:
+                dialog.ok('Error', u'未知错误', u'请重新登录')
+                items.extend([{'label': u'重新登录', 'path': plugin.url_for('relogin')}])
 
     return plugin.finish(items, update_listing=True)
 
