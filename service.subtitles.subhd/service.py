@@ -88,20 +88,9 @@ def Search( item ):
 
     for it in results:
         link = SUBHD_BASE + it.find("div", class_="d_title").a.get('href').encode('utf-8')
-        title = it.find("div", class_="d_title").text.encode('utf-8')
-        #version = it.find(text=re.compile('(字幕翻译|听译版本|机翻版本|官方译本)'.decode('utf-8'))).parent.get('title').encode('utf-8')
-        version = it.find_all("span", class_=re.compile("label"))[-1].get('title').encode('utf-8')
-        if version:
-            if version.find('本字幕按 ') == 0:
-                version = version.split()[1]
-            # if version information is too short, we will append it to the title to give user more information
-            if (len(re.findall(r"[\w']+", version)) < 5):
-                if (title.find(version) == -1):
-                    version = title + ' ' + version
-                else:
-                    version = title
-        else:
-            version = title
+        version = it.find("div", class_="d_title").a.get('title').encode('utf-8')
+        if version.find('本字幕按 ') == 0:
+            version = version.split()[1]
         try:
             group = it.find("div", class_="d_zu").text.encode('utf-8')
             if group.isspace():
