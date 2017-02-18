@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.bdyun" name="百度云盘" version="0.1.10" provider-name="caasiu">
+<addon id="plugin.video.bdyun" name="百度云盘" version="0.1.11" provider-name="caasiu">
 	<requires>
             <import addon="xbmc.python" version="2.20.0" />
             <import addon="script.module.xbmcswift2" version="2.4.0" />
             <import addon="script.module.requests" version="2.9.1" option="false" />
-            <import addon="script.module.keyboard.chinese" version="2.0.5" option="true" />
 	</requires>
 	<extension point="xbmc.python.pluginsource" library="default.py">
 		<provides>audio video</provides>

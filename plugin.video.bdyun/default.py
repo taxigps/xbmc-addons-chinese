@@ -10,7 +10,7 @@ plugin_path = xbmcaddon.Addon(__addon_id__).getAddonInfo('path')
 lib_path = os.path.join(plugin_path, 'resources', 'modules')
 sys.path.append(lib_path)
 
-from resources.modules import get_auth, pcs, utils, cnkeyboard, myplayer
+from resources.modules import get_auth, pcs, utils, myplayer
 from xbmcswift2 import Plugin, actions
 
 plugin = Plugin()
@@ -138,7 +138,7 @@ def search():
     user_info = get_user_info()
     user_cookie = user_info['cookie']
     user_tokens = user_info['tokens']
-    key = cnkeyboard.keyboard(heading=u'输入文件名/关键词')
+    key = dialog.input(heading=u'输入文件名/关键词')
     if key:
         s = pcs.search(user_cookie, user_tokens, key)
         items = []

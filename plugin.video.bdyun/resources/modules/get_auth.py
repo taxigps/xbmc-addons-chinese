@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 import os, sys, re, json 
-from resources.modules import auth, cnkeyboard
+from resources.modules import auth
 
 dialog = xbmcgui.Dialog()
 
@@ -17,9 +17,15 @@ class VcodeWindow(xbmcgui.WindowDialog):
 
         # windowItems
         self.image = xbmcgui.ControlImage(80, 100, 500, 200, self.vcode_path)
-        self.buttonInput = xbmcgui.ControlButton(100, 330, 140, 50, label=u'输入验证码', font='font20', textColor='0xFFFFFFFF')
-        self.buttonRefresh = xbmcgui.ControlButton(290, 330, 140, 50, label=u'刷新验证码', font='font20', textColor='0xFFFFFFFF')
+        self.buttonInput = xbmcgui.ControlButton(
+            100, 330, 220, 50, label=u'输入验证码', alignment=6, font='font13', textColor='0xFFFFFFFF'
+        )
+        self.buttonRefresh = xbmcgui.ControlButton(
+            290, 330, 220, 50, label=u'刷新验证码', alignment=6, font='font13', textColor='0xFFFFFFFF'
+        )
         self.addControls([self.image, self.buttonInput, self.buttonRefresh])
+        self.buttonInput.controlRight(self.buttonRefresh)
+        self.buttonRefresh.controlLeft(self.buttonInput)
         self.setFocus(self.buttonInput)
 
 
@@ -58,7 +64,7 @@ def run(username,password):
         win.doModal()
         codeString = win.codeString
 
-        verifycode = cnkeyboard.keyboard(heading=u'验证码')
+        verifycode = dialog.input(heading=u'验证码')
         if verifycode:
             err_no,query = auth.post_login(cookie,tokens,username,password_enc,rsakey,verifycode,codeString)
             if err_no == 0:
