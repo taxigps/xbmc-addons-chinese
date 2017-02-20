@@ -7,7 +7,7 @@ import xbmc
 import xbmcvfs
 import xbmcgui
 import xbmcaddon
-SERVER = "http://api.rrmj.tv"
+SERVER = "http://api.rr.tv"
 __ADDON__ = xbmcaddon.Addon()
 
 
@@ -92,13 +92,13 @@ class RenRenMeiJu(object):
         return self._header
 
     def search(self, page=1, rows=12, **kwargs):
-        API = '/v2/video/search'
+        API = '/v3plus/video/search'
         kwargs["page"] = page
         kwargs["rows"] = rows
         return self.get_json(SERVER + API, data=urllib.urlencode(kwargs))
 
     def get_album(self, albumId=2):
-        API = '/v2/video/album'
+        API = '/v3plus/video/album'
         return self.get_json(SERVER + API, data=urllib.urlencode(dict(albumId=albumId)))
 
     def index_info(self):
@@ -106,13 +106,13 @@ class RenRenMeiJu(object):
         return self.get_json(SERVER + API)
 
     def video_detail(self, seasonId, userId=0, **kwargs):
-        API = '/v2/video/detail'
+        API = '/v3plus/video/detail'
         kwargs["seasonId"] = seasonId
         kwargs["userId"] = userId
         return self.get_json(SERVER + API, data=urllib.urlencode(kwargs))
 
     def hot_word(self):
-        API = '/v2/video/hotWord'
+        API = '/v3plus/video/hotWord'
         return self.get_json(SERVER + API)
 
 
