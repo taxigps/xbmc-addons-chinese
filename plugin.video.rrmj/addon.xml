@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="plugin.video.rrmj"
        name="人人美剧"
-       version="0.1.7"
+       version="0.2.0"
        provider-name="jindaxia">
   <requires>
     <import addon="script.module.xbmcswift2" version="2.4.0"/>
