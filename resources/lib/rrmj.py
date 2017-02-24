@@ -1,13 +1,13 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 import urllib
 import json
 import time
 from common import *
-import xbmc
 import xbmcvfs
 import xbmcgui
 import xbmcaddon
-SERVER = "http://api.rrmj.tv"
+SERVER = "http://api.rr.tv"
 __ADDON__ = xbmcaddon.Addon()
 
 
@@ -18,7 +18,8 @@ FAKE_HEADERS = {
     "clientVersion": "99.99",
     "c": "5a1fb134-9384-4fc8-a5ae-6e711e24afc1",
     "d": "",
-    "e": "d4dd075d894dd2b8c81f96062dbe7dcbf7d467fd"
+    "e": "d4dd075d894dd2b8c81f96062dbe7dcbf7d467fd",
+    "token": "5f8f489d12f64488aa310334f32153b4"
 }
 
 
@@ -69,8 +70,9 @@ class RenRenMeiJu(object):
         headers.update(b=url)
         s = json.loads(GetHttpData(url, data=data, headers=headers))
         if pretty:
-            xbmc.log(json.dumps(s, sort_keys=True,
-                     indent=4, separators=(',', ': ')))
+            print headers
+            print json.dumps(s, sort_keys=True,
+                             indent=4, separators=(',', ': '))
         return s
 
     def get_ticket(self):
@@ -92,40 +94,35 @@ class RenRenMeiJu(object):
         return self._header
 
     def search(self, page=1, rows=12, **kwargs):
-        API = '/v2/video/search'
+        API = '/v3plus/video/search'
         kwargs["page"] = page
         kwargs["rows"] = rows
         return self.get_json(SERVER + API, data=urllib.urlencode(kwargs))
 
     def get_album(self, albumId=2):
-        API = '/v2/video/album'
+        API = '/v3plus/video/album'
         return self.get_json(SERVER + API, data=urllib.urlencode(dict(albumId=albumId)))
 
     def index_info(self):
-        API = '/v2/video/indexInfo'
+        API = '/v3plus/video/indexInfo'
         return self.get_json(SERVER + API)
 
     def video_detail(self, seasonId, userId=0, **kwargs):
-        API = '/v2/video/detail'
+        API = '/v3plus/season/detail'
         kwargs["seasonId"] = seasonId
-        kwargs["userId"] = userId
+        kwargs["token"] = "5f8f489d12f64488aa310334f32153b4"
         return self.get_json(SERVER + API, data=urllib.urlencode(kwargs))
 
     def hot_word(self):
-        API = '/v2/video/hotWord'
+        API = '/v3plus/video/hotWord'
         return self.get_json(SERVER + API)
-
-
-class SmartRedirectHandler(urllib2.HTTPRedirectHandler):
-    def http_error_302(self, req, fp, code, msg, headers):
-        return headers.get("Location")
 
 
 class RRMJResolver(RenRenMeiJu):
 
     def get_by_sid(self, **kwargs):
-        API = "/v2/video/findM3u8ByEpisodeSid"
-        data = self.get_json(SERVER + API, data=urllib.urlencode(kwargs), pretty=False)
+        API = "/video/findM3u8ByEpisodeSid"
+        data = self.get_json(SERVER + API, data=urllib.urlencode(kwargs))
         if data["code"] != "0000":
             return None, None
         else:
@@ -138,11 +135,6 @@ class RRMJResolver(RenRenMeiJu):
                 print real_url
                 return real_url["V"][0]["U"], current_quality
             else:
-                if __ADDON__.getSetting("handle_redirect") == 'true' and "letvyun/letvmmsid.php" in m3u8["url"]:
-                    request = urllib2.Request(m3u8["url"])
-                    opener = urllib2.build_opener(SmartRedirectHandler)
-                    location = opener.open(request)
-                    return location, current_quality
                 return m3u8["url"], current_quality
 
 
