@@ -5,5 +5,7 @@
 	<setting id="video_cfragmentmax" type="enum" label="30203" values="10|15|20|25|30|35|40|45|50|60|70|80|90|100|200|300|400|500" default="4"/>
 	<setting id="video_fragmentstart" type="enum" label="30204" values="1|10|20|30|40|50|60|70|80|90|100|110|120|130|140|150|160|170|180|190|200" default="0"/>
 	<setting id="video_vplaycont" type="bool" label="30201" default="true"/>
+	<setting id="video_m3u8" type="bool" label="30206" default="true"/>
 	<setting id="http_proxy" type="text" label="30202" values="" default=""/>
+	<setting id="keyboard" type="enum" label="30207" lvalues="30208|30209" default="0"/>
 </settings>

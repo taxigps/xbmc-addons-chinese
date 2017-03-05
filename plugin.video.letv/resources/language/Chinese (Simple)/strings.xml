@@ -11,6 +11,10 @@
     <string id="30203">片段连续 - 存储量成正比</string>
     <string id="30204">片段的开始</string>
     <string id="30205">视频服务器选择</string>
+    <string id="30206">直接播放m3u8</string>
+    <string id="30207">输入键盘</string>
+    <string id="30208">Kodi内置键盘</string>
+    <string id="30209">中文输入插件</string>
         
     <!-- Plugin settings values -->
     <string id="30300">标清</string>

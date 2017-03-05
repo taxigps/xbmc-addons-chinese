@@ -6,11 +6,6 @@ import base64
 import simplejson
 import threading
 
-try:
-    from ChineseKeyboard import Keyboard as Apps
-except:
-    from xbmc import Keyboard as Apps
-
 ########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
@@ -30,7 +25,13 @@ __addon__ = xbmcaddon.Addon(id=__addonid__)
 __addonicon__ = os.path.join(__addon__.getAddonInfo('path'), 'icon.png')
 __settings__ = xbmcaddon.Addon(id=__addonid__)
 __profile__ = xbmc.translatePath(__settings__.getAddonInfo('profile'))
+__m3u8__    = xbmc.translatePath( os.path.join( __profile__, 'temp.m3u8') ).decode("utf-8")
 cookieFile = __profile__ + 'cookies.letv'
+
+if (__addon__.getSetting('keyboard')=='0'):
+    from xbmc import Keyboard as Apps
+else:
+    from ChineseKeyboard import Keyboard as Apps
 
 # # UserAgent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
 UserAgent = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
@@ -551,7 +552,7 @@ def progListMovie(name, url, cat, filtrs, page, listpage):
     if (listpage == None):
         link = getHttpData(url)
         # print link
-        listpage = re.compile('<ulclass="label_list.+?>(.+?)</ul>').findall(link)[0]
+        listpage = re.compile('<dl class="dl_list">(.+?)</dl>').findall(link)[0]
         match = re.compile('<div class="sort_navy.+?">(.+?)</div>').findall(link)
         if len(match):
             listpage += match[0].replace('li', 'lo')
@@ -863,7 +864,7 @@ def progListUgc(name, url, cat, filtrs, page, listpage):
     
     if (listpage == None):
         link = getHttpData(url)
-        listpage = re.compile('<ulclass="label_list.+?>(.+?)</ul>').findall(link)[0]
+        listpage = re.compile('<ul\s*class="label_list.+?>(.+?)</ul>').findall(link)[0]
         listpage += re.compile('<div class="sort_navy.+?">(.+?)</div>').findall(link)[0].replace('li', 'lo')
         cat = updateListSEL(name, url, cat, filtrs, 0, listpage)    
     p_url = p_url % (fltrCategory, page, filtrs)    
@@ -1127,12 +1128,17 @@ def decrypt_url(url, mCheck = True):
     if (mCheck):
         pDialog.update(90)
     m3u8_list = decode(m3u8)
+    with open(__m3u8__, "wb") as m3u8File:
+        m3u8File.write(m3u8_list)
+    m3u8File.close()
+
 	# urls contains array of v_url video links for playback
     urls = re.findall(r'^[^#][^\r]*', m3u8_list, re.MULTILINE)
     return urls   
 
 ##################################################################################
 def playVideoLetv(name, url, thumb):
+    videom3u8 = __addon__.getSetting('video_m3u8')
     pDialog.create('匹配视频', '请耐心等候! 尝试匹配视频文件 ...')
     pDialog.update(0)
 
@@ -1140,12 +1146,17 @@ def playVideoLetv(name, url, thumb):
     pDialog.close()
 
     if len(v_urls):
-        xplayer.play(name, thumb, v_urls)
+        if videom3u8 == 'true':
+            listitem = xbmcgui.ListItem(name,thumbnailImage=thumb)
+            listitem.setInfo(type="Video",infoLabels={"Title":name})
+            xbmc.Player().play(__m3u8__, listitem)
+        else:
+            xplayer.play(name, thumb, v_urls)
 
-        # need xmbc.sleep to make xbmc callback working properly
-        while xplayer.is_active:
-            xbmc.sleep(100)
-        pDialog.close()
+            # need xmbc.sleep to make xbmc callback working properly
+            while xplayer.is_active:
+                xbmc.sleep(100)
+            pDialog.close()
     else:
         # if '解析失败' in link: (license constraint etc)
     	dialog.ok(__addonname__, '无法播放：未匹配到视频文件，请选择其它视频')

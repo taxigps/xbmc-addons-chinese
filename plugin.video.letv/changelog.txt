@@ -1,6 +1,11 @@
 ﻿########################################################################
 # 乐视网(LeTv) by cmeng
 ########################################################################
+# Version 1.6.0 2017-03-55 (taxigps)
+- Add setting to select kodi internal keyboard
+- Add setting to select play m3u8 directly
+- Fixed can't get program list because site changed
+
 # Version 1.5.9 2016-05-25 (cmeng)
 # Implement all possible fixes to handle slow network response (starve network data)
 # Add video server selection option

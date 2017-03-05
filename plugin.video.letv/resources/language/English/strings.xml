@@ -11,6 +11,10 @@
     <string id="30203">Video Fragments Concatenate - proportional to disk size</string>
     <string id="30204">Video Fragment Start #</string>
     <string id="30205">Video Server Selection</string>
+    <string id="30206">Play m3u8 directly</string>
+    <string id="30207">Input keyboard</string>
+    <string id="30208">Kodi internal keyboard</string>
+    <string id="30209">Chinese keyboard add-on</string>
     
     <!-- Plugin settings values -->
     <string id="30300">LD: Low Defination</string>
