@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+	<setting id="keyboard" type="enum" label="输入键盘" values="Kodi内置键盘|中文输入插件" default="0"/>
+</settings>

@@ -1,10 +1,15 @@
 #coding: utf8
 import tempfile
-from xbmcswift2 import Plugin, xbmcgui, xbmc
+from xbmcswift2 import Plugin, xbmcgui, xbmc, xbmcaddon
 from resources.lib.bilibili import Bili
 from resources.lib.config import TEMP_DIR
 from resources.lib.subtitle import subtitle_offset
-from ChineseKeyboard import Keyboard
+
+__addon__ = xbmcaddon.Addon()
+if (__addon__.getSetting('keyboard')=='0'):
+    from xbmc import Keyboard
+else:
+    from ChineseKeyboard import Keyboard
 
 plugin = Plugin()
 bili = Bili()
