@@ -401,9 +401,24 @@ CATEGORY = {
     }, 
     "11": {
         "url": "http://bangumi.bilibili.com/tv/", 
-        "subs": [], 
+        "subs": ["1101", "1102", "1103"], 
         "title": "电视剧"
     }, 
+    "1101": {
+        "url": "http://www.bilibili.com/video/soap-three-1.html", 
+        "subs": [], 
+        "title": "连载"
+    }, 
+    "1102": {
+        "url": "http://www.bilibili.com/video/tv-drama-1.html", 
+        "subs": [], 
+        "title": "完结"
+    },
+    "1103": {
+        "url": "http://www.bilibili.com/video/soap-three-1.html#!page=1&tagid=5608&tag=%E6%97%A5%E5%89%A7", 
+        "subs": [], 
+        "title": "连载日剧"
+    },
     "13": {
         "url": "http://bangumi.bilibili.com/22/", 
         "subs": [
