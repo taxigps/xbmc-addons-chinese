@@ -82,6 +82,15 @@ class Bilibili():
             url = 'http:' + item.a['href']
             category_dict[tid] = {'title': title, 'url': url, 'subs':[]}
             node['subs'].append(tid)
+
+        #Fix video and movie
+        if '11' not in category_dict['0']['subs']:
+            category_dict['0']['subs'].append('11')
+        if '23' not in category_dict['0']['subs']:
+            category_dict['0']['subs'].append('23')
+        category_dict['11'] = {'title': u'电视剧', 'url': 'http://bangumi.bilibili.com/tv/', 'subs': []}
+        category_dict['23'] = {'title': u'电影', 'url': 'http://bangumi.bilibili.com/movie/', 'subs': []}
+
         for sub in category_dict['0']['subs']:
             node = category_dict[sub]
             url = node['url']
@@ -98,14 +107,6 @@ class Bilibili():
                 url = HOME_URL + item.a['href']
                 category_dict[tid] = {'title': title, 'url': url, 'subs':[]}
                 node['subs'].append(tid)
-
-        #Fix video and movie
-        if '11' not in category_dict['0']['subs']:
-            category_dict['0']['subs'].append('11')
-        if '23' not in category_dict['0']['subs']:
-            category_dict['0']['subs'].append('23')
-        category_dict['11'] = {'title': u'电视剧', 'url': 'http://bangumi.bilibili.com/tv/', 'subs': []}
-        category_dict['23'] = {'title': u'电影', 'url': 'http://bangumi.bilibili.com/movie/', 'subs': []}
         return category_dict
 
     def get_category(self, tid = '0'):
