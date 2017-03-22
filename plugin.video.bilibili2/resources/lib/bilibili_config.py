@@ -95,6 +95,11 @@ ORDER = [
 
 
 CATEGORY = {
+    "146": {
+        "url": "http://www.bilibili.com//www.bilibili.com/video/movie_japan_1.html", 
+        "subs": [], 
+        "title": "日本电影"
+    }, 
     "153": {
         "url": "http://www.bilibili.com//www.bilibili.com/video/bangumi_chinese_1.html", 
         "subs": [], 
@@ -174,6 +179,16 @@ CATEGORY = {
         ], 
         "title": "舞蹈"
     }, 
+    "82": {
+        "url": "http://www.bilibili.com//www.bilibili.com/video/movie-presentation-1.html", 
+        "subs": [], 
+        "title": "电影相关"
+    }, 
+    "83": {
+        "url": "http://www.bilibili.com//www.bilibili.com/video/movie-movie-1.html", 
+        "subs": [], 
+        "title": "其他国家"
+    }, 
     "138": {
         "url": "http://www.bilibili.com/video/ent_funny_1.html", 
         "subs": [], 
@@ -188,6 +203,11 @@ CATEGORY = {
             "127"
         ], 
         "title": "鬼畜"
+    }, 
+    "85": {
+        "url": "http://www.bilibili.com//www.bilibili.com/video/tv-micromovie-1.html", 
+        "subs": [], 
+        "title": "短片"
     }, 
     "24": {
         "url": "http://www.bilibili.com/video/douga-mad-1.html", 
@@ -226,7 +246,14 @@ CATEGORY = {
     }, 
     "23": {
         "url": "http://bangumi.bilibili.com/movie/", 
-        "subs": [], 
+        "subs": [
+            "82", 
+            "85", 
+            "145", 
+            "146", 
+            "147", 
+            "83"
+        ], 
         "title": "电影"
     }, 
     "47": {
@@ -331,10 +358,30 @@ CATEGORY = {
         "subs": [], 
         "title": "动物圈"
     }, 
+    "147": {
+        "url": "http://www.bilibili.com//www.bilibili.com/video/movie_chinese_1.html", 
+        "subs": [], 
+        "title": "国产电影"
+    }, 
+    "145": {
+        "url": "http://www.bilibili.com//www.bilibili.com/video/movie_west_1.html", 
+        "subs": [], 
+        "title": "欧美电影"
+    }, 
+    "128": {
+        "url": "http://www.bilibili.com//www.bilibili.com/video/tv-presentation-1.html", 
+        "subs": [], 
+        "title": "电视剧相关"
+    }, 
     "39": {
         "url": "http://www.bilibili.com/video/speech-course-1.html", 
         "subs": [], 
         "title": "演讲•公开课"
+    }, 
+    "15": {
+        "url": "http://www.bilibili.com//www.bilibili.com/video/soap-three-1.html", 
+        "subs": [], 
+        "title": "连载剧集"
     }, 
     "121": {
         "url": "http://www.bilibili.com/video/gmv-1.html", 
@@ -371,6 +418,11 @@ CATEGORY = {
         "subs": [], 
         "title": "广告"
     }, 
+    "86": {
+        "url": "http://www.bilibili.com//www.bilibili.com/video/tv-sfx-1.html", 
+        "subs": [], 
+        "title": "特摄·布袋"
+    }, 
     "160": {
         "url": "http://www.bilibili.com/video/life.html", 
         "subs": [
@@ -401,7 +453,12 @@ CATEGORY = {
     }, 
     "11": {
         "url": "http://bangumi.bilibili.com/tv/", 
-        "subs": [], 
+        "subs": [
+            "15", 
+            "34", 
+            "86", 
+            "128"
+        ], 
         "title": "电视剧"
     }, 
     "13": {
@@ -467,6 +524,11 @@ CATEGORY = {
             "98"
         ], 
         "title": "科技"
+    }, 
+    "34": {
+        "url": "http://www.bilibili.com//www.bilibili.com/video/tv-drama-1.html", 
+        "subs": [], 
+        "title": "完结剧集"
     }, 
     "19": {
         "url": "http://www.bilibili.com/video/game-mugen-1.html", 
