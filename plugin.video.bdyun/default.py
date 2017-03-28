@@ -298,8 +298,7 @@ def play_music(filepath):
     listitem.setInfo(type='Music', infoLabels={'Title': name})
 
     if url:
-        player = myplayer.Player()
-        player.play(url,listitem,windowed=True)
+        xbmc.Player().play(url, listitem, windowed=False)
 
 
 # cache the output of content menu
