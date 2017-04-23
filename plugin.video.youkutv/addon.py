@@ -2058,7 +2058,7 @@ def play(vid, playContinue=False):
     try:
         for i in range(settings['resolution'], len(settings_data['resolution'])):
             for t in settings_data['resolution_type'][i]:
-                for s in movdat1['stream']:
+                for s in movdat1['stream'][::-1]:
                     if settings['language'] == 0 or language_code == s['audio_lang'] or s['audio_lang'] == 'default':
                         if t == s['stream_type']:
                             stream = s
