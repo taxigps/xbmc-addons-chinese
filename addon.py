@@ -1949,14 +1949,11 @@ class youkuDecoder:
         e_code = self.trans_e(self.f_code_1, base64.b64decode(ep))
         return e_code.split('_')
 
-    def generate_ep(self, no, streamfileids, sid, token):
-        number = hex(int(str(no), 10))[2:].upper()
-        if len(number) == 1:
-            number = '0' + number
-        fileid = streamfileids[0:8] + number + streamfileids[10:]
-        tmp = self.trans_e(self.f_code_2, sid + '_' + fileid + '_' + token)
-        ep = urllib.quote(base64.b64encode(tmp), safe='~()*!.\'')
-        return fileid, ep
+    def generate_ep(self, no, fileid, sid, token):
+        ep = urllib.quote(self._calc_ep(sid, fileid, token).encode('latin1'),
+            safe="~()*!.'"
+        )
+        return ep
 
 def getNumber(data, k):
     try:
@@ -2061,7 +2058,7 @@ def play(vid, playContinue=False):
     try:
         for i in range(settings['resolution'], len(settings_data['resolution'])):
             for t in settings_data['resolution_type'][i]:
-                for s in movdat1['stream']:
+                for s in movdat1['stream'][::-1]:
                     if settings['language'] == 0 or language_code == s['audio_lang'] or s['audio_lang'] == 'default':
                         if t == s['stream_type']:
                             stream = s
@@ -2084,44 +2081,8 @@ def play(vid, playContinue=False):
 
     #Calculate the URLs
     try:
-        if 0:
-            oip = movdat['security']['ip']
-            ep = movdat['security']['encrypt_string']
-            ep, token, sid = youkuDecoder()._calc_ep2(playid, ep)
-
-            query = urllib.urlencode(dict(
-                vid=playid, ts=int(time.time()), keyframe=1, type=resolution,
-                ep=ep, oip=oip, ctype=12, ev=1, token=token, sid=sid,
-            ))
-            url = 'http://pl.youku.com/playlist/m3u8?%s' % (query)
-            result = GetHttpData(url)
-            f = open(m3u8_file, 'wb')
-            f.write(result)
-            f.close()
-
-            playlist = xbmc.PlayList(1)
-            playlist.clear()
-
-            urls = re.findall(r'(http://[^?]+)\?ts_start=0', result)
-            if settings_data['play_type'][settings['play']] == 'list':
-                for i in range(len(urls)):
-                    title =movdat['video']['title'] + u" - 第"+str(i+1)+"/"+str(len(urls)) + u"节"
-                    listitem=xbmcgui.ListItem(title)
-                    listitem.setInfo(type="Video",infoLabels={"Title":title})
-                    playlist.add(urls[i], listitem)
-            elif settings_data['play_type'][settings['play']] == 'stack':
-                playurl = 'stack://' + ' , '.join(urls)
-                listitem=xbmcgui.ListItem(movdat['video']['title'])
-                listitem.setInfo(type="Video", infoLabels={"Title":movdat['video']['title']})
-                playlist.add(playurl, listitem)
-            else:
-                listitem=xbmcgui.ListItem(movdat['video']['title'])
-                listitem.setInfo(type="Video", infoLabels={"Title":movdat['video']['title']})
-                playlist.add(m3u8_file, listitem)
-
         urls = []
         segs = stream['segs']
-        streamfileid = stream['stream_fileid']
 
         oip = movdat['security']['ip']
         ep = movdat['security']['encrypt_string']
@@ -2130,7 +2091,8 @@ def play(vid, playContinue=False):
         for no in range(len(segs)):
             k = segs[no]['key']
             assert k != -1
-            fileid, ep = youkuDecoder().generate_ep(no, streamfileid, sid, token)
+            fileid = stream['segs'][no]['fileid']
+            ep = youkuDecoder().generate_ep(no, fileid, sid, token)
             q = urllib.urlencode(dict(
                 ctype = 12,
                 ev    = 1,
