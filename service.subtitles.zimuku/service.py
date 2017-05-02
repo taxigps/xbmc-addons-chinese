@@ -5,6 +5,7 @@ import os
 import sys
 import xbmc
 import urllib
+import urllib2
 import xbmcvfs
 import xbmcaddon
 import xbmcgui,xbmcplugin
@@ -26,6 +27,7 @@ sys.path.append (__resource__)
 
 ZIMUKU_API = 'http://www.zimuku.net/search?q=%s'
 ZIMUKU_BASE = 'http://www.zimuku.net'
+UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
 def log(module, msg):
     xbmc.log((u"%s::%s - %s" % (__scriptname__,module,msg,)).encode('utf-8'),level=xbmc.LOGDEBUG )
@@ -44,7 +46,9 @@ def Search( item ):
     else:
         url = ZIMUKU_API % (item['title'])
     try:
-        socket = urllib.urlopen(url)
+        req = urllib2.Request(url)
+        req.add_header('User-Agent', UserAgent)
+        socket = urllib2.urlopen(req)
         data = socket.read()
         socket.close()
         soup = BeautifulSoup(data)
@@ -55,7 +59,9 @@ def Search( item ):
         moviename = it.find("div", class_="title").a.text.encode('utf-8')
         movieurl = '%s%s' % (ZIMUKU_BASE, it.find("div", class_="title").a.get('href').encode('utf-8'))
         try:
-            socket = urllib.urlopen(movieurl)
+            req = urllib2.Request(movieurl)
+            req.add_header('User-Agent', UserAgent)
+            socket = urllib2.urlopen(req)
             data = socket.read()
             socket.close()
             soup = BeautifulSoup(data).find("div", class_="subs box clearfix")
@@ -113,11 +119,16 @@ def Download(url,lang):
     subtitle_list = []
     exts = [".srt", ".sub", ".smi", ".ssa", ".ass" ]
     try:
-        socket = urllib.urlopen( url )
+        req = urllib2.Request(url)
+        req.add_header('User-Agent', UserAgent)
+        socket = urllib2.urlopen(req)
         data = socket.read()
+        socket.close()
         soup = BeautifulSoup(data)
         url = '%s%s' % (ZIMUKU_BASE, soup.find("li", class_="dlsub").a.get('href').encode('utf-8'))
-        socket = urllib.urlopen( url )
+        req = urllib2.Request(url)
+        req.add_header('User-Agent', UserAgent)
+        socket = urllib2.urlopen(req)
         filename = socket.headers['Content-Disposition'].split('filename=')[1]
         if filename[0] == '"' or filename[0] == "'":  
             filename = filename[1:-1]  
