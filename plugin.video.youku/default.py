@@ -8,11 +8,11 @@ __addon__     = xbmcaddon.Addon()
 __addonname__ = __addon__.getAddonInfo('name')
 __profile__   = xbmc.translatePath( __addon__.getAddonInfo('profile') ).decode("utf-8")
 
-UserAgent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
-ORDER_LIST = [['7','今日增加播放'], ['6','本周增加播放'], ['1','历史最多播放'], ['3','上映时间'], ['9','近期上映'], ['10','近期更新'], ['5','最多评论'], ['11','用户好评']]
-ORDER_LIST2 = [['1','最新发布'], ['2','最多播放'], ['3','最多评论'], ['8','最具争议'], ['4','最多收藏'], ['5','最广传播']]
-YEAR_LIST2 = [['4','不限'], ['1','今日'], ['2','本周'], ['3','本月']]
 UserAgent = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
+ORDER_LIST1 = [['1','最多播放'], ['2','最多评论'], ['4','最受欢迎'], ['5','最近上映'], ['6','最近更新']]
+DAYS_LIST1  = [['1','今日'], ['2','本周'], ['4','历史']]
+ORDER_LIST2 = [['1','最多播放'], ['2','最新发布'], ['3','最多评论'], ['4','最多收藏'], ['5','最受欢迎']]
+DAYS_LIST2  = [['1','今日'], ['2','本周'], ['3','本月'], ['4','历史']]
 
 class youkuDecoder:
     def __init__( self ):
@@ -87,6 +87,16 @@ class youkuDecoder:
         new_ep = self.trans_e(self.f_code_2, '%s_%s_%s' % (sid, vid, token))
         return base64.b64encode(new_ep), token, sid
 
+    def get_sid(self, ep):
+        e_code = self.trans_e(self.f_code_1, base64.b64decode(ep))
+        return e_code.split('_')
+
+    def generate_ep(self, no, fileid, sid, token):
+        ep = urllib.quote(self._calc_ep(sid, fileid, token).encode('latin1'),
+            safe="~()*!.'"
+        )
+        return ep
+
 def log(txt):
     message = '%s: %s' % (__addonname__, txt)
     xbmc.log(msg=message, level=xbmc.LOGDEBUG)
@@ -137,16 +147,16 @@ def getCurrent(text,list,id):
 
 def getList(listpage,id,genre,area,year):
     if id == 'c_95':
-        str1 = '风格'
-        str3a = '发行'
+        str1 = '风格：'
+        str3a = '发行：'
         str3b = 'r'
     elif id == 'c_84' or id == 'c_87':
-        str1 = '类型'
-        str3a = '出品'
+        str1 = '类型：'
+        str3a = '出品：'
         str3b = 'pr'
     else:
-        str1 = '类型'
-        str3a = '时间'
+        str1 = '类型：'
+        str3a = '时间：'
         str3b = 'r'
     match = re.compile('<label>%s</label>(.+?)</ul>' % (str1), re.DOTALL).search(listpage)
     genrelist = re.compile('_g_([^_\.]*)[^>]*>([^<]+)</a>').findall(match.group(1))
@@ -154,7 +164,7 @@ def getList(listpage,id,genre,area,year):
     if id == 'c_84' or id == 'c_87':
         arealist = []
     else:
-        match = re.compile('<label>地区</label>(.+?)</ul>', re.DOTALL).search(listpage)
+        match = re.compile('<label>地区：</label>(.+?)</ul>', re.DOTALL).search(listpage)
         arealist = re.compile('_a_([^_\.]*)[^>]*>([^<]+)</a>').findall(match.group(1))
         getCurrent(match.group(1), arealist, area)
     match = re.compile('<label>%s</label>(.+?)</ul>' % (str3a), re.DOTALL).search(listpage)
@@ -163,30 +173,30 @@ def getList(listpage,id,genre,area,year):
     return genrelist,arealist,yearlist
 
 def getList2(listpage,genre):
-    match = re.compile('<label>类型</label>(.+?)</ul>', re.DOTALL).search(listpage)
+    match = re.compile('<label>类型：</label>(.+?)</ul>', re.DOTALL).search(listpage)
     if match:
-        genrelist = re.compile('<li><a href=".*?/v_showlist/[^g]*g([0-9]+)[^\.]*\.html"[^>]*>(.+?)</a></li>').findall(match.group(1))
+        genrelist = re.compile('<li><a href=".*?/category/video/[^g]*g_([0-9]+)[^\.]*\.html"[^>]*>(.+?)</a></li>').findall(match.group(1))
         getCurrent(match.group(1), genrelist, genre)
     else:
         genrelist = []
     return genrelist
 
 def rootList():
-    link = GetHttpData('http://www.youku.com/v/')
-    match0 = re.compile('<label>分类</label>(.+?)</ul>', re.DOTALL).search(link)
-    match = re.compile('<li><a\s*href="/([^/]+)/([^\.]+)\.html"[^>]+>(.+?)</a></li>').findall(match0.group(1))
+    link = GetHttpData('http://list.youku.com/')
+    match0 = re.compile('<label>分类：</label>(.+?)</ul>', re.DOTALL).search(link)
+    match = re.compile('<li><a\s*href="/category/([^/]+)/([^\.]+)\.html">(.+?)</a></li>', re.DOTALL).findall(match0.group(1))
     totalItems = len(match)
     for path, id, name in match:
-        if path == 'v_olist':
-            u = sys.argv[0]+"?mode=1&name="+urllib.quote_plus(name)+"&id="+urllib.quote_plus(id)+"&genre=&area=&year=&order=7&page=1"
+        if path == 'show':
+            u = sys.argv[0]+"?mode=1&name="+urllib.quote_plus(name)+"&id="+urllib.quote_plus(id)+"&genre=&area=&year=&order=1&days=1&page=1"
         else:
-            u = sys.argv[0]+"?mode=11&name="+urllib.quote_plus(name)+"&id="+urllib.quote_plus(id)+"&genre=0&year=1&order=2&page=1"
+            u = sys.argv[0]+"?mode=11&name="+urllib.quote_plus(name)+"&id="+urllib.quote_plus(id)+"&genre=0&year=1&order=1&days=1&page=1"
         li = xbmcgui.ListItem(name)
         xbmcplugin.addDirectoryItem(int(sys.argv[1]),u,li,True,totalItems)
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-def progList(name,id,page,genre,area,year,order):
-    url = 'http://www.youku.com/v_olist/%s_a_%s_s__g_%s_r_%s_o_%s_p_%s.html' % (id, area, genre, year, order, page)
+def progList(name,id,page,genre,area,year,order,days):
+    url = 'http://list.youku.com/category/show/%s_g_%s_a_%s_s_%s_d_%s_r_%s_p_%s.html' % (id, genre, area, order, days, year, page)
     link = GetHttpData(url)
     match = re.compile('<ul class="yk-pages">(.+?)</ul>', re.DOTALL).search(link)
     plist = []
@@ -205,9 +215,9 @@ def progList(name,id,page,genre,area,year,order):
     else:
         listpage = ''
     if id == 'c_95':
-        match = re.compile('<div class="v">(.+?)</div>\s*</div>\s*</div>\s*</div>', re.DOTALL).findall(link)
+        match = re.compile('<div class="yk-pack p-list"(.+?)</ul></div>', re.DOTALL).findall(link)
     else:
-        match = re.compile('<div class="p p-small">(.+?)</div>\s*</div>\s*</div>\s*</div>', re.DOTALL).findall(link)
+        match = re.compile('<div class="yk-pack pack-film">(.+?)</ul></div>', re.DOTALL).findall(link)
     totalItems = len(match) + 1 + len(plist)
     currpage = int(page)
 
@@ -227,8 +237,8 @@ def progList(name,id,page,genre,area,year,order):
             yearstr = '全部出品'
         else:
             yearstr = '全部年份'
-    li = xbmcgui.ListItem(name+'（第'+str(currpage)+'/'+str(totalpages)+'页）【[COLOR FFFF0000]' + genrestr + '[/COLOR]/[COLOR FF00FF00]' + areastr + '[/COLOR]/[COLOR FFFFFF00]' + yearstr + '[/COLOR]/[COLOR FF00FFFF]' + searchDict(ORDER_LIST,order) + '[/COLOR]】（按此选择）')
-    u = sys.argv[0]+"?mode=4&name="+urllib.quote_plus(name)+"&id="+urllib.quote_plus(id)+"&genre="+urllib.quote_plus(genre)+"&area="+urllib.quote_plus(area)+"&year="+urllib.quote_plus(year)+"&order="+order+"&page="+urllib.quote_plus(listpage)
+    li = xbmcgui.ListItem(name+'（第'+str(currpage)+'/'+str(totalpages)+'页）【[COLOR FFFF0000]' + genrestr + '[/COLOR]/[COLOR FF00FF00]' + areastr + '[/COLOR]/[COLOR FFFFFF00]' + yearstr  + '[/COLOR]/[COLOR FF00FF00]' + searchDict(DAYS_LIST1,days) + '[/COLOR]/[COLOR FF00FFFF]' + searchDict(ORDER_LIST1,order) + '[/COLOR]】（按此选择）')
+    u = sys.argv[0]+"?mode=4&name="+urllib.quote_plus(name)+"&id="+urllib.quote_plus(id)+"&genre="+urllib.quote_plus(genre)+"&area="+urllib.quote_plus(area)+"&year="+urllib.quote_plus(year)+"&order="+order+"&days="+days+"&page="+urllib.quote_plus(listpage)
     xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True, totalItems)
     for i in range(0,len(match)):
         if id in ('c_96','c_95'):
@@ -239,17 +249,11 @@ def progList(name,id,page,genre,area,year,order):
             isdir = True
         match1 = re.compile('/id_(.+?).html"').search(match[i])   
         p_id = match1.group(1)
-        if id == 'c_95':
-            match1 = re.compile('<div class="v-thumb">\s*<img src="(.+?)"').search(match[i])
-            p_thumb = match1.group(1)
-            match1 = re.compile('<div class="v-meta-title">\s*<a [^>]+>(.+?)</a>').search(match[i])
-            p_name = match1.group(1)
-        else:
-            match1 = re.compile('<div class="p-thumb">\s*<img src="(.+?)"').search(match[i])
-            p_thumb = match1.group(1)
-            match1 = re.compile('<div class="p-meta-title"><a .*?">(.+?)</a>').search(match[i])
-            p_name = match1.group(1)
-        match1 = re.compile('<span class="p-status">(.+?)</span>').search(match[i])
+        match1 = re.compile('<img class="quic".*?src="(.+?)"').search(match[i])
+        p_thumb = match1.group(1)
+        match1 = re.compile('<li class="title"><a .*?">(.+?)</a>').search(match[i])
+        p_name = match1.group(1)
+        match1 = re.compile('<li class="status hover-hide"><span .*?<span>(.+?)</span>').search(match[i])
         if match1:
             if match1.group(1) == '资料':
                 mode = 99
@@ -276,7 +280,7 @@ def progList(name,id,page,genre,area,year,order):
         
     for num in plist:
         li = xbmcgui.ListItem("... 第" + num + "页")
-        u = sys.argv[0]+"?mode=1&name="+urllib.quote_plus(name)+"&id="+urllib.quote_plus(id)+"&genre="+urllib.quote_plus(genre)+"&area="+urllib.quote_plus(area)+"&year="+year+"&order="+order+"&page="+str(num)
+        u = sys.argv[0]+"?mode=1&name="+urllib.quote_plus(name)+"&id="+urllib.quote_plus(id)+"&genre="+urllib.quote_plus(genre)+"&area="+urllib.quote_plus(area)+"&year="+year+"&order="+order+"&days="+days+"&page="+str(num)
         xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True, totalItems)         
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -301,27 +305,27 @@ def getMovie(name,id,thumb,res):
         PlayVideo(name, id, thumb, res)
 
 def seriesList(name,id,thumb,res):
-    url = "http://www.youku.com/show_point_id_%s.html?dt=json&__rt=1&__ro=reload_point" % (id)
+    url = "http://v.youku.com/v_show/id_%s.html" % (id)
     data = GetHttpData(url)
-    pages = re.compile('<li data="(point_reload_[0-9]+)"', re.DOTALL).findall(data)
-    if len(pages)>1:
-        for i in range(1,len(pages)):
-            url = "http://www.youku.com/show_point/id_%s.html?dt=json&divid=%s&tab=0&__rt=1&__ro=%s" % (id, pages[i], pages[i])
-            link = GetHttpData(url)
-            data += link
-    match = re.compile('<div class="item">(.+?)</div><!--.item-->', re.DOTALL).findall(data)
+    #pages = re.compile('<li data="(point_reload_[0-9]+)"', re.DOTALL).findall(data)
+    #if len(pages)>1:
+    #    for i in range(1,len(pages)):
+    #        url = "http://www.youku.com/show_point/id_%s.html?dt=json&divid=%s&tab=0&__rt=1&__ro=%s" % (id, pages[i], pages[i])
+    #        link = GetHttpData(url)
+    #        data += link
+    match = re.compile('class="item(.+?)</div>', re.DOTALL).findall(data)
     totalItems = len(match)
 
     for i in range(0,len(match)):
-        match1 = re.compile('<div class="link"><a .*?href="http://v.youku.com/v_show/id_(.+?)\.html[^"]*"').search(match[i])
+        match1 = re.compile('//v.youku.com/v_show/id_(.+?)\.html').search(match[i])
         if match1:
             p_id = match1.group(1)
         else:
             continue
-        match1 = re.compile('<div class="thumb"><img .*?src="(.+?)"').search(match[i])
-        p_thumb = match1.group(1)
-        match1 = re.compile('<div class="title">[\s]*<a [^>]+>(.+?)</a>').search(match[i])
-        p_name = match1.group(1)
+        #match1 = re.compile('<div class="thumb"><img .*?src="(.+?)"').search(match[i])
+        p_thumb = thumb
+        match1 = re.compile('title="(.+?)"').search(match[i])
+        p_name = "%s %s" % (name, match1.group(1))
         p_name1 = p_name
         if match[i].find('<i class="ico-1080P"')>0:
             p_name1 += '[1080P]'
@@ -341,8 +345,8 @@ def seriesList(name,id,thumb,res):
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-def progList2(name,id,page,genre,year,order):
-    url = 'http://www.youku.com/v_showlist/t%sd%s%sg%sp%s.html' % (order, year, id, genre, page)
+def progList2(name,id,page,genre,order,days):
+    url = 'http://list.youku.com/category/video/%s_g_%s_s_%s_d_%s_p_%s.html' % (id, genre, order, days, page)
     link = GetHttpData(url)
     match = re.compile('<ul class="yk-pages">(.+?)</ul>', re.DOTALL).search(link)
     plist = []
@@ -360,7 +364,8 @@ def progList2(name,id,page,genre,year,order):
         listpage = match.group(1)
     else:
         listpage = ''
-    match = re.compile('<div class="v">(.+?)</div>\s*</div>\s*</div>\s*</div>', re.DOTALL).findall(link)
+    match = re.compile('<div class="yk-pack p-list"(.+?)</ul></div>', re.DOTALL).findall(link)
+
     totalItems = len(match) + 1 + len(plist)
     currpage = int(page)
 
@@ -369,16 +374,16 @@ def progList2(name,id,page,genre,year,order):
         genrestr = '全部类型'
     else:
         genrestr = searchDict(genrelist,genre)
-    li = xbmcgui.ListItem(name+'（第'+str(currpage)+'/'+str(totalpages)+'页）【[COLOR FFFF0000]' + genrestr + '[/COLOR]/[COLOR FF00FF00]' + searchDict(YEAR_LIST2,year) + '[/COLOR]/[COLOR FF00FFFF]' + searchDict(ORDER_LIST2,order) + '[/COLOR]】（按此选择）')
-    u = sys.argv[0]+"?mode=12&name="+urllib.quote_plus(name)+"&id="+urllib.quote_plus(id)+"&genre="+urllib.quote_plus(genre)+"&year="+urllib.quote_plus(year)+"&order="+order+"&page="+urllib.quote_plus(listpage)
+    li = xbmcgui.ListItem(name+'（第'+str(currpage)+'/'+str(totalpages)+'页）【[COLOR FFFF0000]' + genrestr + '[/COLOR]/[COLOR FF00FF00]' + searchDict(DAYS_LIST2,days) + '[/COLOR]/[COLOR FF00FFFF]' + searchDict(ORDER_LIST2,order) + '[/COLOR]】（按此选择）')
+    u = sys.argv[0]+"?mode=12&name="+urllib.quote_plus(name)+"&id="+urllib.quote_plus(id)+"&genre="+urllib.quote_plus(genre)+"&order="+order+"&days="+days+"&page="+urllib.quote_plus(listpage)
     xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True, totalItems)
     for i in range(0,len(match)):
-        match1 = re.compile('<div class="v-link">\s*<a href="http://v.youku.com/v_show/id_(.+?)\.html"').search(match[i])
+        match1 = re.compile('/id_(.+?).html"').search(match[i])
         p_id = match1.group(1)
-        match1 = re.compile('<div class="v-thumb">\s*<img src="(.+?)"').search(match[i])
+        match1 = re.compile('<img class="quic".*?src="(.+?)"').search(match[i])
         p_thumb = match1.group(1)
-        match1 = re.compile('<div class="v-meta-title">\s*<a [^>]+>(.+?)</a>').search(match[i])
-        p_name = match1.group(1).replace('&quot;','"')
+        match1 = re.compile('<li class="title"><a .*?">(.+?)</a>').search(match[i])
+        p_name = match1.group(1)
         p_name1 = p_name
         if match[i].find('<i class="ico-1080P"')>0:
             p_name1 += '[1080P]'
@@ -398,7 +403,7 @@ def progList2(name,id,page,genre,year,order):
 
     for num in plist:
         li = xbmcgui.ListItem("... 第" + num + "页")
-        u = sys.argv[0]+"?mode=11&name="+urllib.quote_plus(name)+"&id="+urllib.quote_plus(id)+"&genre="+urllib.quote_plus(genre)+"&year="+year+"&order="+order+"&page="+str(num)
+        u = sys.argv[0]+"?mode=11&name="+urllib.quote_plus(name)+"&id="+urllib.quote_plus(id)+"&genre="+urllib.quote_plus(genre)+"&order="+order+"&days="+days+"&page="+str(num)
         xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, True, totalItems)         
     xbmcplugin.setContent(int(sys.argv[1]), 'movies')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -460,7 +465,7 @@ def PlayVideo(name,id,thumb,res):
     if typeid:
         oip = movdat['security']['ip']
         ep = movdat['security']['encrypt_string']
-        ep, token, sid = youkuDecoder()._calc_ep2(vid, ep)
+        sid, token = youkuDecoder().get_sid(ep)
         play_method = int(__addon__.getSetting('play_method'))
         if play_method != 0: # m3u8方式
             query = urllib.urlencode(dict(
@@ -471,7 +476,6 @@ def PlayVideo(name,id,thumb,res):
             movurl = 'http://pl.youku.com/playlist/m3u8?%s|Cookie=%s' % (query, cookie)
 
         else: # 默认播放方式
-            fileId = movdat['stream'][streamno]['stream_fileid'].encode('utf-8')
             if typeid in ('mp4', 'mp4hd'):
                 type = 'mp4'
             else:
@@ -480,15 +484,20 @@ def PlayVideo(name,id,thumb,res):
             segs = movdat['stream'][streamno]['segs']
             total = len(segs)
             for no in range(0, total):
-                number = '%02X' % no
-                segfileId = fileId[0:8]+number+fileId[10:]
-                ep = youkuDecoder()._calc_ep(sid, segfileId, token)
                 k = segs[no]['key'].encode('utf-8')
+                fileid = segs[no]['fileid'].encode('utf-8')
+                ep = youkuDecoder().generate_ep(no, fileid, sid, token)
                 query = urllib.urlencode(dict(
-                    ctype=12, ev=1, K=k, ep=ep, oip=oip, token=token, yxon=1
+                    ctype = 12,
+                    ev    = 1,
+                    K     = k,
+                    ep    = urllib.unquote(ep),
+                    oip   = oip,
+                    token = token,
+                    yxon  = 1
                 ))
                 url = 'http://k.youku.com/player/getFlvPath/sid/%s_00/st/%s/fileid/%s?%s' \
-                     % (sid, type, segfileId, query)
+                     % (sid, type, fileid, query)
                 link = GetHttpData(url)
                 json_response = simplejson.loads(link)
                 urls.append(json_response[0]['server'].encode('utf-8'))
@@ -499,7 +508,7 @@ def PlayVideo(name,id,thumb,res):
         listitem.setInfo(type="Video",infoLabels={"Title":name})
         xbmc.Player().play(movurl, listitem)
 
-def performChanges(name,id,listpage,genre,area,year,order):
+def performChanges(name,id,listpage,genre,area,year,order,days):
     genrelist,arealist,yearlist = getList(listpage,id,genre,area,year)
     change = False
     if id == 'c_95':
@@ -530,17 +539,21 @@ def performChanges(name,id,listpage,genre,area,year,order):
         if sel != -1:
             year = yearlist[sel][0]
             change = True
-
-    list = [x[1] for x in ORDER_LIST]
+    list = [x[1] for x in DAYS_LIST1]
+    sel = dialog.select('范围', list)
+    if sel != -1:
+        days = DAYS_LIST1[sel][0]
+        change = True
+    list = [x[1] for x in ORDER_LIST1]
     sel = dialog.select('排序', list)
     if sel != -1:
-        order = ORDER_LIST[sel][0]
+        order = ORDER_LIST1[sel][0]
         change = True
 
     if change:
-        progList(name,id,'1',genre,area,year,order)
+        progList(name,id,'1',genre,area,year,order,days)
 
-def performChanges2(name,id,listpage,genre,year,order):
+def performChanges2(name,id,listpage,genre,order,days):
     genrelist = getList2(listpage, genre)
     change = False
     dialog = xbmcgui.Dialog()
@@ -550,10 +563,10 @@ def performChanges2(name,id,listpage,genre,year,order):
         if sel != -1:
             genre = genrelist[sel][0]
             change = True
-    list = [x[1] for x in YEAR_LIST2]
+    list = [x[1] for x in DAYS_LIST2]
     sel = dialog.select('范围', list)
     if sel != -1:
-        year = YEAR_LIST2[sel][0]
+        days = DAYS_LIST2[sel][0]
         change = True
     list = [x[1] for x in ORDER_LIST2]
     sel = dialog.select('排序', list)
@@ -562,7 +575,7 @@ def performChanges2(name,id,listpage,genre,year,order):
         change = True
 
     if change:
-        progList2(name,id,'1',genre,year,order)
+        progList2(name,id,'1',genre,order,days)
 
 def get_params():
     param = []
@@ -615,6 +628,10 @@ try:
 except:
     pass
 try:
+    days = urllib.unquote_plus(params["days"])
+except:
+    pass
+try:
     year = urllib.unquote_plus(params["year"])
 except:
     pass
@@ -646,17 +663,17 @@ urllib2.install_opener(opener)
 if mode == None:
     rootList()
 elif mode == 1:
-    progList(name,id,page,genre,area,year,order)
+    progList(name,id,page,genre,area,year,order,days)
 elif mode == 2:
     getMovie(name,id,thumb,res)
 elif mode == 3:
     seriesList(name,id,thumb,res)
 elif mode == 4:
-    performChanges(name,id,page,genre,area,year,order)
+    performChanges(name,id,page,genre,area,year,order,days)
 elif mode == 10:
     PlayVideo(name,id,thumb,res)
 elif mode == 11:
-    progList2(name,id,page,genre,year,order)
+    progList2(name,id,page,genre,order,days)
 elif mode == 12:
-    performChanges2(name,id,page,genre,year,order)
+    performChanges2(name,id,page,genre,order,days)
 
