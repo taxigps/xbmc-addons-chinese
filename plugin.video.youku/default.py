@@ -397,7 +397,16 @@ def selResolution(streamtypes):
     return streamtypes[ratelist[sel][2]], ratelist[sel][1], ratelist[sel][2], ratelist[sel][3]
 
 def PlayVideo(name,id,thumb):
-    url = 'http://play.youku.com/play/get.json?vid=%s&ct=12' % (id)
+    res = urllib2.urlopen('https://log.mmstat.com/eg.js')
+    cna = res.headers['etag'][1:-1]
+    query = urllib.urlencode(dict(
+        vid       = id,
+        ccode     = '0401',
+        client_ip = '192.168.1.1',
+        utid      = cna,
+        client_ts = time.time() / 1000
+    ))
+    url = 'https://ups.youku.com/ups/get.json?%s' % (query)
     link = GetHttpData(url, referer='http://static.youku.com/')
     json_response = simplejson.loads(link)
     movdat = json_response['data']
@@ -421,7 +430,14 @@ def PlayVideo(name,id,thumb):
                     name = '%s %s' % (name, langlist[i]['lang'].encode('utf-8'))
                     break
     if vid != id:
-        url = 'http://play.youku.com/play/get.json?vid=%s&ct=12' % (vid)
+        query = urllib.urlencode(dict(
+            vid       = id,
+            ccode     = '0401',
+            client_ip = '192.168.1.1',
+            utid      = cna,
+            client_ts = time.time() / 1000
+        ))
+        url = 'https://ups.youku.com/ups/get.json?%s' % (query)
         link = GetHttpData(url, referer='http://static.youku.com/')
         json_response = simplejson.loads(link)
         movdat = json_response['data']
@@ -429,6 +445,7 @@ def PlayVideo(name,id,thumb):
     streamtypes = [stream['stream_type'].encode('utf-8') for stream in movdat['stream']]
     typeid, typename, streamno, resolution = selResolution(streamtypes)
     if typeid:
+        '''
         oip = movdat['security']['ip']
         ep = movdat['security']['encrypt_string']
         sid, token = youkuDecoder().get_sid(ep)
@@ -476,7 +493,8 @@ def PlayVideo(name,id,thumb):
                 json_response = simplejson.loads(link)
                 urls.append(json_response[0]['server'].encode('utf-8'))
             movurl = 'stack://' + ' , '.join(urls)
-
+        '''
+        movurl = movdat['stream'][streamno]['m3u8_url']
         name = '%s[%s]' % (name, typename)
         listitem=xbmcgui.ListItem(name,thumbnailImage=thumb)
         listitem.setInfo(type="Video",infoLabels={"Title":name})
