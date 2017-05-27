@@ -55,7 +55,6 @@ For proper Chinese text display on xbmc, do the following steps:
 * 搜狐视频(SoHu) - plugin.video.sohuvideo - Online video from [tv.sohu.com](http://tv.sohu.com/)
 * 音悦台MV(YinYueTai) - plugin.video.yinyuetai - MV from www.yinyuetai.com
 * 优酷视频(YouKu) - plugin.video.youku - Online tv and movies from www.youku.com
-* 优酷视频2(YouKu2) - plugin.video.youku2 - Online tv and movies from www.youku.com
 * YouKu TV - plugin.video.youkutv - Online tv and movies from www.youku.com, with wonderful GUI
 * 战旗TV(ZhanqiTV) - plugin.video.zhanqitv - Online video from www.zhanqi.tv
 
