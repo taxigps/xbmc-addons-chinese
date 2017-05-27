@@ -41,6 +41,8 @@ def get_av_item(aid, **kwargs):
 @plugin.route('/play/<cid>/')
 def play(cid):
     urls = bilibili.get_video_urls(cid)
+    for i in range(len(urls)):
+        urls[i] = urls[i] + '|Referer=http://www.bilibili.com/'
     if (len(urls) > 1):
         plugin.set_resolved_url('stack://' + ' , '.join(urls))
     else:

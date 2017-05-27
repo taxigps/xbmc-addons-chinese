@@ -8,7 +8,7 @@ class LoginDialog(xbmcgui.WindowDialog):
         self.img = xbmcgui.ControlImage(400, 10, 400, 100,self.cptloc)
         self.addControl(self.img)
         self.kbd = xbmc.Keyboard()
-        self.kbd.setHeading(u'请输入验证码')
+        #self.kbd.setHeading(u'请输入验证码')
 
     def get(self):
         self.show()

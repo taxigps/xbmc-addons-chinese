@@ -96,17 +96,17 @@ ORDER = [
 
 CATEGORY = {
     "146": {
-        "url": "http://www.bilibili.com//www.bilibili.com/video/movie_japan_1.html", 
+        "url": "http://www.bilibili.com/video/movie_japan_1.html", 
         "subs": [], 
         "title": "日本电影"
     }, 
     "153": {
-        "url": "http://www.bilibili.com//www.bilibili.com/video/bangumi_chinese_1.html", 
+        "url": "http://www.bilibili.com/video/bangumi_chinese_1.html ", 
         "subs": [], 
         "title": "国产动画"
     }, 
     "152": {
-        "url": "http://www.bilibili.com//www.bilibili.com/video/bagumi_offical_1.html", 
+        "url": "http://www.bilibili.com/video/bagumi_offical_1.html", 
         "subs": [], 
         "title": "官方延伸"
     }, 
@@ -180,12 +180,12 @@ CATEGORY = {
         "title": "舞蹈"
     }, 
     "82": {
-        "url": "http://www.bilibili.com//www.bilibili.com/video/movie-presentation-1.html", 
+        "url": "http://www.bilibili.com/video/movie-presentation-1.html", 
         "subs": [], 
         "title": "电影相关"
     }, 
     "83": {
-        "url": "http://www.bilibili.com//www.bilibili.com/video/movie-movie-1.html", 
+        "url": "http://www.bilibili.com/video/movie-movie-1.html", 
         "subs": [], 
         "title": "其他国家"
     }, 
@@ -204,10 +204,10 @@ CATEGORY = {
         ], 
         "title": "鬼畜"
     }, 
-    "85": {
-        "url": "http://www.bilibili.com//www.bilibili.com/video/tv-micromovie-1.html", 
+    "170": {
+        "url": "http://www.bilibili.com/video/guochuang-offical-1.html", 
         "subs": [], 
-        "title": "短片"
+        "title": "资讯"
     }, 
     "24": {
         "url": "http://www.bilibili.com/video/douga-mad-1.html", 
@@ -286,6 +286,7 @@ CATEGORY = {
         "subs": [
             "1", 
             "13", 
+            "167", 
             "3", 
             "129", 
             "4", 
@@ -359,17 +360,17 @@ CATEGORY = {
         "title": "动物圈"
     }, 
     "147": {
-        "url": "http://www.bilibili.com//www.bilibili.com/video/movie_chinese_1.html", 
+        "url": "http://www.bilibili.com/video/movie_chinese_1.html", 
         "subs": [], 
         "title": "国产电影"
     }, 
     "145": {
-        "url": "http://www.bilibili.com//www.bilibili.com/video/movie_west_1.html", 
+        "url": "http://www.bilibili.com/video/movie_west_1.html", 
         "subs": [], 
         "title": "欧美电影"
     }, 
     "128": {
-        "url": "http://www.bilibili.com//www.bilibili.com/video/tv-presentation-1.html", 
+        "url": "http://www.bilibili.com/video/tv-presentation-1.html", 
         "subs": [], 
         "title": "电视剧相关"
     }, 
@@ -379,7 +380,7 @@ CATEGORY = {
         "title": "演讲•公开课"
     }, 
     "15": {
-        "url": "http://www.bilibili.com//www.bilibili.com/video/soap-three-1.html", 
+        "url": "http://www.bilibili.com/video/soap-three-1.html", 
         "subs": [], 
         "title": "连载剧集"
     }, 
@@ -393,10 +394,15 @@ CATEGORY = {
         "subs": [], 
         "title": "野生技术协会"
     }, 
-    "124": {
-        "url": "http://www.bilibili.com/video/tech-fun-1.html", 
+    "168": {
+        "url": "http://www.bilibili.com/video/guochuang-fanvid-1.html ", 
         "subs": [], 
-        "title": "趣味科普人文"
+        "title": "国产原创相关"
+    }, 
+    "169": {
+        "url": "http://www.bilibili.com/video/glove-puppetry-1.html ", 
+        "subs": [], 
+        "title": "布袋戏"
     }, 
     "126": {
         "url": "http://www.bilibili.com/video/kichiku-manual_vocaloid-1.html", 
@@ -419,9 +425,19 @@ CATEGORY = {
         "title": "广告"
     }, 
     "86": {
-        "url": "http://www.bilibili.com//www.bilibili.com/video/tv-sfx-1.html", 
+        "url": "http://www.bilibili.com/video/tv-sfx-1.html", 
         "subs": [], 
-        "title": "特摄·布袋"
+        "title": "特摄"
+    }, 
+    "167": {
+        "url": "http://bangumi.bilibili.com/guochuang/", 
+        "subs": [
+            "153", 
+            "168", 
+            "169", 
+            "170"
+        ], 
+        "title": "国创"
     }, 
     "160": {
         "url": "http://www.bilibili.com/video/life.html", 
@@ -466,7 +482,6 @@ CATEGORY = {
         "subs": [
             "33", 
             "32", 
-            "153", 
             "51", 
             "152"
         ], 
@@ -488,12 +503,12 @@ CATEGORY = {
         "title": "机械"
     }, 
     "33": {
-        "url": "http://www.bilibili.com//www.bilibili.com/video/bangumi-two-1.html", 
+        "url": "http://www.bilibili.com/video/bangumi-two-1.html", 
         "subs": [], 
         "title": "连载动画"
     }, 
     "32": {
-        "url": "http://www.bilibili.com//www.bilibili.com/video/part-twoelement-1.html", 
+        "url": "http://www.bilibili.com/video/part-twoelement-1.html", 
         "subs": [], 
         "title": "完结动画"
     }, 
@@ -508,7 +523,7 @@ CATEGORY = {
         "title": "VOCALOID·UTAU"
     }, 
     "51": {
-        "url": "http://www.bilibili.com//www.bilibili.com/video/douga-else-information-1.html", 
+        "url": "http://www.bilibili.com/video/douga-else-information-1.html", 
         "subs": [], 
         "title": "资讯"
     }, 
@@ -526,7 +541,7 @@ CATEGORY = {
         "title": "科技"
     }, 
     "34": {
-        "url": "http://www.bilibili.com//www.bilibili.com/video/tv-drama-1.html", 
+        "url": "http://www.bilibili.com/video/tv-drama-1.html", 
         "subs": [], 
         "title": "完结剧集"
     }, 
@@ -539,6 +554,16 @@ CATEGORY = {
         "url": "http://www.bilibili.com/video/music-oped-1.html", 
         "subs": [], 
         "title": "OP/ED/OST"
+    }, 
+    "124": {
+        "url": "http://www.bilibili.com/video/tech-fun-1.html", 
+        "subs": [], 
+        "title": "趣味科普人文"
+    }, 
+    "85": {
+        "url": "http://www.bilibili.com/video/tv-micromovie-1.html", 
+        "subs": [], 
+        "title": "短片"
     }, 
     "136": {
         "url": "http://www.bilibili.com/video/music-game-1.html", 
