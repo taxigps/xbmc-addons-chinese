@@ -104,7 +104,10 @@ class Bilibili():
                     continue
                 tid = item['tid']
                 title = item.a.contents[0]
-                url = HOME_URL + item.a['href']
+                if item.a['href'][:2] == '//':
+                    url = 'http:' + item.a['href']
+                else:
+                    url = HOME_URL + item.a['href']
                 category_dict[tid] = {'title': title, 'url': url, 'subs':[]}
                 node['subs'].append(tid)
         return category_dict
