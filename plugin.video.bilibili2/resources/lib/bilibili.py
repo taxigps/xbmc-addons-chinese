@@ -8,8 +8,9 @@ import urllib, urllib2
 import re
 import os
 import tempfile
+import random
 import xml.dom.minidom as minidom
-from cookielib import LWPCookieJar
+from cookielib import MozillaCookieJar
 import requests
 from bs4 import BeautifulSoup
 from bilibili_config import *
@@ -20,7 +21,7 @@ class Bilibili():
         self.appsecret = appsecret
         self.is_login = False
         cookie_path = os.path.dirname(os.path.abspath(__file__)) + '/.cookie'
-        self.cj = LWPCookieJar(cookie_path)
+        self.cj = MozillaCookieJar(cookie_path)
         if os.path.isfile(cookie_path):
             self.cj.load()
             if requests.utils.dict_from_cookiejar(self.cj).has_key('DedeUserID'):
@@ -30,9 +31,11 @@ class Bilibili():
         urllib2.install_opener(opener)
 
     def get_captcha(self, path = None):
-        utils.get_page_content('https://passport.bilibili.com/login')
-        result = utils.get_page_content(LOGIN_CAPTCHA_URL, 
-                                        headers = {'Referer':'https://passport.bilibili.com/ajax/miniLogin/minilogin'})
+        if not requests.utils.dict_from_cookiejar(self.cj).has_key('sid'):
+            utils.get_page_content(LOGIN_CAPTCHA_URL.format(random.random()),
+                                   headers = {'Referer':'https://passport.bilibili.com/login'})
+        result = utils.get_page_content(LOGIN_CAPTCHA_URL.format(random.random()),
+                                        headers = {'Referer':'https://passport.bilibili.com/login'})
         if path == None:
             path = tempfile.gettempdir() + '/captcha.jpg'
         with open(path, 'wb') as f:
@@ -41,8 +44,8 @@ class Bilibili():
 
     def get_encryped_pwd(self, pwd):
         import rsa
-        result = json.loads(utils.get_page_content(LOGIN_HASH_URL, 
-                                                   headers={'Referer':'https://passport.bilibili.com/ajax/miniLogin/minilogin'}))
+        result = json.loads(utils.get_page_content(LOGIN_HASH_URL.format(random.random()),
+                                                   headers={'Referer':'https://passport.bilibili.com/login'}))
         pwd = result['hash'] + pwd
         key = result['key']
         pub_key = rsa.PublicKey.load_pkcs1_openssl_pem(key)
@@ -225,12 +228,12 @@ class Bilibili():
         if self.is_login == True:
             return True, ''
         pwd = self.get_encryped_pwd(pwd)
-        data = 'userid={0}&pwd={1}&keep=1&captcha={2}'.format(userid, pwd, captcha)
-        result = utils.get_page_content(LOGIN_URL, data, 
-                                        {'Origin':'https://passport.bilibili.com', 
-                                         'Referer':'https://passport.bilibili.com/ajax/miniLogin/minilogin'})
+        data = 'cType=2&vcType=1&captcha={}&user={}&pwd={}&keep=true&gourl=http://www.bilibili.com/'.format(captcha, userid, pwd)
+        result = utils.get_page_content(LOGIN_URL, data,
+                                        {'Origin':'https://passport.bilibili.com',
+                                         'Referer':'https://passport.bilibili.com/login'})
         if not requests.utils.dict_from_cookiejar(self.cj).has_key('DedeUserID'):
-            return False, LOGIN_ERROR_MAP[json.loads(result)['message']['code']]
+            return False, LOGIN_ERROR_MAP[json.loads(result)['code']]
         self.cj.save()
         self.is_login = True
         self.mid = str(requests.utils.dict_from_cookiejar(self.cj)['DedeUserID'])
@@ -263,7 +266,7 @@ class Bilibili():
         url = INTERFACE_URL.format(str(cid), m.hexdigest())
         doc = minidom.parseString(utils.get_page_content(url))
         urls = [durl.getElementsByTagName('url')[0].firstChild.nodeValue for durl in doc.getElementsByTagName('durl')]
-        urls = [url 
+        urls = [url
                 if not re.match(r'.*\.qqvideo\.tc\.qq\.com', url)
                 else re.sub(r'.*\.qqvideo\.tc\.qq\.com', 'http://vsrc.store.qq.com', url)
                 for url in urls]
@@ -277,7 +280,7 @@ class Bilibili():
 if __name__ == '__main__':
     b = Bilibili()
     #if b.is_login == False:
-    #    b.get_captcha()
+    #    b.get_captcha('')
     #    captcha = raw_input('Captcha: ')
     #    print b.login(u'catro@foxmail.com', u'123456', captcha)
     #print b.get_fav(49890104)
