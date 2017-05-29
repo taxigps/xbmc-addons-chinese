@@ -17,7 +17,9 @@ def get_page_content(page_full_url, data = None, headers = {}):
         ua = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:6.0.2) Gecko/20100101 Firefox/6.0.2'}
         ua.update(headers)
         req = urllib2.Request(page_full_url, headers=ua, data = data)
+        print (req.headers.items())
         response = urllib2.urlopen(req)
+        print(response.info())
         if response.headers.get('content-encoding', '') == 'gzip':
             return _get_gzip_content(response.read())
         elif response.headers.get('content-encoding', '') == 'deflate':
