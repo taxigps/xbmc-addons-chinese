@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, re, string, sys, os, gzip, StringIO
 from uuid import uuid4
 from random import random,randint
@@ -121,7 +121,7 @@ def searchDict(dlist,idx):
 
 def getcatList(listpage, id, cat):
     # 类型(电影,纪录片,动漫,娱乐,旅游), 分类(电视剧,综艺,片花), 流派(音乐), 一级分类(教育), 行业(时尚)
-    match = re.compile('<h3>(类型|分类|流派|一级分类|行业)：</h3>(.*?)</ul>', re.DOTALL).findall(listpage)
+    match = re.compile('<h3>(类型|分类|流派|一级分类|行业|频道)：</h3>(.*?)</ul>', re.DOTALL).findall(listpage)
     if id in ('3','9'):   # 纪录片&旅游
         catlist = re.compile('/www/' + id + '/(\d*)-[^>]+>(.*?)</a>').findall(match[0][1])
     elif id in ('5','10'):   # 音乐&片花
@@ -151,7 +151,7 @@ def getareaList(listpage, id, area):
     return arealist
 
 def getyearList(listpage, id, year):
-    match = re.compile('<h3>年代：</h3>(.*?)</ul>', re.DOTALL).findall(listpage)
+    match = re.compile('<h3>我的年代：</h3>(.*?)</ul>', re.DOTALL).findall(listpage)
     yearlist = re.compile('/www/' + id + '/\d*-\d*---------\d*-([\d_]*)-[^>]+>(.*?)</a>').findall(match[0])
     match1 = re.compile('<a href="#">(.*?)</a>').search(match[0])
     if match1:
@@ -346,7 +346,7 @@ def seriesList(name,id,thumb,page):
             u = sys.argv[0] + "?mode=3&name=" + urllib.quote_plus(p_name) + "&id=" + urllib.quote_plus(p_id)+ "&thumb=" + urllib.quote_plus(p_thumb)
             xbmcplugin.addDirectoryItem(int(sys.argv[1]), u, li, False, totalItems)
     else:
-        url = 'http://cache.video.qiyi.com/avlist/%s/%s/' % (id, page)
+        url = 'http://cache.video.qiyi.com/jp/avlist/%s/%s/' % (id, page)
         link = GetHttpData(url)
         data = link[link.find('=')+1:]
         json_response = simplejson.loads(data)
@@ -476,7 +476,7 @@ def PlayVideo(name,id,thumb):
                 tvId = re.compile('data-player-tvid="(.+?)"', re.DOTALL).findall(link)[0]
                 videoId = re.compile('data-player-videoid="(.+?)"', re.DOTALL).findall(link)[0]
             else:
-                url = 'http://cache.video.qiyi.com/avlist/%s/' % (id[0])
+                url = 'http://cache.video.qiyi.com/jp/avlist/%s/' % (id[0])
                 link = GetHttpData(url)
                 data = link[link.find('=')+1:]
                 json_response = simplejson.loads(data)
