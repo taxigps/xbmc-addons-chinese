@@ -1,3 +1,6 @@
+v0.3.0
+- fix new api with signature 修复需要签名的新API
+
 v0.2.0
 - fix new api
 
