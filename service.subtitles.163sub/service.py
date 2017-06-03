@@ -172,7 +172,8 @@ def Download(id,lang):
         sel = xbmcgui.Dialog().select('请选择压缩包中的字幕', list)
         if sel == -1:
             sel = 0
-        subtitle_list.append(os.path.join(path, list[sel]))
+        if len(list):
+            subtitle_list.append(os.path.join(path, list[sel]))
 
     return subtitle_list
 
