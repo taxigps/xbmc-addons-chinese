@@ -422,6 +422,32 @@
     </extension>
 </addon>
 
+<addon id="plugin.video.meijumao"
+    name="美剧猫(meijumao)"
+    version="1.0.0"
+    provider-name="BirdZhang">
+    <requires>
+        <import addon="script.module.beautifulsoup4" version="4.3.2"/>
+        <import addon="script.module.html5lib" version="0.1.0"/>
+        <import addon="script.module.keyboard.chinese" version="2.0.4" optional="true"/>
+    </requires>
+    <extension
+        point="xbmc.python.pluginsource"
+        library="addon.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">meijumao video plugin</summary>
+        <summary lang="zh">美剧猫插件</summary>
+        <description lang="en">online video from www.meijumao.net</description>
+        <description lang="zh">美剧猫</description>
+        <platform>all</platform>
+        <website><![CDATA[https://github.com/0312birdzhang/plugin.video.meijumao]]></website>
+        <forum></forum>
+        <source><![CDATA[https://github.com/0312birdzhang/plugin.video.meijumao]]></source>
+        </extension>
+</addon>
+
 <addon id="plugin.video.pandatv"
     name="熊猫TV(pandatv)"
     version="2.0.0"

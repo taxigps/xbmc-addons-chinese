@@ -47,6 +47,7 @@ For proper Chinese text display on xbmc, do the following steps:
 * 风行视频(Funshion) - plugin.video.funshion - Online videos from www.funshion.com
 * 酷6云中剧场(Ku6) - plugin.video.ku6 - Online video from www.juchang.com
 * 乐视网(LeTV) - plugin.video.letv - Online video from www.letv.com.cn
+* 美剧猫(meijumao) - plugin.video.meijumao - online video from www.meijumao.net
 * PPS影音(PPS.tv) - plugin.video.pps - Video from PPS for client side playback
 * PPS网络电视(PPStream) - plugin.video.ppstream - PPS online tv and movies
 * PPTV视频 - plugin.video.pptv - Online videos from www.pptv.com
