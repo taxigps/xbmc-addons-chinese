@@ -1,4 +1,4 @@
-﻿﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Module: default
 # Author: BirdZhang
 # Created on: 6.6.2017
@@ -129,13 +129,13 @@ def list_sections(section):
             list_item = xbmcgui.ListItem(label="上一页")
             url = '{0}?action=list_sections&section={1}'.format(
                 _url, will_page[0].find("a").get("href"))
-            is_folder = False
+            is_folder = True
             listing.append((url, list_item, is_folder))
         if will_page[-1].find("a").get("href") != "#":
             list_item = xbmcgui.ListItem(label="下一页")
             url = '{0}?action=list_sections&section={1}'.format(
                 _url, will_page[-1].find("a").get("href"))
-            is_folder = False
+            is_folder = True
             listing.append((url, list_item, is_folder))
         
     xbmcplugin.addDirectoryItems(_handle, listing, len(listing))
