@@ -1,3 +1,7 @@
+# 版本说明
+
+因多瑙更改域名，本版本仅仅更新为新域名。 特别感谢@cameron93lin
+
 # Introduction 简介
 
 This plugin is for people who want to watch dnvod videos on Kodi(Xbmc). Only work for the area outside Mainland China. Specially for Chinese Language speaking people.
@@ -6,7 +10,7 @@ This plugin is for people who want to watch dnvod videos on Kodi(Xbmc). Only wor
 
 # Version 版本
 
-v1.0.2
+v1.0.3
 
 # Update 更新
 
@@ -23,10 +27,10 @@ XBMC 版本16.1或以上
 
 
 
-16.1版本以上已自带  ~~Xbmc的Requests模块~~ 
+16.1版本以上已自带  ~~Xbmc的Requests模块~~
 
 
-Build in module in version 16.1  ~~Xbmc requests module: https://github.com/beenje/script.module.requests~~ 
+Build in module in version 16.1  ~~Xbmc requests module: https://github.com/beenje/script.module.requests~~
 
 
 
