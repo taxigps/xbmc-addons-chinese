@@ -22,8 +22,8 @@ addon = xbmcaddon.Addon(id='plugin.video.dnvodPlayer')
 __language__ = addon.getLocalizedString
 rootDir = addon.getAddonInfo('path')
 rootDir = xbmc.translatePath(rootDir)
-url1 = 'http://www.dnvod.eu'
-url2 = 'http://www.dnvod.eu/Movie/Readyplay.aspx?id=7COqHhPaRZg%3d'
+url1 = 'http://www.dvnod.tv'
+url2 = 'http://www.dvnod.tv/Movie/Readyplay.aspx?id=7COqHhPaRZg%3d'
 #get ASP.NET_SessionId
 def getSessionID (url1,url2):
     s=requests.Session()
@@ -55,8 +55,8 @@ Searchheaders = {"User-Agent": 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) 
 "Content-Type": "application/x-www-form-urlencoded",
 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
 #"Content-Length": "36",
-"Host": "www.dnvod.eu",
-"Referer": "http://www.dnvod.eu/",
+"Host": "www.dvnod.tv",
+"Referer": "http://www.dvnod.tv/",
 "Accept-Encoding": "",
 "Accept-Language": "de-DE,de;q=0.8,en-US;q=0.6,en;q=0.4,zh-CN;q=0.2,zh;q=0.2,zh-TW;q=0.2,fr-FR;q=0.2,fr;q=0.2",}
 
@@ -64,7 +64,7 @@ Searchheaders = {"User-Agent": 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) 
 headers = {"User-Agent": user_agent,
 "Content-Type": "application/x-www-form-urlencoded",
 "Accept": "*/*",
-"Referer": "http://www.dnvod.eu/Movie/Readyplay.aspx?id=jydSM%2fudfCo%3d",
+"Referer": "http://www.dvnod.tv/Movie/Readyplay.aspx?id=jydSM%2fudfCo%3d",
 "Accept-Encoding": "",
 "Accept-Language": "de-DE,de;q=0.8,en-US;q=0.6,en;q=0.4,zh-CN;q=0.2,zh;q=0.2,zh-TW;q=0.2,fr-FR;q=0.2,fr;q=0.2",
 "X-Requested-With": "XMLHttpRequest",
@@ -72,16 +72,16 @@ headers = {"User-Agent": user_agent,
 "Cookie": cookies}
 
 #create server headers
-headers2 = {"Host": "www.dnvod.eu",
+headers2 = {"Host": "www.dvnod.tv",
 "Content-Length": "36",
 "Cache-Control": "nax-age=0",
 "Accept": "*/*",
-"Origin": "http://www.dnvod.eu",
+"Origin": "http://www.dvnod.tv",
 "X-Requested-With": "XMLHttpRequest",
 "User-Agent": user_agent,
 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
 "DNT": "1",
-"Referer": "http://www.dnvod.eu/Movie/Readyplay.aspx?id=%2bWXev%2bhf16w%3d",
+"Referer": "http://www.dvnod.tv/Movie/Readyplay.aspx?id=%2bWXev%2bhf16w%3d",
 "Accept-Encoding": "",
 "Accept-Language": "de-DE,de;q=0.8,en-US;q=0.6,en;q=0.4,zh-CN;q=0.2,zh;q=0.2,zh-TW;q=0.2,fr-FR;q=0.2,fr;q=0.2",
 "Connection": "keep-alive",
@@ -122,7 +122,7 @@ def Search():
     inputMovieName=urllib.quote_plus(sstr)
     if hascookie==False:
         try:
-            urlSearch = 'http://www.dnvod.eu/Movie/Search.aspx?tags=a'
+            urlSearch = 'http://www.dvnod.tv/Movie/Search.aspx?tags=a'
             req = urllib2.Request(urlSearch, headers=Searchheaders)
             searchResponse = opener.open(req)
         except urllib2.HTTPError as e:
@@ -148,10 +148,10 @@ def Search():
                 'pass': sparam,
                 'jschl_answer': result
                 })
-            searchUrl = 'http://www.dnvod.eu/cdn-cgi/l/chk_jschl?'+'jschl_vc='+str(fparam)+'&pass='+str(sparam)+'&jschl_answer='+str(result)
+            searchUrl = 'http://www.dvnod.tv/cdn-cgi/l/chk_jschl?'+'jschl_vc='+str(fparam)+'&pass='+str(sparam)+'&jschl_answer='+str(result)
             try:
                 print searchUrl
-                headers['Referer']='http://www.dnvod.eu/Movie/Search.aspx?tags=a'
+                headers['Referer']='http://www.dvnod.tv/Movie/Search.aspx?tags=a'
                 req = urllib2.Request(searchUrl, headers=Searchheaders)
                 time.sleep(5)
                 sresult = opener.open(req)
@@ -161,8 +161,8 @@ def Search():
                 print e.code
                 print e.read()
     
-    headers['Referer']='http://www.dnvod.eu/'
-    urlSearch = 'http://www.dnvod.eu/Movie/Search.aspx?tags='+inputMovieName
+    headers['Referer']='http://www.dvnod.tv/'
+    urlSearch = 'http://www.dvnod.tv/Movie/Search.aspx?tags='+inputMovieName
     searchRequest = urllib2.Request(urlSearch,None,Searchheaders)
     searchResponse = opener.open(searchRequest)
     searchdataResponse = searchResponse.read()
@@ -213,7 +213,7 @@ def Detail():
     filmIdReg = r'id=(.*%3d)'
     filmIdPattern = re.compile(filmIdReg)
     filmIdResult = filmIdPattern.findall(searchResult[whichResultInt])
-    searchUrl = 'http://www.dnvod.eu/Movie/detail.aspx?id='+filmIdResult[0]
+    searchUrl = 'http://www.dvnod.tv/Movie/detail.aspx?id='+filmIdResult[0]
     detailRequest = urllib2.Request(searchUrl,None,headers)
     detailResponse = urllib2.urlopen(detailRequest)
     detaildataResponse = detailResponse.read()
@@ -250,7 +250,7 @@ def Episode():
 
     whichEpisodeStr = params['ep']
     whichEpisodeInt = int(whichEpisodeStr)-1
-    playUrl = 'http://www.dnvod.eu'+detailResult[whichEpisodeInt]
+    playUrl = 'http://www.dvnod.tv'+detailResult[whichEpisodeInt]
     requestFir = urllib2.Request(playUrl,None,headers)
     responseFir  = urllib2.urlopen(requestFir)
     data_responseFir = responseFir.read()
@@ -260,7 +260,7 @@ def Episode():
     result  = pattern.findall(data_responseFir)
     para2   = result[0]
 
-    urlSec = 'http://www.dnvod.eu/Movie/GetResource.ashx?id='+para2+'&type=htm'
+    urlSec = 'http://www.dvnod.tv/Movie/GetResource.ashx?id='+para2+'&type=htm'
     
     regkeyString = r'key:.*\'(.*)\','
     patternkeyString = re.compile(regkeyString)
