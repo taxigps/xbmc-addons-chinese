@@ -30,3 +30,7 @@ msgstr "請選擇要使用的字幕文件"
 msgctxt "#32007"
 msgid "Use Shooter Player API (may become slower)"
 msgstr "自動搜尋時同時搜尋射手影音庫(可能會使搜尋變慢)"
+
+msgctxt "#32008"
+msgid "Use custom API token (register at assrt.net)" 
+msgstr "使用自定義API密鑰(可在assrt.net註冊後獲得)"

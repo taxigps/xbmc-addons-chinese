@@ -31,3 +31,7 @@ msgctxt "#32007"
 msgid "Use Shooter Player API (may become slower)"
 msgstr "自动搜索时同时搜索射手影音库(可能会使搜索变慢)"
 
+msgctxt "#32008"
+msgid "Use custom API token (register at assrt.net)" 
+msgstr "使用自定义API密钥(可在assrt.net注册后获得)"
+

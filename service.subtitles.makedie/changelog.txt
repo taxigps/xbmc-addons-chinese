@@ -1,4 +1,7 @@
-﻿1.0.8
+﻿1.0.9
+- change to api.assrt.net
+
+1.0.8
 - fixed: can't remove temp dir under osx
 
 1.0.7
