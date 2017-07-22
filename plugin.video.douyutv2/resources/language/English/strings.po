@@ -1,8 +1,6 @@
 msgid ""
 msgstr ""
 
-#English
-
 msgctxt "#32001"
 msgid "Next page..."
 msgstr ""
