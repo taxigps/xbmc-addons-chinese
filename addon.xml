@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="script.iptvtool"
+    name="IPTV Tool" version="1.0.0" provider-name="Taxigps">
+	<requires>
+		<import addon="xbmc.python" version="2.1.0" />
+		<import addon="script.module.simplejson" version="2.0.10" />
+	</requires>
+
+	<extension point="xbmc.python.script" library="default.py">
+		<provides>executable</provides>
+	</extension>
+
+	<extension point="xbmc.service" library="epgservice.py" start="login" />
+
+	<extension point="xbmc.addon.metadata">
+		<summary lang="en">Automatic setting PVR IPTV Simple Client</summary>
+		<summary lang="zh">自动设置PVR的IPTV客户端</summary>
+		<description lang="en">Automatic setting PVR IPTV Simple Client for M3U playlist, channels logos and EPG</description>
+		<description lang="zh">自动设置PVR的IPTV客户端，包括M3U播放列表、频道图标和电子节目单</description>
+		<disclaimer lang="en"></disclaimer>
+		<language></language>
+		<platform>all</platform>
+		<license>GNU GENERAL PUBLIC LICENSE, Version 2</license>
+		<forum></forum>
+		<website></website>
+		<source>https://github.com/taxigps/script.iptvtool</source>
+	</extension>
+</addon>

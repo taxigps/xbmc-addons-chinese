@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+	<setting label="30010" type="bool" id="epg" default="false" />
+	<setting label="30011" type="bool" id="epg_cctv" default="true" enable="eq(-1,true)" />
+	<setting label="30012" type="bool" id="epg_province" default="true" enable="eq(-2,true)" />
+	<setting label="30013" type="bool" id="epg_phoenix" default="false" enable="false" />
+</settings>
