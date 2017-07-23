@@ -80,6 +80,7 @@ PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStre
 
 ## Program Add-ons
 
+* IPTV Tool - script.iptvtool - Automatic setting PVR IPTV Simple Client with chinese channels.
 * Skin Font - script.skinfont - Add arial font type to any skin for display chinese characters. 
 
 ## Subtitle Add-ons
