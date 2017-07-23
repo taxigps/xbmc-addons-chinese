@@ -1,0 +1,115 @@
+#EXTM3U
+    #EXTINF:-1 tvg-id="cctv1" tvg-logo="cctv1.png",CCTV-1HD
+    http://222.191.24.6:6610/2/2/ch00000090990000001021/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctv5" tvg-logo="cctv5.png",CCTV-5HD
+    http://222.191.24.6:6610/2/2/ch00000090990000001240/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctv5plus" tvg-logo="cctv5plus.png",CCTV-5+HD
+    http://222.191.24.6:6610/2/2/ch00000090990000001044/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="btv1" tvg-logo="btv1.png",北京卫视HD
+    http://122.96.52.11:8080/gitv_live/BTV-1/BTV-1.m3u8
+    #EXTINF:-1 tvg-id="hubei" tvg-logo="hubei.png",湖北卫视HD
+    http://223.82.250.95:8080/ysten-businessmobile/live/hdhubeistv/astv.m3u8
+    #EXTINF:-1 tvg-id="hunan" tvg-logo="hunan.png",湖南卫视HD
+    http://223.82.250.95:8080/ysten-businessmobile/live/hdhunanstv/astv.m3u8
+    #EXTINF:-1 tvg-id="shenzhen" tvg-logo="shenzhen.png",深圳卫视HD
+    http://223.82.250.95:8080/ysten-businessmobile/live/hdshenzhenstv/astv.m3u8
+    #EXTINF:-1 tvg-id="guangdong" tvg-logo="guangdong.png",广东卫视HD
+    http://223.82.250.95:8080/ysten-businessmobile/live/hdguangdongstv/astv.m3u8
+    #EXTINF:-1 tvg-id="tianjin" tvg-logo="tianjin.png",天津卫视HD
+    http://223.82.250.95:8080/ysten-businessmobile/live/hdtianjinstv/astv.m3u8
+    #EXTINF:-1 tvg-id="jiangxi" tvg-logo="jiangxi.png",江西卫视HD
+    http://223.82.250.95:8080/ysten-businessmobile/live/jiangxistv/astv.m3u8
+    #EXTINF:-1 tvg-id="jiangsu" tvg-logo="jiangsu.png",江苏卫视HD
+    http://222.191.24.6:6610/2/2/ch00000090990000001301/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="fenghuang" tvg-logo="fenghuang.png",凤凰中文HD
+    http://223.82.250.95:8080/ysten-businessmobile/live/fhchinese/dujuejiami.m3u8
+    #EXTINF:-1 tvg-id="fenghuang2" tvg-logo="fenghuang2.png",凤凰资讯HD
+    http://223.82.250.94:8080/ysten-businessmobile/live/fhzixun/dujuejiami.m3u8
+    #EXTINF:-1 tvg-id="cctv1" tvg-logo="cctv1.png",CCTV-1
+    http://222.191.24.6:6610/2/2/ch00000090990000001018/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctv2" tvg-logo="cctv2.png",CCTV-2
+    http://222.191.24.6:6610/2/2/ch00000090990000001025/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctv3" tvg-logo="cctv3.png",CCTV-3
+    http://222.191.24.6:6610/2/2/ch00000090990000001027/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctv4" tvg-logo="cctv4.png",CCTV-4
+    http://222.191.24.6:6610/2/2/ch00000090990000001118/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctv5" tvg-logo="cctv5.png",CCTV-5
+    http://222.191.24.6:6610/2/2/ch00000090990000001029/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctv5plus" tvg-logo="cctv5plus.png",CCTV-5+
+    http://222.191.24.6:6610/2/2/ch00000090990000001297/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctv6" tvg-logo="cctv6.png",CCTV-6
+    http://222.191.24.6:6610/2/2/ch00000090990000001031/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctv7" tvg-logo="cctv7.png",CCTV-7
+    http://222.191.24.6:6610/2/2/ch00000090990000001120/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctv8" tvg-logo="cctv8.png",CCTV-8
+    http://222.191.24.6:6610/2/2/ch00000090990000001033/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctvjilu" tvg-logo="cctvjilu.png",CCTV-9
+    http://222.191.24.6:6610/2/2/ch00000090990000001035/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctv10" tvg-logo="cctv10.png",CCTV-10
+    http://222.191.24.6:6610/2/2/ch00000090990000001124/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctv11" tvg-logo="cctv11.png",CCTV-11
+    http://222.191.24.6:6610/2/2/ch00000090990000001126/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctv12" tvg-logo="cctv12.png",CCTV-12
+    http://222.191.24.6:6610/2/2/ch00000090990000001128/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctv13" tvg-logo="cctv13.png",CCTV-13
+    http://222.191.24.6:6610/2/2/ch00000090990000001130/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctvchild" tvg-logo="cctvchild.png",CCTV-14少儿
+    http://222.191.24.6:6610/2/2/ch00000090990000001133/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="cctv15" tvg-logo="cctv15.png",CCTV-15音乐
+    http://222.191.24.6:6610/2/2/ch00000090990000001134/index.m3u8?ispcode=3
+    #EXTINF:-1 tvg-id="anhui" tvg-logo="anhui.png",安徽卫视
+    http://223.82.250.95:8080/ysten-businessmobile/live/anhuistv/astv.m3u8
+    #EXTINF:-1 tvg-id="chongqing" tvg-logo="chongqing.png",重庆卫视
+    http://122.96.52.11:8080/gitv_live/G_CHONGQING/G_CHONGQING.m3u8
+    #EXTINF:-1 tvg-id="dongfang" tvg-logo="dongfang.png",东方卫视
+    http://122.96.52.11:8080/gitv_live/G_DONGFANG/G_DONGFANG.m3u8
+    #EXTINF:-1 tvg-id="dongnan" tvg-logo="dongnan.png",东南卫视
+    http://122.96.52.11:8080/gitv_live/DNWS/DNWS.m3u8
+    #EXTINF:-1 tvg-id="gansu" tvg-logo="gansu.png",甘肃卫视
+    http://122.96.52.11:8080/gitv_live/G_GANSU/G_GANSU.m3u8
+    #EXTINF:-1 tvg-id="guangdong" tvg-logo="guangdong.png",广东卫视
+    http://122.96.52.11:8080/gitv_live/G_GUANGDONG/G_GUANGDONG.m3u8
+    #EXTINF:-1 tvg-id="guangxi" tvg-logo="guangxi.png",广西卫视
+    http://122.96.52.11:8080/gitv_live/GXWS/GXWS.m3u8
+    #EXTINF:-1 tvg-id="guizhou" tvg-logo="guizhou.png",贵州卫视
+    http://122.96.52.11:8080/gitv_live/G_GUIZHOU/G_GUIZHOU.m3u8
+    #EXTINF:-1 tvg-id="hebei" tvg-logo="hebei.png",河北卫视
+    http://223.82.250.95:8080/ysten-businessmobile/live/hebeistv/astv.m3u8
+    #EXTINF:-1 tvg-id="henan" tvg-logo="henan.png",河南卫视
+    http://122.96.52.11:8080/gitv_live/HENAN/HENAN.m3u8
+    #EXTINF:-1 tvg-id="hubei" tvg-logo="hubei.png",湖北卫视
+    http://122.96.52.11:8080/gitv_live/G_HUBEI/G_HUBEI.m3u8
+    #EXTINF:-1 tvg-id="hunan" tvg-logo="hunan.png",湖南卫视
+    http://122.96.52.11:8080/gitv_live/G_HUNAN/G_HUNAN.m3u8
+    #EXTINF:-1 tvg-id="jiangxi" tvg-logo="jiangxi.png",江西卫视
+    http://122.96.52.11:8080/gitv_live/JXWS/JXWS.m3u8
+    #EXTINF:-1 tvg-id="jilin" tvg-logo="jilin.png",吉林卫视
+    http://122.96.52.11:8080/gitv_live/G_JILIN/G_JILIN.m3u8
+    #EXTINF:-1 tvg-id="liaoning" tvg-logo="liaoning.png",辽宁卫视
+    http://223.82.250.95:8080/ysten-businessmobile/live/liaoningstv/astv.m3u8
+    #EXTINF:-1 tvg-id="neimenggu" tvg-logo="neimenggu.png",内蒙古卫视
+    http://122.96.52.11:8080/gitv_live/G_NEIMENGGU/G_NEIMENGGU.m3u8
+    #EXTINF:-1 tvg-id="ningxia" tvg-logo="ningxia.png",宁夏卫视
+    http://122.96.52.11:8080/gitv_live/G_NINGXIA/G_NINGXIA.m3u8
+    #EXTINF:-1 tvg-id="qinghai" tvg-logo="qinghai.png",青海卫视
+    http://122.96.52.11:8080/gitv_live/G_QINGHAI/G_QINGHAI.m3u8
+    #EXTINF:-1 tvg-id="shandong" tvg-logo="shandong.png",山东卫视
+    http://122.96.52.11:8080/gitv_live/SDWS/SDWS.m3u8
+    #EXTINF:-1 tvg-id="shan1xi" tvg-logo="shan1xi.png",山西卫视
+    http://122.96.52.11:8080/gitv_live/SXWS/SXWS.m3u8
+    #EXTINF:-1 tvg-id="shan3xi" tvg-logo="shan3xi.png",陕西卫视
+    http://223.82.250.95:8080/ysten-businessmobile/live/shanxi1stv/astv.m3u8
+    #EXTINF:-1 tvg-id="shenzhen" tvg-logo="shenzhen.png",深圳卫视
+    http://122.96.52.11:8080/gitv_live/G_SHENZHEN/G_SHENZHEN.m3u8
+    #EXTINF:-1 tvg-id="sichuan" tvg-logo="sichuan.png",四川卫视
+    http://122.96.52.11:8080/gitv_live/SCWS/SCWS.m3u8
+    #EXTINF:-1 tvg-id="tianjin" tvg-logo="tianjin.png",天津卫视
+    http://122.96.52.11:8080/gitv_live/TJWS/TJWS.m3u8
+    #EXTINF:-1 tvg-id="xinjiang" tvg-logo="xinjiang.png",新疆卫视
+    http://122.96.52.11:8080/gitv_live/G_XINJIANG/G_XINJIANG.m3u8
+    #EXTINF:-1 tvg-id="yunnan" tvg-logo="yunnan.png",云南卫视
+    http://122.96.52.11:8080/gitv_live/G_YUNNAN/G_YUNNAN.m3u8.m3u8
+    #EXTINF:-1 tvg-id="zhejiang" tvg-logo="zhejiang.png",浙江卫视
+    http://122.96.52.11:8080/gitv_live/G_ZHEJIANG/G_ZHEJIANG.m3u8
+    #EXTINF:-1 tvg-id="travel" tvg-logo="travel.png",旅游卫视
+    http://122.96.52.11:8080/gitv_live/LYWS/LYWS.m3u8

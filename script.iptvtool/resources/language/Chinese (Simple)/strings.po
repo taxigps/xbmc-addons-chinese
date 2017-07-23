@@ -1,0 +1,45 @@
+# {{subst:Name}} Media Center language file
+# Addon Name: IPTV Tool
+# Addon id: script.iptvtool
+# Addon Provider: Taxigps
+msgid ""
+msgstr ""
+"Project-Id-Version: {{subst:Name}} Addons\n"
+"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: {{subst:Name}} Translation Team\n"
+"Language-Team: English (http://www.transifex.com/projects/p/xbmc-addons/language/en/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "#30010"
+msgid "Enable EPG Service"
+msgstr "启用电子节目单服务"
+
+msgctxt "#30011"
+msgid "Download EPG for CCTV Channels"
+msgstr "下载央视频道电子节目单"
+
+msgctxt "#30012"
+msgid "Download EPG for Provincial Channels"
+msgstr "下载卫视频道电子节目单"
+
+msgctxt "#30013"
+msgid "Download EPG for PHOENIX TV Channels"
+msgstr "下载凤凰卫视电子节目单"
+
+msgctxt "#30030"
+msgid "IPTV Tool"
+msgstr "IPTV Tool"
+
+msgctxt "#30031"
+msgid "Open IPTV Tool Settings"
+msgstr "打开 IPTV Tool 设置"
+
+msgctxt "#30032"
+msgid "Config PVR IPTV Simple Client"
+msgstr "配置 PVR IPTV Simple Client"
