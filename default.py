@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import xbmc
 import xbmcgui
 import xbmcaddon
 import os
@@ -17,6 +18,7 @@ if(mode != -1):
 
     elif(mode == 1):
         addonid = 'pvr.iptvsimple'
+        xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Addons.SetAddonEnabled", "params": { "addonid": "%s", "enabled": true }, "id": 1 }' %(addonid))
         iptvsimple = xbmcaddon.Addon(id=addonid)
 
         iptvsimple.setSetting("logoPathType", "0") #set to local path

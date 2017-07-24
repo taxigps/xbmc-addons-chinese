@@ -1,2 +1,7 @@
+[B]1.0.1[/B]
+- fix error when script invoked without an addon
+- enabled addon pvr.iptvsimple before set settings
+- get EPG for phoenix tv channels
+
 [B]1.0.0[/B]
 - Initial version
