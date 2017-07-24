@@ -5,11 +5,12 @@ import os
 import datetime
 import traceback
 import urllib2
+import re
 import simplejson
 
 from resources.lib.utils import *
 
-def updateChannel(fHandle, channelID, channelName):
+def updateChannelCCTV(fHandle, channelID, channelName):
     try:
         log("Updating channel " + channelID)
 
@@ -38,6 +39,34 @@ def updateChannel(fHandle, channelID, channelName):
     except Exception:
         log(traceback.format_exc())
 
+def updateChannelPHNX(fHandle, channelID, siteID, channelName):
+    try:
+        log("Updating channel " + channelID)
+
+        dateInChina = (datetime.datetime.utcnow() + datetime.timedelta(hours=8)).replace(hour=0, minute=0) #UTC +0800
+
+        #Get data
+        request = urllib2.Request("https://www.tvsou.com/epg/%s/%s" % (siteID, dateInChina.strftime("%Y%m%d")))
+        resp = urllib2.urlopen(request)
+        data = resp.read().decode("utf-8")
+        programmes = re.compile('<li class="relative cur.*?data-name="([^"]+)" data-mainstars="([\d:]+)-([\d:]+)" data-content="([^"]+)"', re.DOTALL).findall(data)
+
+        #Write channel data
+        fHandle.write('<channel id="{0}">\n'.format(channelID))
+        fHandle.write('<display-name lang="cn">{0}</display-name>\n'.format(channelName))
+        fHandle.write('</channel>\n'.format(channelID))
+
+        #Write programme data
+        for entry in programmes:
+            startTime = dateInChina.replace(hour=int(entry[1].split(':')[0]), minute=int(entry[1].split(':')[1]))
+            stopTime  = dateInChina.replace(hour=int(entry[2].split(':')[0]), minute=int(entry[2].split(':')[1]))
+
+            fHandle.write('<programme start="{0}" stop="{1}" channel="{2}">\n'.format(formatDate(startTime), formatDate(stopTime), channelID))
+            fHandle.write('<title lang="cn">{0}</title>\n'.format(entry[0].encode("utf-8")))
+            fHandle.write('</programme>\n')
+    except Exception:
+        log(traceback.format_exc())
+
 def formatDate(obj):
     return obj.strftime("%Y%m%d%H%M00 +0800")
 
@@ -52,11 +81,15 @@ def doUpdate():
 
         if getSetting("epg_cctv") == "true":
             for id, name in CHANNEL_CCTV:
-                updateChannel(fHandle, id, name)
+                updateChannelCCTV(fHandle, id, name)
 
         if getSetting("epg_province") == "true":
             for id, name in CHANNEL_PROV:
-                updateChannel(fHandle, id, name)
+                updateChannelCCTV(fHandle, id, name)
+
+        if getSetting("epg_phoenix") == "true":
+            for id, id2, name in CHANNEL_PHNX:
+                updateChannelPHNX(fHandle, id, id2, name)
 
         fHandle.write('</tv>\n')
         fHandle.close()

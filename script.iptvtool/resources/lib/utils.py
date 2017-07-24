@@ -3,8 +3,8 @@
 import xbmc
 import xbmcaddon
 
-__addon__     = xbmcaddon.Addon()
-__addon__id__ = __addon__.getAddonInfo('id')
+__addon__id__ = 'script.iptvtool'
+__addon__     = xbmcaddon.Addon(__addon__id__)
 
 CHANNEL_CCTV = [
 	["cctv1",       "CCTV-1 综合"],
@@ -68,6 +68,11 @@ CHANNEL_PROV = [
 	["yanbian",     "延边卫视"],
 	["yunnan",      "云南卫视"],
 	["zhejiang",    "浙江卫视"],
+]
+
+CHANNEL_PHNX = [
+	["fenghuang",  "fhws",              "凤凰卫视"],
+	["fenghuang2", "fenghuangzixuntai", "凤凰资讯"],
 ]
 
 def log(txt):
