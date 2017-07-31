@@ -24,7 +24,7 @@ rootDir = addon.getAddonInfo('path')
 rootDir = xbmc.translatePath(rootDir)
 url1 = 'http://www.dnvod.tv'
 url2 = 'http://www.dnvod.tv/Movie/Readyplay.aspx?id=7COqHhPaRZg%3d'
-#get ASP.NET_SessionId
+#get SessionId
 def getSessionID (url1,url2):
     s=requests.Session()
     s.get(url1)
@@ -37,7 +37,7 @@ def getSessionID (url1,url2):
     return sessionID
 
 def getCookies():
-    cookies = 'ASP.NET_SessionId='+sessionID
+    cookies = 'dn_sid='+sessionID
     return cookies
 def getUserAgent():
     user_agent = 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'
@@ -272,6 +272,7 @@ def Episode():
     requestSec = urllib2.Request(urlSec,data,headers2)
     responseSec = urllib2.urlopen(requestSec)
     real_url = responseSec.read()
+    
     pattern = re.compile(r'(\d||\d\d||\d\d\d||\d\d\d\d||\d\d\d\d\d||\d\d\d\d\d\d||\d\d\d\d\d\d\d||\d\d\d\d\d\d\d\d)\.mp4')
     num = re.split(pattern,real_url)
     hdurl = num[0]+'hd-'+num[1]+'.mp4'
