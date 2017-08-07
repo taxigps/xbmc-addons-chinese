@@ -31,3 +31,6 @@ msgctxt "#32007"
 msgid "Use Shooter Player API (may become slower)"
 msgstr ""
 
+msgctxt "#32008"
+msgid "Use custom API token (register at assrt.net)" 
+msgstr ""

@@ -18,8 +18,7 @@ from cStringIO import StringIO
 import zlib
 import random
 from urlparse import urlparse
-from bs4 import BeautifulSoup
-import html5lib
+import json
 
 __addon__ = xbmcaddon.Addon()
 __author__     = __addon__.getAddonInfo('author')
@@ -282,39 +281,51 @@ def CalcFileHash(a):
 
 
 def getSubByTitle(title, langs):
+    DEFAULT_TOKEN = "vXMvTf8eu4pfmAVmllp8OY6aYqVbeB4F"
     subtitles_list = []
-    url = 'http://sub.makedie.me/sub/?searchword=%s&utm_source=xbmc&utm_medium=xbmc&utm_campaign=search' % title
+    token = __addon__.getSetting("customToken") or DEFAULT_TOKEN
+    extra_arg = ""
+    if title == os.path.basename(xbmc.Player().getPlayingFile()):
+        extra_arg = "&no_muxer=1"
+    url = 'http://api.assrt.net/v1/sub/search?token=%s&q=%s&xbmc=1%s' % (token, title, extra_arg)
     socket = urllib.urlopen( url )
     data = socket.read()
-    soup = BeautifulSoup(data, 'html5lib')
     socket.close()
-    results = soup.find_all("div", attrs={"class":"subitem"})
-    for it in results:
-            name = it.find("a", attrs={"class":"introtitle"})['title'].encode('utf-8').strip()
-            id = re.search('/xml/sub/\d+/(\d+).xml',
-                                  it.find("a", attrs={"class":"introtitle"})['href'].encode('utf-8')
-                                  ).group(1)
-            # match = it.find(text=re.compile("调校：*".decode('utf-8')))
-            # if match:
-            #     version = match[3:].encode('utf-8').strip().replace('\n','')
-            #     if version: name = version
-            subtype = re.findall("格式：\s*([^\(]+)(?:\(\?\))*".decode('utf-8'), it.ul.li.text.strip())
-            if subtype and subtype[0] and subtype[0]!=u'\u4e0d\u660e':#不明
-                name = '[' + subtype[0].encode('utf-8') + '] ' + name
-            rating = str(int(it.ul.img['src'].split('/')[-1].split('.')[0])/20)
-            match = it.find(text=re.compile("语言：".decode('utf-8')))
-            if match:
-                match = match.encode('utf-8')
-            else:
-                match = ''
-            if 'chi' in langs:
-                if '简' in match or '繁' in match or '双语' in match:
-                    subtitles_list.append({"language_name":"Chinese", "filename":name, "id":id, "language_flag":'zh', "rating":rating})
-                else:
-                    subtitles_list.append({"language_name":"", "filename":name, "id":id, "language_flag":'zh', "rating":rating})#default to chinese
-            elif 'eng' in langs and '英' in match:
-                subtitles_list.append({"language_name":"English", "filename":name, "id":id, "language_flag":'en', "rating":rating})
-            
+    result = json.loads(data)
+    if result['status']:
+        dialog = xbmcgui.Dialog()
+        if result['status'] == 30900 and token == DEFAULT_TOKEN:
+            dialog.notification(u'公共API配额超限', '建议使用自定义密钥', xbmcgui.NOTIFICATION_INFO, 3000)
+        else:
+            dialog.notification(u'API请求失败', '%d: %s' % (result['status'], result['errmsg']), xbmcgui.NOTIFICATION_ERROR, 3000)
+        return
+    for sub in result['sub']['subs']:
+        _ = []
+        for k in ('videoname', 'native_name'):
+            if k in sub and sub[k]:
+                _.append(sub[k])
+        it = {"id":sub['id'],
+                "filename": "/".join(_),
+                "rating":str(int(sub['vote_score'])/20),
+                "language_name":"",
+                "language_flag":""
+               }
+        if 'lang' in sub:
+            ll = sub['lang']['langlist']
+            if 'langchs' in ll or 'langcht' in ll or 'langdou' in ll:
+                it.update({"language_name":"Chinese", "language_flag":'zh'})
+            elif 'langeng' in ll:
+                it.update({"language_name":"English", "language_flag":'en'})
+            elif 'langjap' in ll:
+                it.update({"language_name":"Japanese", "language_flag":'jp'})
+            elif 'langkor' in ll:
+                it.update({"language_name":"Korea", "language_flag":'kr'})
+            elif 'langesp' in ll:
+                it.update({"language_name":"Spanish", "language_flag":'es'})
+            elif 'langfra' in ll:
+                it.update({"language_name":"France", "language_flag":'fr'})
+        subtitles_list.append(it)
+
     if subtitles_list:
         for it in subtitles_list:
             listitem = xbmcgui.ListItem(label=it["language_name"],
@@ -324,7 +335,7 @@ def getSubByTitle(title, langs):
                                   )
             listitem.setProperty( "sync", "false" )
             listitem.setProperty( "hearing_imp", "false" )
-            url = "plugin://%s/?action=download&id=%s" % (__scriptid__, '999999'+it["id"])
+            url = "plugin://%s/?action=download&id=%s" % (__scriptid__, '999999%s' % it["id"])
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
 
 def Search(item):
@@ -338,7 +349,8 @@ def Search(item):
         getSubByTitle(title, item['3let_language'])
     else:
         title = '%s %s' % (item['title'], item['year'])
-        getSubByTitle(title, item['3let_language'])#use shooter fake 
+        # pass original filename, api.assrt.net will handle it more properly
+        getSubByTitle(xbmc.getInfoLabel("VideoPlayer.Title"), item['3let_language']) # use shooter fake 
         if __addon__.getSetting("subSourceAPI") == 'true': # use splayer api
             if 'chi' in item['3let_language']:
                 getSubByHash(item['file_original_path'], "chn", "zh", "Chinese")
@@ -384,7 +396,7 @@ def DownloadID(id):
 
     subtitle_list = []
     if id.startswith('999999'):
-        url = 'http://sub.makedie.me/download/%06d/%s' %(int(id[6:]), 'XBMC.SUBTITLE')
+        url = 'http://assrt.net/download/%06d/%s' %(int(id[6:]), 'XBMC.SUBTITLE')
     else:
         url = 'http://shooter.cn/files/file3.php?hash=duei7chy7gj59fjew73hdwh213f&fileid=%s' % (id)
         socket = urllib.urlopen( url )

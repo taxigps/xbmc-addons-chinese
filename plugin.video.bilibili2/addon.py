@@ -3,7 +3,7 @@ from xbmcswift2 import Plugin, xbmc, xbmcgui
 from resources.lib.bilibili import Bilibili
 import time
 import string, random, os
-import tempfile
+
 try:
     from resources.lib.login_dialog import LoginDialog
 except:
@@ -13,6 +13,7 @@ except:
 
 plugin = Plugin()
 bilibili = Bilibili()
+tempdir = xbmc.translatePath('special://home/temp')
 
 def previous_page(endpoint, page, total_page, **kwargs):
     if int(page) > 1:
@@ -274,7 +275,7 @@ def login():
             if username=='' or password=='':
                 plugin.notify('用户名或密码为空', delay=2000)
                 return
-        filename = tempfile.gettempdir() + '/' + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) + '.jpg'
+        filename = tempdir + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) + '.jpg'
         captcha = LoginDialog(captcha = bilibili.get_captcha(filename)).get()
         os.remove(filename)
         result, msg = bilibili.login(username, password, captcha)

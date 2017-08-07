@@ -80,12 +80,13 @@ PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStre
 
 ## Program Add-ons
 
+* IPTV Tool - script.iptvtool - Automatic setting PVR IPTV Simple Client with chinese channels.
 * Skin Font - script.skinfont - Add arial font type to any skin for display chinese characters. 
 
 ## Subtitle Add-ons
 
 * 163sub - service.subtitles.163sub - Search and download subtitles from [www.163sub.com](http://www.163sub.com)
-* Shooter(Fake) - service.subtitles.makedie - Search and download subtitles from [sub.makedie.me](http://sub.makedie.me)
+* Shooter(Fake) - service.subtitles.makedie - Search and download subtitles from [assrt.net](http://assrt.net)
 * Sub HD - service.subtitles.subhd - Search and download subtitles from [subhd.com](http://subhd.com)
 * subom - service.subtitles.subom - Search and download subtitles from [subom.net](http://subom.net/)
 * zimuku - service.subtitles.zimuku - Search and download subtitles from [zimuku.net](http://www.zimuku.net)
