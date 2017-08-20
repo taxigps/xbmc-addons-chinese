@@ -7,7 +7,7 @@ import hashlib
 import time
 import simplejson
 
-# Plugin constants 
+# Plugin constants
 __addonname__ = "奇艺视频(QIYI)"
 __addonid__   = "plugin.video.qiyi"
 __addon__     = xbmcaddon.Addon(id=__addonid__)
@@ -16,65 +16,6 @@ CHANNEL_LIST = [['电影','1'], ['电视剧','2'], ['纪录片','3'], ['动漫',
 ORDER_LIST = [['4','更新时间'], ['11','热门']]
 PAYTYPE_LIST = [['','全部影片'], ['0','免费影片'], ['1','会员免费'], ['2','付费点播']]
 
-'''
-class QYPlayer(xbmc.Player):
-    def __init__(self):
-        xbmc.Player.__init__(self)
-
-    def play(self, name, thumb, baseurl, vlinks, gen_uid):
-        self.is_active = True
-        self.name = name
-        self.thumb = thumb
-        self.baseurl = baseurl
-        self.vlinks = vlinks
-        self.gen_uid = gen_uid
-        self.curpos = 0
-        self.geturl()
-        self.playrun()
-
-    def geturl(self):
-        if self.curpos < len(self.vlinks):
-            vlink = self.vlinks[self.curpos]["l"]
-            if not vlink.startswith("/"):
-                #vlink is encode
-                vlink=getVrsEncodeCode(vlink)
-            key=getDispathKey(vlink.split("/")[-1].split(".")[0])
-            baseurl=self.baseurl.split("/")
-            baseurl.insert(-1,key)
-            url="/".join(baseurl)+vlink+'?su='+self.gen_uid+'&qyid='+uuid4().hex+'&client=&z=&bt=&ct=&tn='+str(randint(10000,20000))
-            self.videourl=simplejson.loads(GetHttpData(url))["l"]
-            self.curpos = self.curpos + 1
-        else:
-            self.videourl = None
-
-    def playrun(self):
-        title = self.name + " - 第"+str(self.curpos)+"/"+str(len(self.vlinks)) + "节"
-        listitem = xbmcgui.ListItem(title,thumbnailImage=self.thumb)
-        listitem.setInfo(type="Video",infoLabels={"Title":title})
-        xbmc.Player.play(self, self.videourl, listitem)
-        self.geturl()
-
-    def onPlayBackStarted(self):
-        xbmc.Player.onPlayBackStarted(self)
-
-    def onPlayBackSeek(self, time, seekOffset):
-        xbmc.Player.onPlayBackSeek(self, time, seekOffset)
-
-    def onPlayBackSeekChapter(self, chapter):
-        xbmc.Player.onPlayBackSeek(self, chapter)
-
-    def onPlayBackEnded(self):
-        if self.videourl:
-            self.playrun()
-        else:
-            self.is_active = False
-            xbmc.Player.onPlayBackEnded(self)
-
-    def onPlayBackStopped(self):
-        self.is_active = False
-
-qyplayer = QYPlayer()
-'''
 
 def GetHttpData(url):
     print "getHttpData: " + url
@@ -103,7 +44,7 @@ def GetHttpData(url):
         if (charset != 'utf-8') and (charset != 'utf8'):
             httpdata = httpdata.decode(charset, 'ignore').encode('utf8', 'ignore')
     return httpdata
-   
+
 def urlExists(url):
     try:
         resp = urllib2.urlopen(url)
@@ -385,15 +326,33 @@ def seriesList(name,id,thumb,page):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def selResolution(items):
+    # stream_types = [
+    #     {'id': '4k', 'container': 'm3u8', 'video_profile': '4k'},
+    #     {'id': 'BD', 'container': 'm3u8', 'video_profile': '1080p'},
+    #     {'id': 'TD', 'container': 'm3u8', 'video_profile': '720p'},
+    #     {'id': 'TD_H265', 'container': 'm3u8', 'video_profile': '720p H265'},
+    #     {'id': 'HD', 'container': 'm3u8', 'video_profile': '540p'},
+    #     {'id': 'HD_H265', 'container': 'm3u8', 'video_profile': '540p H265'},
+    #     {'id': 'SD', 'container': 'm3u8', 'video_profile': '360p'},
+    #     {'id': 'LD', 'container': 'm3u8', 'video_profile': '210p'},
+    # ]
+    # vd_2_id = {10: '4k', 19: '4k', 5:'BD', 18: 'BD', 21: 'HD_H265', 2: 'HD', 4: 'TD', 17: 'TD_H265', 96: 'LD', 1: 'SD', 14: 'TD'}
+    # id_2_profile = {'4k':'4k', 'BD': '1080p','TD': '720p', 'HD': '540p', 'SD': '360p', 'LD': '210p', 'HD_H265': '540p H265', 'TD_H265': '720p H265'}
+
     ratelist = []
     for i in range(0,len(items)):
         if items[i] == 96: ratelist.append([7, '极速', i])    # 清晰度设置值, 清晰度, match索引
-        if items[i] == 1: ratelist.append([6, '流畅', i])
-        if items[i] == 2: ratelist.append([5, '标清', i])
-        if items[i] == 3: ratelist.append([4, '超清', i])
-        if items[i] == 4 or items[i] == 17: ratelist.append([3, '720P', i])
-        if items[i] == 5 or items[i] == 18: ratelist.append([2, '1080P', i])
-        if items[i] == 10 or items[i] == 19: ratelist.append([1, '4K', i])
+        elif items[i] == 1: ratelist.append([6, '流畅', i])
+        elif items[i] == 2: ratelist.append([5, '标清', i])
+        elif items[i] == 3: ratelist.append([4, '超清', i])
+        elif items[i] == 21: ratelist.append([4, '540p H265', i])
+        elif items[i] == 4 or items[i] == 14: ratelist.append([3, '720P', i])
+        elif items[i] == 17: ratelist.append([3, '720p H265', i])
+        elif items[i] == 5 or items[i] == 18: ratelist.append([2, '1080P', i])
+        elif items[i] == 10 or items[i] == 19: ratelist.append([1, '4K', i])
+        else:
+            ratelist.append([8, 'unknown', i])
+
     ratelist.sort()
     if len(ratelist) > 1:
         resolution = int(__addon__.getSetting('resolution'))
@@ -409,54 +368,6 @@ def selResolution(items):
     else:
         sel = 0
     return ratelist[sel][2]
-
-'''
-def getVRSXORCode(arg1,arg2):
-    loc3=arg2 %3
-    if loc3 == 1:
-        return arg1^121
-    if loc3 == 2:
-        return arg1^72
-    return arg1^103
-
-def getVrsEncodeCode(vlink):
-    loc6=0
-    loc2=''
-    loc3=vlink.split("-")
-    loc4=len(loc3)
-    # loc5=loc4-1
-    for i in range(loc4-1,-1,-1):
-        loc6=getVRSXORCode(int(loc3[loc4-i-1],16),i)
-        loc2+=chr(loc6)
-    return loc2[::-1]
-
-def mix(tvid):
-    salt = '4a1caba4b4465345366f28da7c117d20'
-    tm = str(randint(2000,4000))
-    src = 'eknas'
-    sc = hashlib.md5(salt + tm + tvid).hexdigest()
-    return tm,sc,src
-
-def getVMS(tvid,vid,uid):
-    #tm ->the flash run time for md5 usage
-    #um -> vip 1 normal 0
-    #authkey -> for password protected video ,replace '' with your password
-    #puid user.passportid may empty?
-    #TODO: support password protected video
-    tm,sc,src = mix(tvid)
-    vmsreq='http://cache.video.qiyi.com/vms?key=fvip&src=1702633101b340d8917a69cf8a4b8c7' +\
-                "&tvId="+tvid+"&vid="+vid+"&vinfo=1&tm="+tm+\
-                "&enc="+sc+\
-                "&qyid="+uid+"&tn="+str(random()) +"&um=1" +\
-                "&authkey="+hashlib.md5(hashlib.md5(b'').hexdigest()+str(tm)+tvid).hexdigest()
-    return simplejson.loads(GetHttpData(vmsreq))
-
-def getDispathKey(rid):
-    tp=")(*&^flash@#$%a"  #magic from swf
-    time=simplejson.loads(GetHttpData("http://data.video.qiyi.com/t?tn="+str(random())))["t"]
-    t=str(int(floor(int(time)/(10*60.0))))
-    return hashlib.md5(t+tp+rid).hexdigest()
-'''
 
 def getVMS(tvid, vid):
     t = int(time.time() * 1000)
@@ -489,13 +400,13 @@ def PlayVideo(name,id,thumb):
     else:
          tvId = id[0]
          videoId = id[1]
- 
+
     info = getVMS(tvId, videoId)
     if info["code"] != "A00000":
         dialog = xbmcgui.Dialog()
         ok = dialog.ok(__addonname__, '无法播放此视频')
         return
-    
+
     vs = info["data"]["vidl"]
     sel = selResolution([x['vd'] for x in vs])
     if sel == -1:

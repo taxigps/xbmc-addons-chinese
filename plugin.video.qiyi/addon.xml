@@ -1,8 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.qiyi"
-    name="奇艺视频(QIYI)"
-    version="2.2.7"
-    provider-name="taxigps">
+<addon id="plugin.video.qiyi" name="奇艺视频(QIYI)" version="2.2.8" provider-name="taxigps">
     <requires>
       <import addon="script.module.simplejson" version="3.3.0"/>
     </requires>
