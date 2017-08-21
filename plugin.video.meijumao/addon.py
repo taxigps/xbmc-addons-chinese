@@ -17,6 +17,9 @@ import urllib
 from bs4 import BeautifulSoup
 import html5lib
 import os
+import json
+import string
+from urllib import quote
 
 try:
     from ChineseKeyboard import Keyboard
@@ -25,16 +28,17 @@ except Exception as e:
 
 
 def post(url, data):
-    req = urllib2.Request(url)
-    # enable cookie
-    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
-    response = opener.open(req, data)
-    return response.read()
+    data = data.encode('utf-8')
+    request = urllib2.Request(url)
+    request.add_header('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
+    request.add_header('User-Agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A5297c Safari/602.1')
+    f = urllib2.urlopen(request, data)
+    return f.read().decode('utf-8')
 
 
 def get(url):
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36 Edge/15.15063',
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1',
         'Host': 'www.meijumao.net'}
     try:
         req = urllib2.Request(url, None, headers)
@@ -65,7 +69,6 @@ __index__ = [
     ("/maogetvs", u"猫哥推荐"),
     ("/alltvs", u"所有美剧"),
     ("/populartvs", u"热门美剧")
-    # ("/sitemaptvs",u"美剧索引")
 ]
 
 
@@ -158,7 +161,7 @@ def list_series(series, seriesname, fanart_image):
                 "\n", ""))
         if not serie.a.get("href").startswith("/"):
             continue
-        url = '{0}?action=play_video&episode={1}&name={2}'.format(
+        url = '{0}?action=list_playsource&episode={1}&name={2}'.format(
             _url,
             serie.a.get("href"),
             "[COLOR green]" +
@@ -187,13 +190,14 @@ def list_playsource(episode, name):
         list_item = xbmcgui.ListItem(label=source.get_text())
         if source.get("href").startswith("http"):
             continue
-        # url = '{0}?action=play_video&episode={1}&name={2}'.format(_url, source.get("href"),name)
+        url = '{0}?action=play_video&episode={1}&name={2}'.format(_url, source.get("href"),name)
         listing.append((source.get("href"), name))
     if len(listing) == 0:
         dialog.ok(__addonname__, '没有找到视频源')
         return
-    else:
-        play_video(listing[0])
+    xbmcplugin.addDirectoryItems(_handle, listing, len(listing))
+    xbmcplugin.endOfDirectory(_handle)
+        
 
 
 def play_video(episode, name):
@@ -202,7 +206,6 @@ def play_video(episode, name):
     :param path: str
     :return: None
     """
-    episode = episode.replace("show_episode?", "play_episode?")
     html = get(_meijumao + episode)
     if not html:
         dialog.ok(__addonname__, '没有找到视频源，播放出错')
@@ -218,23 +221,46 @@ def play_video(episode, name):
     for script in soup_js.find_all('script'):
         matched = re.search('http.*m3u8.*\"', script.get_text())
         if matched:
-            play_url = matched.group().replace(
+            return json.dumps({
+                "type":"m3u",
+                "url":matched.group().replace(
                 "\"",
                 "").replace(
                 "&amp;",
                 "&").replace(
                 "->application/x-mpegURL",
                 "")
+                })
     if len(play_url) == 0:
-        dialog.ok(__addonname__, '没有找到视频源，播放出错')
-        return
+        for iframe in soup_js.find_all("iframe"):
+            iframe_src = iframe.attrs['src']
+            bdurl = quote(iframe_src,safe=string.printable)
+            play_url = getBDyun(bdurl)
+    else:
+        play_url = _meijumao + episode 
     play_item = xbmcgui.ListItem(name)
-    play_item.setInfo(type="Video", infoLabels={"Title": name})
+    play_item.setInfo(type="Video", infoLabels={"Title": title})
     # Pass the item to the Kodi player.
     xbmcplugin.setResolvedUrl(_handle, True, listitem=play_item)
     # directly play the item.
     xbmc.Player().play(play_url, play_item)
 
+def getBDyun(bdurl):
+    html = get(bdurl)
+    soup = BeautifulSoup(html, "html.parser")
+    script = soup.find_all("script")[-1].string
+    url=""
+    for i in script.split("\n"):
+        if "url" in i:
+            url = i.split(":")[1].strip(" ").replace("'","").replace(",","").replace("\r","")
+            break
+    data = "url="+url+"&up=0"
+    bdjson = json.loads(post("https://meijumao.cn/yunparse/api.php", data))
+    if bdjson.get("msg") == "ok":
+        return bdjson.get("url")
+    else:
+        dialog.ok(__addonname__, '没有找到百度视频源，播放出错')
+        return None
 
 def search():
     keyboard = xbmc.Keyboard('', '请输入搜索内容')
