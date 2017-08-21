@@ -190,14 +190,15 @@ def list_playsource(episode, name):
         list_item = xbmcgui.ListItem(label=source.get_text())
         if source.get("href").startswith("http"):
             continue
-        url = '{0}?action=play_video&episode={1}&name={2}'.format(_url, source.get("href"),name)
-        listing.append((source.get("href"), name))
+        listing.append( source.get("href"))
     if len(listing) == 0:
         dialog.ok(__addonname__, '没有找到视频源')
         return
-    xbmcplugin.addDirectoryItems(_handle, listing, len(listing))
-    xbmcplugin.endOfDirectory(_handle)
-        
+    elif len(listing ) == 1:
+        play_video(listing[0], name)
+    else:
+        ret = dialog.select("选择播放源",listing)
+        play_video(ret, name)
 
 
 def play_video(episode, name):
