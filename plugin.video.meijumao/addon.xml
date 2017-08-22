@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="plugin.video.meijumao"
     name="美剧猫(meijumao)"
-    version="1.0.0"
+    version="1.0.1"
     provider-name="BirdZhang">
     <requires>
         <import addon="script.module.beautifulsoup4" version="4.3.2"/>
