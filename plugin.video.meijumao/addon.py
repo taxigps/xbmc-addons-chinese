@@ -29,9 +29,11 @@ except Exception as e:
 
 def post(url, data):
     data = data.encode('utf-8')
-    request = urllib2.Request(url)
-    request.add_header('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
-    request.add_header('User-Agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A5297c Safari/602.1')
+    request_headers = {
+        'Content-Type' :'application/x-www-form-urlencoded; charset=UTF-8',
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/10.0 Mobile/14A5297c Safari/602.1'
+        }
+    request = urllib2.Request(url,headers=request_headers)
     f = urllib2.urlopen(request, data)
     return f.read().decode('utf-8')
 
@@ -237,7 +239,7 @@ def play_video(episode, name):
                 })
     if len(play_url) == 0:
         for iframe in soup_js.find_all("iframe"):
-            iframe_src = iframe.attrs['src']
+            iframe_src = iframe.attrs['src'].encode("utf-8")
             bdurl = quote(iframe_src,safe=string.printable)
             play_url = getBDyun(bdurl)
     else:
