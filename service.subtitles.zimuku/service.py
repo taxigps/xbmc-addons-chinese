@@ -30,7 +30,8 @@ ZIMUKU_BASE = 'http://www.zimuku.net'
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
 def log(module, msg):
-    xbmc.log((u"%s::%s - %s" % (__scriptname__,module,msg,)).encode('utf-8'),level=xbmc.LOGDEBUG )
+    if isinstance(msg, unicode): msg = msg.encode("utf-8")
+    xbmc.log("{0}::{1} - {2}".format(__scriptname__,module,msg) ,level=xbmc.LOGDEBUG )
 
 def normalizeString(str):
     return str
@@ -38,20 +39,21 @@ def normalizeString(str):
 def Search( item ):
     subtitles_list = []
 
-    log( __name__ ,"Search for [%s] by name" % (os.path.basename( item['file_original_path'] ),))
+    log( sys._getframe().f_code.co_name ,"Search for [%s] by name" % (os.path.basename(item['file_original_path'])))
     if item['mansearch']:
         url = ZIMUKU_API % (item['mansearchstr'])
     elif len(item['tvshow']) > 0:
         url = ZIMUKU_API % (item['tvshow'])
     else:
         url = ZIMUKU_API % (item['title'])
+    log( sys._getframe().f_code.co_name ,"Search API url: %s" % (url))
     try:
         req = urllib2.Request(url)
         req.add_header('User-Agent', UserAgent)
         socket = urllib2.urlopen(req)
         data = socket.read()
         socket.close()
-        soup = BeautifulSoup(data)
+        soup = BeautifulSoup(data, 'html.parser')
     except:
         return
     results = soup.find_all("div", class_="item prel clearfix")
@@ -64,7 +66,7 @@ def Search( item ):
             socket = urllib2.urlopen(req)
             data = socket.read()
             socket.close()
-            soup = BeautifulSoup(data).find("div", class_="subs box clearfix")
+            soup = BeautifulSoup(data, 'html.parser').find("div", class_="subs box clearfix")
         except:
             return
         subs = soup.tbody.find_all("tr")
@@ -118,14 +120,16 @@ def Download(url,lang):
 
     subtitle_list = []
     exts = [".srt", ".sub", ".smi", ".ssa", ".ass" ]
+    log( sys._getframe().f_code.co_name ,"Download page: %s" % (url))
     try:
         req = urllib2.Request(url)
         req.add_header('User-Agent', UserAgent)
         socket = urllib2.urlopen(req)
         data = socket.read()
         socket.close()
-        soup = BeautifulSoup(data)
-        url = '%s%s' % (ZIMUKU_BASE, soup.find("li", class_="dlsub").a.get('href').encode('utf-8'))
+        soup = BeautifulSoup(data, 'html.parser')
+        url = '%s%s' % (ZIMUKU_BASE, soup.find("li", class_="dlsub").a.get('dlurl').encode('utf-8'))
+        log( sys._getframe().f_code.co_name ,"Download url: %s" % (url))
         req = urllib2.Request(url)
         req.add_header('User-Agent', UserAgent)
         socket = urllib2.urlopen(req)
@@ -135,6 +139,10 @@ def Download(url,lang):
         data = socket.read()
         socket.close()
     except:
+        log( sys.exc_info()[2].tb_frame.f_code.co_name, "(%d) [%s]" % (
+            sys.exc_info()[2].tb_lineno,
+            sys.exc_info()[1]
+            ))
         return []
     if len(data) < 1024:
         return []
