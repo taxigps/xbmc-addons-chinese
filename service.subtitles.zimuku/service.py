@@ -128,7 +128,10 @@ def Download(url,lang):
         data = socket.read()
         socket.close()
         soup = BeautifulSoup(data, 'html.parser')
-        url = '%s%s' % (ZIMUKU_BASE, soup.find("li", class_="dlsub").a.get('dlurl').encode('utf-8'))
+        dlpath = soup.find("li", class_="dlsub").a.get('href').encode('utf-8')
+        if dlpath[:10] != '/download/':
+            dlpath = soup.find("li", class_="dlsub").a.get('dlurl').encode('utf-8')
+        url = '%s%s' % (ZIMUKU_BASE, dlpath)
         log( sys._getframe().f_code.co_name ,"Download url: %s" % (url))
         req = urllib2.Request(url)
         req.add_header('User-Agent', UserAgent)
