@@ -1,26 +1,26 @@
 <?xml version="1.2" encoding="UTF-8"?>
 <scraper framework="1.2" date="2016-03-19">
   <NfoUrl dest="3">
-    <RegExp input="$$1" output="&lt;details&gt;&lt;url function=&quot;GetUrlByIMDBId&quot;&gt;http://movie.douban.com/j/subject_suggest?q=tt\1&lt;/url&gt;&lt;details&gt;" dest="3">
+    <RegExp input="$$1" output="&lt;details&gt;&lt;url function=&quot;GetUrlByIMDBId&quot;&gt;https://movie.douban.com/j/subject_suggest?q=tt\1&lt;/url&gt;&lt;details&gt;" dest="3">
       <expression>imdb....?/title/tt([0-9]*)</expression>
     </RegExp>
-    <RegExp input="$$1" output="&lt;details&gt;&lt;url function=&quot;GetUrlByIMDBId&quot;&gt;http://movie.douban.com/j/subject_suggest?q=tt\1&lt;/url&gt;&lt;details&gt;" dest="3+">
+    <RegExp input="$$1" output="&lt;details&gt;&lt;url function=&quot;GetUrlByIMDBId&quot;&gt;https://movie.douban.com/j/subject_suggest?q=tt\1&lt;/url&gt;&lt;details&gt;" dest="3+">
       <expression>imdb....?/Title\?([0-9]*)</expression>
     </RegExp>
   </NfoUrl>
   <GetUrlByIMDBId dest="3">
-    <RegExp input="$$1" output="&lt;details&gt;&lt;url&gt;http://api.douban.com/v2/movie/subject/\1&lt;/url&gt;&lt;id&gt;\1&lt;/id&gt;&lt;details&gt;" dest="3">
-      <expression>&quot;url&quot;:&quot;http:\\/\\/movie.douban.com\\/subject\\/([0-9]+)\\/[^&quot;]*&quot;</expression>
+    <RegExp input="$$1" output="&lt;details&gt;&lt;url&gt;https://api.douban.com/v2/movie/subject/\1&lt;/url&gt;&lt;id&gt;\1&lt;/id&gt;&lt;details&gt;" dest="3">
+      <expression>&quot;url&quot;:&quot;https:\\/\\/movie.douban.com\\/subject\\/([0-9]+)\\/[^&quot;]*&quot;</expression>
     </RegExp>
   </GetUrlByIMDBId>
   <CreateSearchUrl dest="3">
-    <RegExp input="$$1" output="&lt;url&gt;http://api.douban.com/v2/movie/search?q=\1&lt;/url&gt;" dest="3">
+    <RegExp input="$$1" output="&lt;url&gt;https://api.douban.com/v2/movie/search?q=\1&lt;/url&gt;" dest="3">
       <expression noclean="1"/>
     </RegExp>
   </CreateSearchUrl>
   <GetSearchResults dest="8">
 	<RegExp input="$$3" output="&lt;results sorted=&quot;yes&quot;&gt;\1&lt;/results&gt;" dest="8">
-	  <RegExp input="$$1" output="&lt;entity&gt;&lt;title&gt;\1 - \2 (\3)&lt;/title&gt;&lt;url&gt;http://api.douban.com/v2/movie/subject/\4&lt;/url&gt;&lt;id&gt;\4&lt;/id&gt;&lt;/entity&gt;" dest="3+">
+	  <RegExp input="$$1" output="&lt;entity&gt;&lt;title&gt;\1 - \2 (\3)&lt;/title&gt;&lt;url&gt;https://api.douban.com/v2/movie/subject/\4&lt;/url&gt;&lt;id&gt;\4&lt;/id&gt;&lt;/entity&gt;" dest="3+">
 		<expression repeat="yes">&quot;title&quot;: &quot;([^&quot;]*)&quot;, &quot;casts&quot;: \[[^\]]*\], &quot;collect_count&quot;: [0-9]*, &quot;original_title&quot;: &quot;([^&quot;]*)&quot;, &quot;subtype&quot;: &quot;tv&quot;, &quot;directors&quot;: \[[^\]]*\], &quot;year&quot;: &quot;(\d*)&quot;, &quot;images&quot;: \{[^\}]*\}, &quot;alt&quot;: &quot;[^&quot;]*&quot;, &quot;id&quot;: &quot;(\d*)&quot;</expression>
 	  </RegExp>
 	  <expression noclean="1" fixchars="1"/>
@@ -85,10 +85,10 @@
 	  <RegExp conditional="!tmdbfanart" input="$$2" output="&lt;url cache=&quot;\1-fanart.html&quot; function=&quot;GetFanart&quot;&gt;https://movie.douban.com/subject/\1/photos?type=S&lt;/url&gt;" dest="5+">
 		<expression/>
 	  </RegExp>
-      <RegExp input="$$2" output="&lt;url function=&quot;GetDetailsFromHTML&quot;&gt;http://movie.douban.com/subject/\1&lt;/url&gt;" dest="5+">
+      <RegExp input="$$2" output="&lt;url function=&quot;GetDetailsFromHTML&quot;&gt;https://movie.douban.com/subject/\1&lt;/url&gt;" dest="5+">
         <expression/>
       </RegExp>
-      <RegExp input="$$2" output="&lt;episodeguide&gt;&lt;url cache=&quot;\1-eps.html&quot;&gt;http://movie.douban.com/subject/\1&lt;/url&gt;&lt;/episodeguide&gt;" dest="5+">
+      <RegExp input="$$2" output="&lt;episodeguide&gt;&lt;url cache=&quot;\1-eps.html&quot;&gt;https://movie.douban.com/subject/\1&lt;/url&gt;&lt;/episodeguide&gt;" dest="5+">
         <expression></expression>
       </RegExp>
 	  <expression noclean="1"/>
@@ -107,16 +107,16 @@
   </GetDetailsFromHTML>
   <GetPoster dest="5">
     <RegExp input="$$6" output="&lt;details&gt;\1&lt;/details&gt;" dest="5">
-	  <RegExp input="$$1" output="&lt;thumb preview=&quot;\1thumb\2&quot;&gt;\1raw\2|Referer=http://movie.douban.com/&lt;/thumb&gt;" dest="6">
-        <expression repeat="yes" noclean="1,2">&lt;div class=&quot;cover&quot;&gt;\s*&lt;a href=&quot;https://movie.douban.com/photos/photo/[0-9]+/&quot;&gt;\s*&lt;img src=&quot;(https://[^/]+/view/photo/)thumb(/public/[^\.]+\.jpg)&quot; /&gt;</expression>
+	  <RegExp input="$$1" output="&lt;thumb preview=&quot;\1thumb\2&quot;&gt;\1raw\2|Referer=https://movie.douban.com/&lt;/thumb&gt;" dest="6">
+        <expression repeat="yes" noclean="1,2">&lt;div class=&quot;cover&quot;&gt;\s*&lt;a href=&quot;https://movie.douban.com/photos/photo/[0-9]+/&quot;&gt;\s*&lt;img src=&quot;(https://[^/]+/view/photo/)m(/public/[^\.]+\.jpg)&quot; /&gt;</expression>
       </RegExp>
       <expression noclean="1"/>
     </RegExp>
   </GetPoster>
   <GetFanart dest="5">
     <RegExp input="$$6" output="&lt;details&gt;&lt;fanart&gt;\1&lt;/fanart&gt;&lt;/details&gt;" dest="5">
-	  <RegExp input="$$1" output="&lt;thumb preview=&quot;\1thumb\2&quot;&gt;\1raw\2|Referer=http://movie.douban.com/&lt;/thumb&gt;" dest="6">
-        <expression repeat="yes" noclean="1,2">&lt;div class=&quot;cover&quot;&gt;\s*&lt;a href=&quot;https://movie.douban.com/photos/photo/[0-9]+/&quot;&gt;\s*&lt;img src=&quot;(https://[^/]+/view/photo/)thumb(/public/[^\.]+\.jpg)&quot; /&gt;</expression>
+	  <RegExp input="$$1" output="&lt;thumb preview=&quot;\1thumb\2&quot;&gt;\1raw\2|Referer=https://movie.douban.com/&lt;/thumb&gt;" dest="6">
+        <expression repeat="yes" noclean="1,2">&lt;div class=&quot;cover&quot;&gt;\s*&lt;a href=&quot;https://movie.douban.com/photos/photo/[0-9]+/&quot;&gt;\s*&lt;img src=&quot;(https://[^/]+/view/photo/)m(/public/[^\.]+\.jpg)&quot; /&gt;</expression>
       </RegExp>
       <expression noclean="1"/>
     </RegExp>
@@ -131,7 +131,7 @@
       <RegExp input="$$1" output="\1" dest="14">
         <expression>&quot;episode_list&quot;&gt;(.*?)&lt;/div&gt;</expression>
       </RegExp>
-      <RegExp input="$$14" output="&lt;episode&gt;&lt;url cache=&quot;douban-$$13-\1.html&quot;&gt;http://movie.douban.com/subject/$$13/episode/\1&lt;/url&gt;&lt;epnum&gt;\1&lt;/epnum&gt;&lt;season&gt;1&lt;/season&gt;&lt;/episode&gt;" dest="9">
+      <RegExp input="$$14" output="&lt;episode&gt;&lt;url cache=&quot;douban-$$13-\1.html&quot;&gt;https://movie.douban.com/subject/$$13/episode/\1&lt;/url&gt;&lt;epnum&gt;\1&lt;/epnum&gt;&lt;season&gt;1&lt;/season&gt;&lt;/episode&gt;" dest="9">
         <expression repeat="yes">(\d+)</expression>
       </RegExp>
       <expression noclean="1"/>

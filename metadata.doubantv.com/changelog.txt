@@ -1,3 +1,5 @@
+[B]1.2.3[/B]
+- Adapt the new douban api for posts and fanarts
 [B]1.2.2[/B]
 - Get full plot
 [B]1.2.1[/B]
