@@ -5,6 +5,7 @@
        provider-name="taxigps">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
+    <import addon="script.module.requests" version="2.4.3"/>
     <import addon="script.module.beautifulsoup4" version="4.3.2"/>
   </requires>
   <extension point="xbmc.subtitle.module"
