@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 import re
 import os
@@ -10,6 +10,7 @@ import xbmcvfs
 import xbmcaddon
 import xbmcgui,xbmcplugin
 from bs4 import BeautifulSoup
+import requests
 
 __addon__ = xbmcaddon.Addon()
 __author__     = __addon__.getAddonInfo('author')
@@ -35,24 +36,32 @@ def log(module, msg):
 def normalizeString(str):
     return str
 
-def GetHttpData(url, data=''):
-    if data:
-        req = urllib2.Request(url, data)
+
+HEADERS={'Cache-Control': 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, sdch',
+            'Accept-Language': 'en-US,en;q=0.8',
+            'User-Agent': 'Mozilla/6.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.5) Gecko/2008092417 Firefox/3.0.3'}
+
+def session_get(url, id='', referer=''):
+    if id:
+        HEADERS={'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'Accept-Encoding': 'gzip, deflate',
+            'Accept-Language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7',
+            'Host': 'subhd.com',
+            'Origin': 'http://subhd.com',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'}
+
+        s = requests.Session()
+        s.headers.update(HEADERS)
+        r = s.get(referer)
+        s.headers.update({'Referer': referer})
+        r = s.post(url, data={'sub_id': id})
+        return r.content
     else:
-        req = urllib2.Request(url)
-    req.add_header('User-Agent', UserAgent)
-    try:
-        response = urllib2.urlopen(req)
-        httpdata = response.read()
-        response.close()
-    except:
-        log(__name__, "%s (%d) [%s]" % (
-               sys.exc_info()[2].tb_frame.f_code.co_name,
-               sys.exc_info()[2].tb_lineno,
-               sys.exc_info()[1]
-               ))
-        return ''
-    return httpdata
+        s = requests.Session()
+        r = s.get(url)
+        return r.text
 
 def Search( item ):
     subtitles_list = []
@@ -67,9 +76,9 @@ def Search( item ):
     else:
         search_string = item['title']
     url = SUBHD_API % (urllib.quote(search_string))
-    data = GetHttpData(url)
+    data = session_get(url)
     try:
-        soup = BeautifulSoup(data)
+        soup = BeautifulSoup(data, "html.parser")
     except:
         return
 
@@ -79,9 +88,9 @@ def Search( item ):
     if (len(results) == 0) and (len(item['tvshow']) > 0):
         search_string = "%s S%.2d" % (item['tvshow'], int(item['season']))
         url = SUBHD_API % (urllib.quote(search_string))
-        data = GetHttpData(url)
+        data = session_get(url)
         try:
-            soup = BeautifulSoup(data)
+            soup = BeautifulSoup(data, "html.parser")
         except:
             return
         results = [x for x in soup.find_all("div", class_="box") if x.find('div', class_='tvlist')]
@@ -137,7 +146,8 @@ def rmtree(path):
         xbmcvfs.delete(os.path.join(path, file))
     xbmcvfs.rmdir(path) 
 
-def Download(url,lang):
+def Download(url, lang):
+    referer = url
     try: rmtree(__temp__)
     except: pass
     try: os.makedirs(__temp__)
@@ -146,49 +156,50 @@ def Download(url,lang):
     subtitle_list = []
     exts = [".srt", ".sub", ".txt", ".smi", ".ssa", ".ass" ]
     try:
-        data = GetHttpData(url)
-        soup = BeautifulSoup(data)
-        id = soup.find("button", class_="btn btn-danger btn-sm").get("sid").encode('utf-8')
+        log(__name__, url)
+        data = session_get(url)
+        soup = BeautifulSoup(data, "html.parser")
+        # log(__name__, str(soup))
+        id = soup.find("button", class_="btn btn-danger btn-sm").get("sid")
         url = "http://subhd.com/ajax/down_ajax"
-        values = {'sub_id':id}
-        para = urllib.urlencode(values)
-        data = GetHttpData(url, para)
+        data = session_get(url, id=id, referer=referer)
+
         match = re.compile('"url":"([^"]+)"').search(data)
         url = match.group(1).replace(r'\/','/').decode("unicode-escape").encode('utf-8')
-        if url[:4] <> 'http':
-            url = 'http://subhd.com%s' % (url)
-        data = GetHttpData(url)
     except:
         return []
-    if len(data) < 1024:
-        return []
-    zip = os.path.join(__temp__, "subtitles%s" % os.path.splitext(url)[1])
-    with open(zip, "wb") as subFile:
-        subFile.write(data)
-    subFile.close()
-    xbmc.sleep(500)
-    if data[:4] == 'Rar!' or data[:2] == 'PK':
-        xbmc.executebuiltin(('XBMC.Extract("%s","%s")' % (zip,__temp__,)).encode('utf-8'), True)
-    path = __temp__
-    dirs, files = xbmcvfs.listdir(path)
-    if ('__MACOSX') in dirs:
-        dirs.remove('__MACOSX')
-    if len(dirs) > 0:
-        path = os.path.join(__temp__, dirs[0].decode('utf-8'))
-        dirs, files = xbmcvfs.listdir(path)
-    list = []
-    for subfile in files:
-        if (os.path.splitext( subfile )[1] in exts):
-            list.append(subfile.decode('utf-8'))
-    if len(list) == 1:
-        subtitle_list.append(os.path.join(path, list[0]))
-    elif len(list) > 1:
-        sel = xbmcgui.Dialog().select('请选择压缩包中的字幕', list)
-        if sel == -1:
-            sel = 0
-        subtitle_list.append(os.path.join(path, list[sel]))
 
-    return subtitle_list
+    if url:
+        import zipfile
+        zipfile_path = os.path.join(__temp__, "subtitles.zip")
+        r = requests.get(url)
+        with open(zipfile_path, 'wb') as f:
+            f.write(r.content)
+        xbmc.sleep(500)
+        dirs, files = xbmcvfs.listdir(__temp__)
+
+        zip_ref = zipfile.ZipFile(os.path.join(__temp__, 'subtitles.zip'), 'r')
+        zip_ref.extractall(__temp__)
+        zip_ref.close()
+
+        dirs, files = xbmcvfs.listdir(__temp__)
+        sub_path = dirs[0]
+        dirs, files = xbmcvfs.listdir(os.path.join(__temp__, sub_path))
+
+        list = []
+        for subfile in files:
+            list.append(subfile.decode('utf-8'))
+        if len(list) == 1:
+            subtitle_list.append(os.path.join(__temp__, sub_path, list[0]))
+        elif len(list) > 1:
+            sel = xbmcgui.Dialog().select('请选择压缩包中的字幕', list)
+            if sel == -1:
+                sel = 0
+            subtitle_list.append(os.path.join(__temp__, sub_path, list[sel]))
+
+        return subtitle_list
+    else:
+        return None
 
 def get_params():
     param=[]
