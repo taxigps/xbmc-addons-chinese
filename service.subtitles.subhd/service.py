@@ -10,6 +10,7 @@ import xbmcaddon
 import xbmcgui,xbmcplugin
 from bs4 import BeautifulSoup
 import requests
+import simplejson
 
 __addon__ = xbmcaddon.Addon()
 __author__     = __addon__.getAddonInfo('author')
@@ -57,12 +58,12 @@ def session_get(url, id='', referer=''):
         s = requests.Session()
         s.headers.update(HEADERS)
         r = s.get(url)
-        return r.text
+        return r.content
 
 def Search( item ):
     subtitles_list = []
 
-    log( __name__ ,"Search for [%s] by name" % (os.path.basename( item['file_original_path'] ),))
+    log(sys._getframe().f_code.co_name, "Search for [%s] by name" % (os.path.basename( item['file_original_path'] ),))
     if item['mansearch']:
         search_string = item['mansearchstr']
     elif len(item['tvshow']) > 0:
@@ -157,12 +158,23 @@ def Download(url,lang):
         id = soup.find("button", class_="btn btn-danger btn-sm").get("sid").encode('utf-8')
         url = "http://subhd.com/ajax/down_ajax"
         data = session_get(url, id=id, referer=referer)
-        match = re.compile('"url":"([^"]+)"').search(data)
-        url = match.group(1).replace(r'\/','/').decode("unicode-escape").encode('utf-8')
-        if url[:4] <> 'http':
-            url = 'http://subhd.com%s' % (url)
-        data = session_get(url)
+        json_response = simplejson.loads(data)
+        if json_response['success']:
+            url = json_response['url'].replace(r'\/','/').decode("unicode-escape").encode('utf-8')
+            if url[:4] <> 'http':
+                url = 'http://subhd.com%s' % (url)
+            log(sys._getframe().f_code.co_name, "Downloading %s" % (url.decode('utf-8')))
+            data = session_get(url)
+        else:
+            msg = json_response['msg'].decode("unicode-escape")
+            xbmc.executebuiltin((u'XBMC.Notification("subhd","%s")' % (msg)).encode('utf-8'), True)
+            data = ''
     except:
+        log(sys._getframe().f_code.co_name, "%s (%d) [%s]" % (
+               sys.exc_info()[2].tb_frame.f_code.co_name,
+               sys.exc_info()[2].tb_lineno,
+               sys.exc_info()[1]
+               ))
         return []
     if len(data) < 1024:
         return []
