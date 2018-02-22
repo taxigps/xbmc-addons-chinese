@@ -5,11 +5,11 @@ import os
 import sys
 import xbmc
 import urllib
-import urllib2
 import xbmcvfs
 import xbmcaddon
 import xbmcgui,xbmcplugin
 from bs4 import BeautifulSoup
+import requests
 
 __addon__ = xbmcaddon.Addon()
 __author__     = __addon__.getAddonInfo('author')
@@ -35,24 +35,29 @@ def log(module, msg):
 def normalizeString(str):
     return str
 
-def GetHttpData(url, data=''):
-    if data:
-        req = urllib2.Request(url, data)
+def session_get(url, id='', referer=''):
+    if id:
+        HEADERS={'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'Accept-Encoding': 'gzip, deflate',
+            'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+            'Host': 'subhd.com',
+            'Origin': 'http://subhd.com',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0'}
+        s = requests.Session()
+        s.headers.update(HEADERS)
+        r = s.get(referer)
+        s.headers.update({'Referer': referer})
+        r = s.post(url, data={'sub_id': id})
+        return r.content
     else:
-        req = urllib2.Request(url)
-    req.add_header('User-Agent', UserAgent)
-    try:
-        response = urllib2.urlopen(req)
-        httpdata = response.read()
-        response.close()
-    except:
-        log(__name__, "%s (%d) [%s]" % (
-               sys.exc_info()[2].tb_frame.f_code.co_name,
-               sys.exc_info()[2].tb_lineno,
-               sys.exc_info()[1]
-               ))
-        return ''
-    return httpdata
+        HEADERS={'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, sdch',
+            'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0'}
+        s = requests.Session()
+        s.headers.update(HEADERS)
+        r = s.get(url)
+        return r.text
 
 def Search( item ):
     subtitles_list = []
@@ -67,9 +72,9 @@ def Search( item ):
     else:
         search_string = item['title']
     url = SUBHD_API % (urllib.quote(search_string))
-    data = GetHttpData(url)
+    data = session_get(url)
     try:
-        soup = BeautifulSoup(data)
+        soup = BeautifulSoup(data, "html.parser")
     except:
         return
 
@@ -79,9 +84,9 @@ def Search( item ):
     if (len(results) == 0) and (len(item['tvshow']) > 0):
         search_string = "%s S%.2d" % (item['tvshow'], int(item['season']))
         url = SUBHD_API % (urllib.quote(search_string))
-        data = GetHttpData(url)
+        data = session_get(url)
         try:
-            soup = BeautifulSoup(data)
+            soup = BeautifulSoup(data, "html.parser")
         except:
             return
         results = [x for x in soup.find_all("div", class_="box") if x.find('div', class_='tvlist')]
@@ -135,7 +140,7 @@ def rmtree(path):
         rmtree(os.path.join(path, dir))
     for file in files:
         xbmcvfs.delete(os.path.join(path, file))
-    xbmcvfs.rmdir(path) 
+    xbmcvfs.rmdir(path)
 
 def Download(url,lang):
     try: rmtree(__temp__)
@@ -143,21 +148,20 @@ def Download(url,lang):
     try: os.makedirs(__temp__)
     except: pass
 
+    referer = url
     subtitle_list = []
     exts = [".srt", ".sub", ".txt", ".smi", ".ssa", ".ass" ]
     try:
-        data = GetHttpData(url)
-        soup = BeautifulSoup(data)
+        data = session_get(url)
+        soup = BeautifulSoup(data, "html.parser")
         id = soup.find("button", class_="btn btn-danger btn-sm").get("sid").encode('utf-8')
         url = "http://subhd.com/ajax/down_ajax"
-        values = {'sub_id':id}
-        para = urllib.urlencode(values)
-        data = GetHttpData(url, para)
+        data = session_get(url, id=id, referer=referer)
         match = re.compile('"url":"([^"]+)"').search(data)
         url = match.group(1).replace(r'\/','/').decode("unicode-escape").encode('utf-8')
         if url[:4] <> 'http':
             url = 'http://subhd.com%s' % (url)
-        data = GetHttpData(url)
+        data = session_get(url)
     except:
         return []
     if len(data) < 1024:
