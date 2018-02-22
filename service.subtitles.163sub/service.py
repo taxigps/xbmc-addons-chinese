@@ -45,7 +45,7 @@ def Search( item ):
                                         int(item['episode']),)
     else:
         search_str = item['title']
-    log( __name__ ,"Search for [%s] with [%s]" % (os.path.basename( item['file_original_path'] ),search_str.decode('utf-8')))
+    log( sys._getframe().f_code.co_name ,"Search for [%s] with [%s]" % (os.path.basename( item['file_original_path'] ),search_str.decode('utf-8')))
     search_str = urllib.quote(search_str)
     lastid = ''
     results = []
@@ -122,6 +122,23 @@ def rmtree(path):
         xbmcvfs.delete(os.path.join(path, file))
     xbmcvfs.rmdir(path)
 
+def DownloadLinks(links):
+    for link in links:
+        url = link.get('href').encode('utf-8')
+        filename = os.path.basename(url)
+        try:
+            log(sys._getframe().f_code.co_name, "Trying %s" % (url))
+            socket = urllib.urlopen( url )
+            data = socket.read()
+            socket.close()
+            if len(data) > 1024:
+                return filename, data
+            else:
+                return '', ''
+        except Exception, e:
+            log(sys._getframe().f_code.co_name, "Failed to access %s" % (url))
+    return '', ''
+
 def Download(id,lang):
     try: rmtree(__temp__)
     except: pass
@@ -135,17 +152,11 @@ def Download(id,lang):
         socket = urllib.urlopen( url )
         data = socket.read()
         socket.close()
-        soup = BeautifulSoup(data)
-        url = soup.find("a", class_="down_ink download_link").get('href').encode('utf-8')
-        socket = urllib.urlopen( url )
-        #filename = socket.headers['Content-Disposition'].split('filename=')[1]
-        #if filename[0] == '"' or filename[0] == "'":
-        #    filename = filename[1:-1]
-        filename = os.path.basename(url)
-        data = socket.read()
-        socket.close()
+        soup = BeautifulSoup(data, "html.parser")
+        links = soup.find_all("a", class_="down_ink download_link")
     except:
         return []
+    filename, data = DownloadLinks(links)
     if len(data) < 1024:
         return []
     tempfile = os.path.join(__temp__, "subtitles%s" % os.path.splitext(filename)[1])
