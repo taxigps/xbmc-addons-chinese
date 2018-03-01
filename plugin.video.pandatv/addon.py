@@ -1,14 +1,18 @@
 ﻿# -*- coding: utf-8 -*-
 # Module: default
-# Author: Yangqian
+# Author: Yangqian;tclh123
 # Created on: 25.12.2015
 # License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
-# Largely following the example at 
+# Largely following the example at
 # https://github.com/romanvm/plugin.video.example/blob/master/main.py
-import xbmc,xbmcgui,urllib2,re,xbmcplugin
-from urlparse import parse_qsl
+
 import sys
 import json
+import time
+import logging
+from urlparse import parse_qsl
+
+import xbmc,xbmcgui,urllib2,re,xbmcplugin
 
 def post(url, data):
     req = urllib2.Request(url)
@@ -64,21 +68,58 @@ def room_list(game_id):
     # Finish creating a virtual folder.
     xbmcplugin.endOfDirectory(_handle)
 
+
 def play_video(room_id):
     """
     Play a video by the provided path.
     :param path: str
     :return: None
     """
-    f = urllib2.urlopen('http://www.panda.tv/api_room?roomid={room_id}'.format(room_id=room_id))
-    obj = json.loads(f.read())
-    path = 'http://pl3.live.panda.tv/live_panda/{video}.flv'.format(video=obj['data']['videoinfo']['room_key'])
-    play_item = xbmcgui.ListItem(path=path, thumbnailImage=obj['data']['hostinfo']['avatar'])
-    play_item.setInfo(type="Video", infoLabels={"Title":obj['data']['roominfo']['name']})
-    # Pass the item to the Kodi player.
-    xbmcplugin.setResolvedUrl(_handle, True, listitem=play_item)
-    # directly play the item.
-    xbmc.Player().play(path, play_item)
+    r = get_panda_url(room_id)
+    if r:
+        path, play_item = r
+        # Pass the item to the Kodi player.
+        xbmcplugin.setResolvedUrl(_handle, True, listitem=play_item)
+        # directly play the item.
+        xbmc.Player().play(path, play_item)
+
+
+def get_panda_url(roomid):
+    json_request_url ="http://www.panda.tv/api_room_v2?roomid={}&__plat=pc_web&_={}".format(roomid, int(time.time()))
+    f = urllib2.urlopen(json_request_url)
+    content = f.read()
+    api_json = json.loads(content)
+
+    errno = api_json["errno"]
+    errmsg = api_json["errmsg"]
+    if errno:
+        msg = "Errno : {}, Errmsg : {}".format(errno, errmsg)
+        xbmcgui.Dialog().ok('提示框', msg)
+        logging.error(msg)
+        return
+
+    data = api_json["data"]
+    title = data["roominfo"]["name"]
+    room_key = data["videoinfo"]["room_key"]
+    plflag = data["videoinfo"]["plflag"].split("_")
+    status = data["videoinfo"]["status"]
+    if status != "2":
+        msg = "The live stream is not online! (status:%s)" % status
+        xbmcgui.Dialog().ok('提示框', msg)
+        logging.error(msg)
+        return
+
+    data2 = json.loads(data["videoinfo"]["plflag_list"])
+    rid = data2["auth"]["rid"]
+    sign = data2["auth"]["sign"]
+    ts = data2["auth"]["time"]
+    real_url = "http://pl{}.live.panda.tv/live_panda/{}.flv?sign={}&ts={}&rid={}".format(plflag[1], room_key, sign, ts, rid)
+
+    play_item = xbmcgui.ListItem(path=real_url, thumbnailImage=data['hostinfo']['avatar'])
+    play_item.setInfo(type="Video", infoLabels={"Title": title})
+
+    return real_url, play_item
+
 
 def router(paramstring):
     """

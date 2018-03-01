@@ -450,8 +450,8 @@
 
 <addon id="plugin.video.pandatv"
     name="熊猫TV(pandatv)"
-    version="2.0.0"
-    provider-name="Yangqian">
+    version="2.0.5"
+    provider-name="Yangqian;tclh123">
     <requires>
         <import addon="script.module.beautifulsoup" version="3.0.8"/>
     </requires>
