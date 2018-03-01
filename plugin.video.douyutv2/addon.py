@@ -32,7 +32,10 @@ API_SECRET = u'bLFlashflowlad92'
 PAGE_LIMIT=10
 NEXT_PAGE=__language__(32001)
 headers={'Accept':
-     'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8','Accept-Encoding': 'gzip, deflate','User-Agent':'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:16.0) Gecko/20100101 Firefox/16.0'}
+     'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8','Accept-Encoding': 'gzip, deflate','User-Agent':'Mozilla/5.0 (iPad; CPU OS 8_1_3 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12B466 Safari/600.1.4'}
+
+# APPKEY = 'Y237pxTx2In5ayGz' #from android-hd client (https://gist.github.com/ERioK/d73f76dbb0334618ff905f1bf3363401)
+APPKEY = 'zNzMV1y4EMxOHS6I5WKm' # from https://github.com/soimort/you-get/commit/04b5f9f95adf4f584b26417bff19950cc7a46ef4#diff-d0fafb6251bc8f273f8afa0256ffd6f1R54
 
 #Initialize logging
 logging.getLogger().setLevel(logging.INFO)
@@ -137,42 +140,98 @@ def get_room(roomid,cdn):
       #  f.writelines([str(cdn),str(ts),str(sign),url,str(room)])
       return room
 
-def get_play_item_old(room):
-      img=room['data']['owner_avatar']
-      nickname=room['data']['nickname']
-      roomname=room['data']['room_name']
-      roomid=room['data']['room_id']
-      cdn=room['data']['rtmp_cdn']
-      combinedname=pars.unescape(u'{0}:{1}:{3}?cdn={2}'.format(nickname,roomname,cdn,roomid))
-      baseurl=room['data']['rtmp_url']
-      vbest=room['data']['rtmp_live']
-      multi_bitrate=room['data']['rtmp_multi_bitrate']
-      if len(multi_bitrate)!=0:
-        v900=room['data']['rtmp_multi_bitrate']['middle2']
-        v500=room['data']['rtmp_multi_bitrate']['middle']
-      else:
-        v900=vbest
-        v500=vbest
-      if __addon__.getSetting("videoQuality") == "0":
-          vquality=vbest
-      elif __addon__.getSetting("videoQuality") == "1":
-          vquality=v900
-      else:
-          vquality=v500
-      path='{0}/{1}'.format(baseurl,vquality)
-      play_item = xbmcgui.ListItem(combinedname,path=path,thumbnailImage=img)
-      play_item.setInfo(type="Video",infoLabels={"Title":combinedname})
-      return (path,play_item)
+
+# def get_play_item_old(room):
+#       img=room['data']['owner_avatar']
+#       nickname=room['data']['nickname']
+#       roomname=room['data']['room_name']
+#       roomid=room['data']['room_id']
+#       cdn=room['data']['rtmp_cdn']
+#       combinedname=pars.unescape(u'{0}:{1}:{3}?cdn={2}'.format(nickname,roomname,cdn,roomid))
+#       baseurl=room['data']['rtmp_url']
+#       vbest=room['data']['rtmp_live']
+#       multi_bitrate=room['data']['rtmp_multi_bitrate']
+#       if len(multi_bitrate)!=0:
+#         v900=room['data']['rtmp_multi_bitrate']['middle2']
+#         v500=room['data']['rtmp_multi_bitrate']['middle']
+#       else:
+#         v900=vbest
+#         v500=vbest
+#       if __addon__.getSetting("videoQuality") == "0":
+#           vquality=vbest
+#       elif __addon__.getSetting("videoQuality") == "1":
+#           vquality=v900
+#       else:
+#           vquality=v500
+#       path='{0}/{1}'.format(baseurl,vquality)
+#       play_item = xbmcgui.ListItem(combinedname,path=path,thumbnailImage=img)
+#       play_item.setInfo(type="Video",infoLabels={"Title":combinedname})
+#       return (path,play_item)
+
+
+# def get_play_item(roomid, cdn):
+#     html = urllib2.urlopen("http://www.douyu.com/%s" % (roomid)).read().decode('utf-8')
+#     match = re.search(r'"room_id"\s*:\s*(\d+),', html)
+#     if match:
+#         if match.group(0) != u'0':
+#             roomid = match.group(1)
+# 
+#     json_request_url = "http://m.douyu.com/html5/live?roomId=%s" % roomid
+#     res = json.loads(urllib2.urlopen(json_request_url).read().decode('utf-8'))
+#     status = res.get('error', 0)
+#     if status is not 0:
+#         logging.error('Unable to get information for roomid: %s' % (roomid))
+#         return '', None #Error
+#     data = res['data']
+#     if data['show_status'] != u'1':
+#         logging.error('The live stream is not online.')
+#         return '', None #The live stream is not online
+#     img=data['avatar']
+#     nickname=data['nickname']
+#     roomname=data['room_name']
+#     combinedname=pars.unescape(u'{0}:{1}:{3}?cdn={2}'.format(nickname,roomname,cdn,roomid))
+# 
+# 
+#     tt = int(time.time()) 
+#     did = uuid.uuid4().hex.upper()
+#     sign_content = 'lapi/live/thirdPart/getPlay/{0}?aid=pcclient&cdn={1}&rate={2}&time={3}9TUk5fjjUjg9qIMH3sdnh'.format(roomid,
+#             cdn, '0', tt).encode("ascii")
+#     sign = hashlib.md5(sign_content.encode('utf-8')).hexdigest()
+#     headers = {"auth": sign, "time": str(tt), "aid": "pcclient"}
+# 
+#     json_request_url = "https://coapi.douyucdn.cn/lapi/live/thirdPart/getPlay/{0}?cdn={1}&rate={2}".format(roomid,
+#             cdn, '0')
+#     content = urllib2.urlopen(urllib2.Request(json_request_url,
+#         headers=headers)).read()
+# 
+#     res = json.loads(content.decode('utf-8'))
+#     status = res.get('error', 0)
+#     if status is not 0:
+#         logging.error('Unable to get URL for roomid: %s' % (roomid))
+#         return '', None #Error
+#     data = res['data']
+#     path = data.get('live_url')
+#     play_item = xbmcgui.ListItem(combinedname,path=path,thumbnailImage=img)
+#     play_item.setInfo(type="Video",infoLabels={"Title":combinedname})
+#     return (roomid,path,play_item)
+
 
 def get_play_item(roomid, cdn):
-    html = urllib2.urlopen("http://www.douyu.com/%s" % (roomid)).read().decode('utf-8')
-    match = re.search(r'"room_id"\s*:\s*(\d+),', html)
+    html = requests.get("http://www.douyu.com/%s" % roomid, headers=headers).text
+    match = re.search(r'"room_id"\s*:\s*(\d+),', html) or re.search(r'data-onlineid=(\d+)', html)
     if match:
         if match.group(0) != u'0':
             roomid = match.group(1)
 
-    json_request_url = "http://m.douyu.com/html5/live?roomId=%s" % roomid
-    res = json.loads(urllib2.urlopen(json_request_url).read().decode('utf-8'))
+    authstr = 'room/{0}?aid=wp&cdn={1}&client_sys=wp&time={2}'.format(roomid, cdn, int(time.time()))
+    authmd5 = hashlib.md5((authstr + APPKEY).encode()).hexdigest()
+    url = 'http://www.douyutv.com/api/v1/{0}&auth={1}'.format(authstr, authmd5)
+    try:
+        res = requests.get(url, headers=headers).json()
+    except ValueError as e:
+        logging.error('ApiError: %s' % str(e))
+        return '', None
+
     status = res.get('error', 0)
     if status is not 0:
         logging.error('Unable to get information for roomid: %s' % (roomid))
@@ -181,31 +240,15 @@ def get_play_item(roomid, cdn):
     if data['show_status'] != u'1':
         logging.error('The live stream is not online.')
         return '', None #The live stream is not online
-    img=data['avatar']
+    img=data['owner_avatar']
     nickname=data['nickname']
     roomname=data['room_name']
     combinedname=pars.unescape(u'{0}:{1}:{3}?cdn={2}'.format(nickname,roomname,cdn,roomid))
 
+    realurl = data.get('rtmp_url')+'/'+ data.get('rtmp_live')
+    # hls = data.get('hls_url')
 
-    tt = int(time.time()) 
-    did = uuid.uuid4().hex.upper()
-    sign_content = 'lapi/live/thirdPart/getPlay/{0}?aid=pcclient&cdn={1}&rate={2}&time={3}9TUk5fjjUjg9qIMH3sdnh'.format(roomid,
-            cdn, '0', tt).encode("ascii")
-    sign = hashlib.md5(sign_content.encode('utf-8')).hexdigest()
-    headers = {"auth": sign, "time": str(tt), "aid": "pcclient"}
-
-    json_request_url = "https://coapi.douyucdn.cn/lapi/live/thirdPart/getPlay/{0}?cdn={1}&rate={2}".format(roomid,
-            cdn, '0')
-    content = urllib2.urlopen(urllib2.Request(json_request_url,
-        headers=headers)).read()
-
-    res = json.loads(content.decode('utf-8'))
-    status = res.get('error', 0)
-    if status is not 0:
-        logging.error('Unable to get URL for roomid: %s' % (roomid))
-        return '', None #Error
-    data = res['data']
-    path = data.get('live_url')
+    path = realurl
     play_item = xbmcgui.ListItem(combinedname,path=path,thumbnailImage=img)
     play_item.setInfo(type="Video",infoLabels={"Title":combinedname})
     return (roomid,path,play_item)
@@ -254,10 +297,6 @@ def play_video(roomid):
     else:
         douyu.wait_for_idle(1)
 
-
-      
-
- 
 
 def router(paramstring):
     """
