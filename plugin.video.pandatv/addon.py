@@ -6,6 +6,7 @@
 # Largely following the example at
 # https://github.com/romanvm/plugin.video.example/blob/master/main.py
 
+import re
 import sys
 import json
 import time
@@ -13,6 +14,11 @@ import logging
 from urlparse import parse_qsl
 
 import xbmc,xbmcgui,urllib2,re,xbmcplugin
+
+TITLE_PATTERN = '{author}:{topic}:{view_count}'
+RE_ROOM_INFOS = re.compile(r"""<span class="video-title" title=".*?">(.*?)</span>\s*<span class="video-nickname">\s*<i class="icon-host-level.*"></i>\s*(.*?)\s*</span>\s*<span class="video-number">(.*?)</span>""")
+RE_ROOM_IMG = re.compile(r'<img class="video-img.*" data-original="(.*?)" alt=".*?">')
+
 
 def post(url, data):
     req = urllib2.Request(url)
@@ -33,6 +39,12 @@ def list_categories():
     obj = json.loads(f.read())
 
     listing=[]
+
+    list_item = xbmcgui.ListItem(label='全部直播')
+    # list_item.setProperty('fanart_image', game['img'])
+    url='{0}?action=all'.format(_url)
+    listing.append((url, list_item, True))
+
     for game in obj['data']:
         list_item = xbmcgui.ListItem(label=game['cname'], thumbnailImage=game['img'])
         list_item.setProperty('fanart_image', game['img'])
@@ -47,10 +59,34 @@ def list_categories():
     xbmcplugin.endOfDirectory(_handle)
 
 
-def room_list(game_id):
+# def all_list():
+#     html = urllib2.urlopen('https://www.panda.tv/all').read()
+# 
+#     room_ids = re.findall(r'<a href="/\d+" class="video-list-item-wrap" data-id="(\d+)">', html)
+#     room_infos = RE_ROOM_INFOS.findall(html, re.MULTILINE)
+#     room_imgs = RE_ROOM_IMG.findall(html)
+# 
+#     listing=[]
+#     for i, room_id in enumerate(room_ids):
+#         room_name, author, view_count = room_infos[i]
+#         img = room_imgs[i]
+#         title = TITLE_PATTERN.format(topic=room_name, author=author, view_count=view_count)
+#         list_item = xbmcgui.ListItem(label=title, thumbnailImage=img)
+#         list_item.setProperty('fanart_image', img)
+#         url='{0}?action=play&room_id={1}'.format(_url, room_id)
+#         is_folder=False
+#         listing.append((url, list_item, is_folder))
+#     xbmcplugin.addDirectoryItems(_handle, listing, len(listing))
+#     xbmcplugin.endOfDirectory(_handle)
 
-    apiurl = "http://api.m.panda.tv/ajax_get_live_list_by_cate";
-    params = "__plat=iOS&__version=1.0.5.1098&cate={ename}&order=person_num&pageno=1&pagenum=100&status=2".format(ename=game_id)
+
+def room_list(game_id):
+    if game_id == 'ALL':
+        apiurl = 'http://api.m.panda.tv/ajax_live_lists'
+        params = 'pageno=1&pagenum=100&status=2&order=person_num&sproom=1&__version=2.0.1.1481&__plat=android&banner=1'
+    else:
+        apiurl = "http://api.m.panda.tv/ajax_get_live_list_by_cate"
+        params = "__plat=iOS&__version=1.0.5.1098&cate={ename}&order=person_num&pageno=1&pagenum=100&status=2".format(ename=game_id)
 
     returndata = post(apiurl, params);
 
@@ -58,7 +94,8 @@ def room_list(game_id):
 
     listing=[]
     for room in obj['data']['items']:
-        list_item = xbmcgui.ListItem(label=room['name'], thumbnailImage=room['pictures']['img'])
+        title = TITLE_PATTERN.format(topic=room['name'].encode('utf-8'), author=room['userinfo']['nickName'].encode('utf-8'), view_count=room['person_num'].encode('utf-8'))
+        list_item = xbmcgui.ListItem(label=title, thumbnailImage=room['pictures']['img'])
         list_item.setProperty('fanart_image', room['pictures']['img'])
         url='{0}?action=play&room_id={1}'.format(_url, room['id'])
         is_folder=False
@@ -99,7 +136,10 @@ def get_panda_url(roomid):
         return
 
     data = api_json["data"]
-    title = data["roominfo"]["name"]
+    topic = data["roominfo"]["name"]
+    author = data['hostinfo']['name']
+    view_count = data['roominfo']['person_num']
+    title = TITLE_PATTERN.format(topic=topic.encode('utf-8'), author=author.encode('utf-8'), view_count=view_count.encode('utf-8'))
     room_key = data["videoinfo"]["room_key"]
     plflag = data["videoinfo"]["plflag"].split("_")
     status = data["videoinfo"]["status"]
@@ -139,6 +179,9 @@ def router(paramstring):
         elif params['action'] == 'play':
             # Play a video from a provided URL.
             play_video(params['room_id'])
+        elif params['action'] == 'all':
+            # all_list()
+            room_list('ALL')
     else:
         # If the plugin is called from Kodi UI without any parameters,
         # display the list of video categories

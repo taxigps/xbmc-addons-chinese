@@ -1,8 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.pandatv"
-    name="熊猫TV(pandatv)"
-    version="2.0.5"
-    provider-name="Yangqian;tclh123">
+<addon id="plugin.video.pandatv" name="熊猫TV(pandatv)" version="2.0.14" provider-name="Yangqian;tclh123">
     <requires>
         <import addon="script.module.beautifulsoup" version="3.0.8"/>
     </requires>
