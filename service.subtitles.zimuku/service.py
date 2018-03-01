@@ -41,11 +41,12 @@ def Search( item ):
 
     log( sys._getframe().f_code.co_name ,"Search for [%s] by name" % (os.path.basename(item['file_original_path'])))
     if item['mansearch']:
-        url = ZIMUKU_API % (item['mansearchstr'])
+        search_str = item['mansearchstr']
     elif len(item['tvshow']) > 0:
-        url = ZIMUKU_API % (item['tvshow'])
+        search_str = item['tvshow']
     else:
-        url = ZIMUKU_API % (item['title'])
+        search_str = item['title']
+    url = ZIMUKU_API % (urllib.quote(search_str))
     log( sys._getframe().f_code.co_name ,"Search API url: %s" % (url))
     try:
         req = urllib2.Request(url)
@@ -112,6 +113,28 @@ def rmtree(path):
         xbmcvfs.delete(os.path.join(path, file))
     xbmcvfs.rmdir(path)
 
+def DownloadLinks(links):
+    for link in links:
+        dlpath = link.get('href').encode('utf-8')
+        url = '%s%s' % (ZIMUKU_BASE, dlpath)
+        try:
+            log( sys._getframe().f_code.co_name ,"Download url: %s" % (url))
+            req = urllib2.Request(url)
+            req.add_header('User-Agent', UserAgent)
+            socket = urllib2.urlopen(req)
+            filename = socket.headers['Content-Disposition'].split('filename=')[1]
+            if filename[0] == '"' or filename[0] == "'":
+                filename = filename[1:-1]
+            data = socket.read()
+            socket.close()
+            if len(data) > 1024:
+                return filename, data
+            else:
+                return '', ''
+        except Exception, e:
+            log(sys._getframe().f_code.co_name, "Failed to access %s" % (url))
+    return '', ''
+
 def Download(url,lang):
     try: rmtree(__temp__)
     except: pass
@@ -126,27 +149,24 @@ def Download(url,lang):
         req.add_header('User-Agent', UserAgent)
         socket = urllib2.urlopen(req)
         data = socket.read()
-        socket.close()
         soup = BeautifulSoup(data, 'html.parser')
-        dlpath = soup.find("li", class_="dlsub").a.get('href').encode('utf-8')
-        if dlpath[:10] != '/download/':
-            dlpath = soup.find("li", class_="dlsub").a.get('dlurl').encode('utf-8')
-        url = '%s%s' % (ZIMUKU_BASE, dlpath)
-        log( sys._getframe().f_code.co_name ,"Download url: %s" % (url))
+        urlpath = soup.find("li", class_="dlsub").a.get('href').encode('utf-8')
+        url = 'http:%s' % (urlpath)
+        log( sys._getframe().f_code.co_name ,"Download links: %s" % (url))
         req = urllib2.Request(url)
         req.add_header('User-Agent', UserAgent)
         socket = urllib2.urlopen(req)
-        filename = socket.headers['Content-Disposition'].split('filename=')[1]
-        if filename[0] == '"' or filename[0] == "'":  
-            filename = filename[1:-1]  
         data = socket.read()
         socket.close()
+        soup = BeautifulSoup(data, 'html.parser')
+        links = soup.find("div", {"class":"clearfix"}).find_all('a')
     except:
         log( sys.exc_info()[2].tb_frame.f_code.co_name, "(%d) [%s]" % (
             sys.exc_info()[2].tb_lineno,
             sys.exc_info()[1]
             ))
         return []
+    filename, data = DownloadLinks(links)
     if len(data) < 1024:
         return []
     tempfile = os.path.join(__temp__, "subtitles%s" % os.path.splitext(filename)[1])
