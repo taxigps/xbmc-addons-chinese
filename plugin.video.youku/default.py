@@ -401,7 +401,7 @@ def PlayVideo(name,id,thumb):
     cna = res.headers['etag'][1:-1]
     query = urllib.urlencode(dict(
         vid       = id,
-        ccode     = '0401',
+        ccode     = '0507',
         client_ip = '192.168.1.1',
         utid      = cna,
         client_ts = time.time() / 1000
@@ -432,7 +432,7 @@ def PlayVideo(name,id,thumb):
     if vid != id:
         query = urllib.urlencode(dict(
             vid       = id,
-            ccode     = '0401',
+            ccode     = '0507',
             client_ip = '192.168.1.1',
             utid      = cna,
             client_ts = time.time() / 1000
