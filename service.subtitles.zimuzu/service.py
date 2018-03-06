@@ -41,6 +41,7 @@ def normalizeString(str):
     return str
 
 def GetHttpData(url, data=''):
+    log(sys._getframe().f_code.co_name, "url [%s]" % (url))
     if data:
         req = urllib2.Request(url, data)
     else:
@@ -51,8 +52,7 @@ def GetHttpData(url, data=''):
         httpdata = response.read()
         response.close()
     except:
-        log(__name__, "%s (%d) [%s]" % (
-               sys.exc_info()[2].tb_frame.f_code.co_name,
+        log(sys._getframe().f_code.co_name, "(%d) [%s]" % (
                sys.exc_info()[2].tb_lineno,
                sys.exc_info()[1]
                ))
@@ -62,7 +62,7 @@ def GetHttpData(url, data=''):
 def Search( item ):
     subtitles_list = []
 
-    log( __name__ ,"Search for [%s] by name" % (os.path.basename( item['file_original_path'] ),))
+    log(sys._getframe().f_code.co_name, "Search for [%s] by name" % (os.path.basename( item['file_original_path'] )))
     if item['mansearch']:
         search_string = item['mansearchstr']
     elif len(item['tvshow']) > 0:
@@ -74,7 +74,7 @@ def Search( item ):
     url = ZIMUZU_API % (urllib.quote(search_string))
     data = GetHttpData(url)
     try:
-        soup = BeautifulSoup(data)
+        soup = BeautifulSoup(data, 'html.parser')
     except:
         return
     results = soup.find_all("div", class_="search-item")
@@ -119,8 +119,11 @@ def Download(url):
     exts = [".srt", ".sub", ".txt", ".smi", ".ssa", ".ass" ]
     try:
         data = GetHttpData(url)
-        soup = BeautifulSoup(data)
+        soup = BeautifulSoup(data, 'html.parser')
         url = soup.find("div", class_="subtitle-links").a.get('href').encode('utf-8')
+        data = GetHttpData(url)
+        soup = BeautifulSoup(data, 'html.parser')
+        url = soup.find("div", class_="download-box").a.get('href').encode('utf-8')
         data = GetHttpData(url)
     except:
         return []
