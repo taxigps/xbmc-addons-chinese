@@ -868,6 +868,24 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
   </extension>
 </addon>
 
+<addon id="service.subtitles.zimushe"
+       name="ZMS"
+       version="1.0.0"
+       provider-name="taxigps">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+    <import addon="script.module.beautifulsoup4" version="4.3.2"/>
+  </requires>
+  <extension point="xbmc.subtitle.module"
+             library="service.py" />
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">ZMS subtitle</summary>
+    <summary lang="zh">ZMS!字幕社</summary>
+    <description lang="en">Search and download subtitles from www.zimushe.com</description>
+    <description lang="zh">从 www.zimushe.com 下载字幕</description>
+  </extension>
+</addon>
+
 <addon id="service.subtitles.zimuzu"
        name="ZiMuZu"
        version="1.0.3"
