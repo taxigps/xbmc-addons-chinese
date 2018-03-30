@@ -1,5 +1,5 @@
 ﻿# -*- coding: utf-8 -*-
-import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, re, string, sys, os, gzip, StringIO, math
+import xbmc, xbmcgui, xbmcplugin, xbmcaddon, urllib2, urllib, re, string, sys, os, gzip, StringIO, math, urlparse
 import base64, time, cookielib
 import simplejson
 
@@ -379,8 +379,8 @@ def selResolution(streamtypes):
     for i in range(0,len(streamtypes)):
         if streamtypes[i] in ('flv', 'flvhd'): ratelist.append([4, '标清', i, 'flv']) # [清晰度设置值, 清晰度, streamtypes索引]
         if streamtypes[i] in ('mp4', 'mp4hd'): ratelist.append([3, '高清', i, 'mp4'])
-        if streamtypes[i] in ('hd2', 'mp4hd2'): ratelist.append([2, '超清', i, 'hd2'])
-        if streamtypes[i] in ('hd3', 'mp4hd3'): ratelist.append([1, '1080P', i, 'hd3'])
+        if streamtypes[i] in ('hd2', 'hd2v2', 'mp4hd2', 'mp4hd2v2'): ratelist.append([2, '超清', i, 'hd2'])
+        if streamtypes[i] in ('hd3', 'hd3v2', 'mp4hd3', 'mp4hd3v2'): ratelist.append([1, '1080P', i, 'hd3'])
     ratelist.sort()
     if len(ratelist) > 1:
         resolution = int(__addon__.getSetting('resolution'))
@@ -388,7 +388,7 @@ def selResolution(streamtypes):
             list = [x[1] for x in ratelist]
             sel = xbmcgui.Dialog().select('清晰度（低网速请选择低清晰度）', list)
             if sel == -1:
-                return None, None
+                return None, None, None, None
         else:
             sel = 0
             while sel < len(ratelist)-1 and resolution > ratelist[sel][0]: sel += 1
@@ -396,20 +396,50 @@ def selResolution(streamtypes):
         sel = 0
     return streamtypes[ratelist[sel][2]], ratelist[sel][1], ratelist[sel][2], ratelist[sel][3]
 
-def PlayVideo(name,id,thumb):
+def youku_ups(id):
     res = urllib2.urlopen('https://log.mmstat.com/eg.js')
     cna = res.headers['etag'][1:-1]
     query = urllib.urlencode(dict(
         vid       = id,
-        ccode     = '0507',
+        ccode     = '0502',
         client_ip = '192.168.1.1',
         utid      = cna,
-        client_ts = time.time() / 1000
+        client_ts = time.time() / 1000,
+        ckey      = 'DIl58SLFxFNndSV1GFNnMQVYkx1PP5tKe1siZu/86PR1u/Wh1Ptd+WOZsHHWxysSfAOhNJpdVWsdVJNsfJ8Sxd8WKVvNfAS8aS8fAOzYARzPyPc3JvtnPHjTdKfESTdnuTW6ZPvk2pNDh4uFzotgdMEFkzQ5wZVXl2Pf1/Y6hLK0OnCNxBj3+nb0v72gZ6b0td+WOZsHHWxysSo/0y9D2K42SaB8Y/+aD2K42SaB8Y/+ahU+WOZsHcrxysooUeND'
     ))
     url = 'https://ups.youku.com/ups/get.json?%s' % (query)
-    link = GetHttpData(url, referer='http://static.youku.com/')
+    link = GetHttpData(url, referer='http://v.youku.com/')
     json_response = simplejson.loads(link)
-    movdat = json_response['data']
+    api_data = json_response['data']
+    data_error = api_data.get('error')
+    if data_error:
+        api_error_code = data_error.get('code')
+        api_error_msg = data_error.get('note').encode('utf-8')
+        dialog = xbmcgui.Dialog()
+        ok = dialog.ok(__addonname__,'地址解析错误（%d）：\n%s' % (api_error_code,api_error_msg))
+        return {}
+    else:
+        return api_data
+
+def change_cdn(url):
+    # if the cnd_url starts with an ip addr, it should be youku's old CDN
+    # which rejects http requests randomly with status code > 400
+    # change it to the dispatcher of aliCDN can do better
+    # at least a little more recoverable from HTTP 403
+    dispatcher_url = 'vali.cp31.ott.cibntv.net'
+    if dispatcher_url in url:
+        return url
+    elif 'k.youku.com' in url:
+        return url
+    else:
+        url_seg_list = list(urlparse.urlsplit(url))
+        url_seg_list[1] = dispatcher_url
+        return urlparse.urlunsplit(url_seg_list)
+
+def PlayVideo(name,id,thumb):
+    movdat = youku_ups(id)
+    if not movdat:
+        return
 
     vid = id
     lang_select = int(__addon__.getSetting('lang_select')) # 默认|每次选择|自动首选
@@ -430,17 +460,9 @@ def PlayVideo(name,id,thumb):
                     name = '%s %s' % (name, langlist[i]['lang'].encode('utf-8'))
                     break
     if vid != id:
-        query = urllib.urlencode(dict(
-            vid       = id,
-            ccode     = '0507',
-            client_ip = '192.168.1.1',
-            utid      = cna,
-            client_ts = time.time() / 1000
-        ))
-        url = 'https://ups.youku.com/ups/get.json?%s' % (query)
-        link = GetHttpData(url, referer='http://static.youku.com/')
-        json_response = simplejson.loads(link)
-        movdat = json_response['data']
+        movdat = youku_ups(vid)
+        if not movdat:
+            return
 
     streamtypes = [stream['stream_type'].encode('utf-8') for stream in movdat['stream']]
     typeid, typename, streamno, resolution = selResolution(streamtypes)
@@ -495,6 +517,15 @@ def PlayVideo(name,id,thumb):
             movurl = 'stack://' + ' , '.join(urls)
         '''
         movurl = movdat['stream'][streamno]['m3u8_url']
+        #urls = []
+        #is_preview = False
+        #for seg in movdat['stream'][streamno]['segs']:
+        #    if seg.get('cdn_url'):
+        #        urls.append(change_cdn(seg['cdn_url'].encode('utf-8')))
+        #    else:
+        #        is_preview = True
+        #if not is_preview:
+        #    movurl = 'stack://' + ' , '.join(urls)
         name = '%s[%s]' % (name, typename)
         listitem=xbmcgui.ListItem(name,thumbnailImage=thumb)
         listitem.setInfo(type="Video",infoLabels={"Title":name})
