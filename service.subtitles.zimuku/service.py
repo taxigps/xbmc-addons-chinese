@@ -113,14 +113,14 @@ def rmtree(path):
         xbmcvfs.delete(os.path.join(path, file))
     xbmcvfs.rmdir(path)
 
-def DownloadLinks(links):
+def DownloadLinks(links, referer):
     for link in links:
-        dlpath = link.get('href').encode('utf-8')
-        url = '%s%s' % (ZIMUKU_BASE, dlpath)
+        url = link.get('href').encode('utf-8')
         try:
             log( sys._getframe().f_code.co_name ,"Download url: %s" % (url))
             req = urllib2.Request(url)
             req.add_header('User-Agent', UserAgent)
+            req.add_header('Referer', referer)
             socket = urllib2.urlopen(req)
             filename = socket.headers['Content-Disposition'].split('filename=')[1]
             if filename[0] == '"' or filename[0] == "'":
@@ -150,8 +150,9 @@ def Download(url,lang):
         socket = urllib2.urlopen(req)
         data = socket.read()
         soup = BeautifulSoup(data, 'html.parser')
-        urlpath = soup.find("li", class_="dlsub").a.get('href').encode('utf-8')
-        url = 'http:%s' % (urlpath)
+        url = soup.find("li", class_="dlsub").a.get('href').encode('utf-8')
+        if url[:4] != 'http':
+            url = 'http:%s' % (url)
         log( sys._getframe().f_code.co_name ,"Download links: %s" % (url))
         req = urllib2.Request(url)
         req.add_header('User-Agent', UserAgent)
@@ -166,7 +167,7 @@ def Download(url,lang):
             sys.exc_info()[1]
             ))
         return []
-    filename, data = DownloadLinks(links)
+    filename, data = DownloadLinks(links, url)
     if len(data) < 1024:
         return []
     tempfile = os.path.join(__temp__, "subtitles%s" % os.path.splitext(filename)[1])
