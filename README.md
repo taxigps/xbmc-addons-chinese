@@ -91,6 +91,7 @@ PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStre
 * subom - service.subtitles.subom - Search and download subtitles from [subom.net](http://subom.net/)
 * zimuku - service.subtitles.zimuku - Search and download subtitles from [zimuku.net](http://www.zimuku.net)
 * ZiMuZu - service.subtitles.zimuzu - Search and download subtitles from [zimuzu.tv](http://www.zimuzu.tv)
+* ZMS - service.subtitles.zimushe - Search and download subtitles from [zimushe.com](http://www.zimushe.com)
 
 ## TV Scraper Add-ons
 
