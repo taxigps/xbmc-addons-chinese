@@ -1,3 +1,7 @@
+[B]1.0.2[/B]
+- get programme description
+- fix EPG for phoenix tv channel about site change
+
 [B]1.0.1[/B]
 - fix error when script invoked without an addon
 - enabled addon pvr.iptvsimple before set settings
