@@ -71,7 +71,6 @@ def Search( item ):
         except:
             return
         subs = soup.find_all("li")
-        print subs
         for sub in subs:
             link = sub.find("div", class_="linkls-name").a.get('href').encode('utf-8')
             version = sub.find("div", class_="linkls-name").a.text.encode('utf-8')
@@ -151,6 +150,13 @@ def Download(url,lang):
         data = socket.read()
         soup = BeautifulSoup(data, 'html.parser')
         url = soup.find("div", class_="view-btn").a.get('href').encode('utf-8')
+        log( sys._getframe().f_code.co_name ,"Download link page: %s" % (url))
+        req = urllib2.Request(url)
+        req.add_header('User-Agent', UserAgent)
+        socket = urllib2.urlopen(req)
+        data = socket.read()
+        soup = BeautifulSoup(data, 'html.parser')
+        url = soup.find("a", class_="d-btn").get('href').encode('utf-8')
         links = [url]
     except:
         log( sys.exc_info()[2].tb_frame.f_code.co_name, "(%d) [%s]" % (
