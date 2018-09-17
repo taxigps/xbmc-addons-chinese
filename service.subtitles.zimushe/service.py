@@ -26,7 +26,7 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 sys.path.append (__resource__)
 
 ZIMUSHE_API = 'https://www.zimushe.com/search.php?keywords=%s'
-ZIMUSHE_BASE = 'http://www.zimushe.com'
+ZIMUSHE_BASE = 'https://www.zimushe.com'
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
 def log(module, msg):
@@ -43,9 +43,9 @@ def Search( item ):
     if item['mansearch']:
         search_str = item['mansearchstr']
     elif len(item['tvshow']) > 0:
-        search_str = item['tvshow']
+        search_str = "%s %s" % (item['tvshow'], item['year'])
     else:
-        search_str = item['title']
+        search_str = "%s %s" % (item['title'], item['year'])
     url = ZIMUSHE_API % (urllib.quote(search_str))
     log( sys._getframe().f_code.co_name ,"Search API url: %s" % (url))
     try:
@@ -56,11 +56,16 @@ def Search( item ):
         socket.close()
         soup = BeautifulSoup(data, 'html.parser')
     except:
+        log( sys._getframe().f_code.co_name ,"(%d) [%s]" % (
+            sys.exc_info()[2].tb_lineno,
+            sys.exc_info()[1]
+            ))
         return
     results = soup.find_all("div", class_="info")
     for it in results:
         #moviename = it.find("div", class_="title").a.text.encode('utf-8')
-        movieurl = it.a.get('href').encode('utf-8')
+        movieurl = ZIMUSHE_BASE + it.a.get('href').encode('utf-8')
+        log( sys._getframe().f_code.co_name ,"Get subtitle list form url: %s" % (movieurl))
         try:
             req = urllib2.Request(movieurl)
             req.add_header('User-Agent', UserAgent)
@@ -72,7 +77,7 @@ def Search( item ):
             return
         subs = soup.find_all("li")
         for sub in subs:
-            link = sub.find("div", class_="linkls-name").a.get('href').encode('utf-8')
+            link = ZIMUSHE_BASE + sub.find("div", class_="linkls-name").a.get('href').encode('utf-8')
             version = sub.find("div", class_="linkls-name").a.text.encode('utf-8')
             try:
                 labels = sub.find("div", class_="linkls-label").find_all("span")
@@ -149,7 +154,7 @@ def Download(url,lang):
         socket = urllib2.urlopen(req)
         data = socket.read()
         soup = BeautifulSoup(data, 'html.parser')
-        url = soup.find("div", class_="view-btn").a.get('href').encode('utf-8')
+        url = ZIMUSHE_BASE + soup.find("div", class_="view-btn").a.get('href').encode('utf-8')
         log( sys._getframe().f_code.co_name ,"Download link page: %s" % (url))
         req = urllib2.Request(url)
         req.add_header('User-Agent', UserAgent)
