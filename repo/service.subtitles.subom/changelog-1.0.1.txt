@@ -1,5 +1,0 @@
-1.0.1
-- fixed can't remove temp dir under android
-
-1.0.0
-- initial

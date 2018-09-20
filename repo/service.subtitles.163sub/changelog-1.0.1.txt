@@ -1,5 +1,0 @@
-﻿1.0.1
-- support search subtitles for tv shows in library
-
-1.0.0
-- initial
