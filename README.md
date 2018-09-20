@@ -4,7 +4,7 @@ This project is an repository for open source Addon scripts, plugins, and skins 
 
 Note: Chinese repository is also applicable to Kodi (new releases - formerly known as xbmc)
 
-* Forum Discuss in Chinese: [原动力论坛: XBMC媒体中心讨论版][1]
+* Forum Discuss in Chinese: <del>原动力论坛: XBMC媒体中心讨论版</del> (Site closed)
 * Forum Discuss in English: [XBMC Community Forum: Project xbmc-addons-chinese Release Thread][2]
 * QQ Group for Developers: 253355963
 
