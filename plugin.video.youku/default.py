@@ -401,7 +401,7 @@ def youku_ups(id):
     cna = res.headers['etag'][1:-1]
     query = urllib.urlencode(dict(
         vid       = id,
-        ccode     = '0502',
+        ccode     = '0516',
         client_ip = '192.168.1.1',
         utid      = cna,
         client_ts = time.time() / 1000,
