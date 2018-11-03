@@ -61,35 +61,39 @@ def Search( item ):
             sys.exc_info()[1]
             ))
         return
-    results = soup.find_all("div", class_="info")
-    for it in results:
-        #moviename = it.find("div", class_="title").a.text.encode('utf-8')
-        movieurl = ZIMUSHE_BASE + it.a.get('href').encode('utf-8')
-        log( sys._getframe().f_code.co_name ,"Get subtitle list form url: %s" % (movieurl))
-        try:
-            req = urllib2.Request(movieurl)
-            req.add_header('User-Agent', UserAgent)
-            socket = urllib2.urlopen(req)
-            data = socket.read()
-            socket.close()
-            soup = BeautifulSoup(data, 'html.parser').find("ul", class_="linkls")
-        except:
-            return
-        subs = soup.find_all("li")
-        for sub in subs:
-            link = ZIMUSHE_BASE + sub.find("div", class_="linkls-name").a.get('href').encode('utf-8')
-            version = sub.find("div", class_="linkls-name").a.text.encode('utf-8')
+    while True:
+        results = soup.find_all("div", class_="info")
+        for it in results:
+            title = it.find("p", class_="title").a.text.encode('utf-8')
+            link = ZIMUSHE_BASE + it.find("p", class_="title").a.get('href').encode('utf-8')
             try:
-                labels = sub.find("div", class_="linkls-label").find_all("span")
+                labels = it.find("p", class_="label").find_all("span")
                 langs = [x.text.encode('utf-8') for x in labels]
             except:
                 langs = ['未知']
-            name = '%s (%s)' % (version, ",".join(langs))
+            name = '%s (%s)' % (title, ",".join(langs))
             if ('English' in langs) and not(('简体' in langs) or ('繁體' in langs) or ('双语' in langs)):
                 subtitles_list.append({"language_name":"English", "filename":name, "link":link, "language_flag":'en', "rating":"0", "lang":langs})
             else:
                 subtitles_list.append({"language_name":"Chinese", "filename":name, "link":link, "language_flag":'zh', "rating":"0", "lang":langs})
-            
+        nextpage = soup.find("div", class_="pages").find("a", text=u"下一页")
+        if nextpage:
+            url = ZIMUSHE_BASE + '/' + nextpage.get('href').encode('utf-8')
+            try:
+                req = urllib2.Request(url)
+                req.add_header('User-Agent', UserAgent)
+                socket = urllib2.urlopen(req)
+                data = socket.read()
+                socket.close()
+                soup = BeautifulSoup(data, 'html.parser')
+            except:
+                log( sys._getframe().f_code.co_name ,"(%d) [%s]" % (
+                    sys.exc_info()[2].tb_lineno,
+                    sys.exc_info()[1]
+                    ))
+                break
+        else:
+            break
 
     if subtitles_list:
         for it in subtitles_list:
