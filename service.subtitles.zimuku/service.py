@@ -116,6 +116,7 @@ def rmtree(path):
 def DownloadLinks(links, referer):
     for link in links:
         url = link.get('href').encode('utf-8')
+        url = ZIMUKU_BASE + url
         try:
             log( sys._getframe().f_code.co_name ,"Download url: %s" % (url))
             req = urllib2.Request(url)
@@ -152,7 +153,7 @@ def Download(url,lang):
         soup = BeautifulSoup(data, 'html.parser')
         url = soup.find("li", class_="dlsub").a.get('href').encode('utf-8')
         if url[:4] != 'http':
-            url = 'http:%s' % (url)
+            url = ZIMUKU_BASE + url
         log( sys._getframe().f_code.co_name ,"Download links: %s" % (url))
         req = urllib2.Request(url)
         req.add_header('User-Agent', UserAgent)
