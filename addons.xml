@@ -815,7 +815,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="service.subtitles.zimuku"
        name="zimuku"
-       version="1.0.9"
+       version="1.0.10"
        provider-name="taxigps">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
