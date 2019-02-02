@@ -132,7 +132,7 @@ def DownloadLinks(links, referer):
     return '', ''
 
 def Download(url,lang):
-    try: rmtree(__temp__)
+    try: shutil.rmtree(__temp__)
     except: pass
     try: os.makedirs(__temp__)
     except: pass
