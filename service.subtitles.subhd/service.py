@@ -26,7 +26,7 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 
 sys.path.append (__resource__)
 
-SUBHD_API  = 'http://subhd.com/search/%s'
+SUBHD_API  = 'http://subhd.com/search0/%s'
 SUBHD_BASE = 'http://subhd.com'
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
@@ -36,7 +36,7 @@ def log(module, msg):
 def normalizeString(str):
     return str
 
-def session_get(url, id='', referer=''):
+def session_get(url, id='', referer='', dtoken=''):
     if id:
         HEADERS={'Accept': 'application/json, text/javascript, */*; q=0.01',
             'Accept-Encoding': 'gzip, deflate',
@@ -156,8 +156,9 @@ def Download(url,lang):
         data = session_get(url)
         soup = BeautifulSoup(data, "html.parser")
         id = soup.find("button", class_="btn btn-danger btn-sm").get("sid").encode('utf-8')
+        dtoken = soup.find("button", class_="btn btn-danger btn-sm").get("dtoken").encode('utf-8')
         url = "http://subhd.com/ajax/down_ajax"
-        data = session_get(url, id=id, referer=referer)
+        data = session_get(url, id=id, referer=referer, dtoken=dtoken)
         json_response = simplejson.loads(data)
         if json_response['success']:
             url = json_response['url'].replace(r'\/','/').decode("unicode-escape").encode('utf-8')
