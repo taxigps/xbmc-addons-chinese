@@ -9,6 +9,7 @@ import urllib2
 import xbmcvfs
 import xbmcaddon
 import xbmcgui,xbmcplugin
+import shutil
 from bs4 import BeautifulSoup
 
 __addon__ = xbmcaddon.Addon()
@@ -144,7 +145,7 @@ def DownloadLinks(links):
     return '', ''
 
 def Download(url,lang):
-    try: rmtree(__temp__)
+    try: shutil.rmtree(__temp__)
     except: pass
     try: os.makedirs(__temp__)
     except: pass
