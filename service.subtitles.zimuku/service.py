@@ -9,6 +9,7 @@ import urllib2
 import xbmcvfs
 import xbmcaddon
 import xbmcgui,xbmcplugin
+import shutil
 from bs4 import BeautifulSoup
 
 __addon__ = xbmcaddon.Addon()
@@ -104,14 +105,8 @@ def Search( item ):
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
 
 def rmtree(path):
-    if isinstance(path, unicode):
-        path = path.encode('utf-8')
-    dirs, files = xbmcvfs.listdir(path)
-    for dir in dirs:
-        rmtree(os.path.join(path, dir))
-    for file in files:
-        xbmcvfs.delete(os.path.join(path, file))
-    xbmcvfs.rmdir(path)
+    try: shutil.rmtree(path)
+    except: pass
 
 def DownloadLinks(links, referer):
     for link in links:
