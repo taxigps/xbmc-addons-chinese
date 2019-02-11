@@ -6,6 +6,7 @@ import sys
 import xbmc
 import urllib
 import urllib2
+import shutil
 import xbmcvfs
 import xbmcaddon
 import xbmcgui,xbmcplugin
@@ -112,16 +113,6 @@ def Search( item ):
                                                                         )
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
 
-def rmtree(path):
-    if isinstance(path, unicode):
-        path = path.encode('utf-8')
-    dirs, files = xbmcvfs.listdir(path)
-    for dir in dirs:
-        rmtree(os.path.join(path, dir))
-    for file in files:
-        xbmcvfs.delete(os.path.join(path, file))
-    xbmcvfs.rmdir(path)
-
 def DownloadLinks(links):
     for link in links:
         url = link
@@ -144,7 +135,7 @@ def DownloadLinks(links):
     return '', ''
 
 def Download(url,lang):
-    try: rmtree(__temp__)
+    try: shutil.rmtree(__temp__)
     except: pass
     try: os.makedirs(__temp__)
     except: pass
