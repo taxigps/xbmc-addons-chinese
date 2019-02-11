@@ -5,6 +5,7 @@ import os
 import sys
 import xbmc
 import urllib
+import shutil
 import xbmcvfs
 import xbmcaddon
 import xbmcgui,xbmcplugin
@@ -26,7 +27,7 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 
 sys.path.append (__resource__)
 
-SUBHD_API  = 'http://subhd.com/search/%s'
+SUBHD_API  = 'http://subhd.com/search0/%s'
 SUBHD_BASE = 'http://subhd.com'
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
@@ -36,7 +37,8 @@ def log(module, msg):
 def normalizeString(str):
     return str
 
-def session_get(url, id='', referer=''):
+def session_get(url, id='', referer='', dtoken=''):
+    log(sys._getframe().f_code.co_name, "url=%s id=%s referer=%s dtoken=%s" % (url, id, referer, dtoken))
     if id:
         HEADERS={'Accept': 'application/json, text/javascript, */*; q=0.01',
             'Accept-Encoding': 'gzip, deflate',
@@ -48,7 +50,7 @@ def session_get(url, id='', referer=''):
         s.headers.update(HEADERS)
         r = s.get(referer)
         s.headers.update({'Referer': referer})
-        r = s.post(url, data={'sub_id': id})
+        r = s.post(url, data={'sub_id': id, 'dtoken': dtoken})
         return r.content
     else:
         HEADERS={'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -133,18 +135,8 @@ def Search( item ):
                                                                     )
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
 
-def rmtree(path):
-    if isinstance(path, unicode):
-        path = path.encode('utf-8')
-    dirs, files = xbmcvfs.listdir(path)
-    for dir in dirs:
-        rmtree(os.path.join(path, dir))
-    for file in files:
-        xbmcvfs.delete(os.path.join(path, file))
-    xbmcvfs.rmdir(path)
-
 def Download(url,lang):
-    try: rmtree(__temp__)
+    try: shutil.rmtree(__temp__)
     except: pass
     try: os.makedirs(__temp__)
     except: pass
@@ -156,8 +148,9 @@ def Download(url,lang):
         data = session_get(url)
         soup = BeautifulSoup(data, "html.parser")
         id = soup.find("button", class_="btn btn-danger btn-sm").get("sid").encode('utf-8')
+        dtoken = soup.find("button", class_="btn btn-danger btn-sm").get("dtoken").encode('utf-8')
         url = "http://subhd.com/ajax/down_ajax"
-        data = session_get(url, id=id, referer=referer)
+        data = session_get(url, id=id, referer=referer, dtoken=dtoken)
         json_response = simplejson.loads(data)
         if json_response['success']:
             url = json_response['url'].replace(r'\/','/').decode("unicode-escape").encode('utf-8')
