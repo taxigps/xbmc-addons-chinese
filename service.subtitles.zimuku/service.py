@@ -34,8 +34,15 @@ def log(module, msg):
     if isinstance(msg, unicode): msg = msg.encode("utf-8")
     xbmc.log("{0}::{1} - {2}".format(__scriptname__,module,msg) ,level=xbmc.LOGDEBUG )
 
-def normalizeString(str):
-    return str
+def rmtree(path):
+    if isinstance(path, unicode):
+        path = path.encode('utf-8')
+    dirs, files = xbmcvfs.listdir(path)
+    for dir in dirs:
+        rmtree(os.path.join(path, dir))
+    for file in files:
+        xbmcvfs.delete(os.path.join(path, file))
+    xbmcvfs.rmdir(path)
 
 def Search( item ):
     subtitles_list = []
@@ -128,7 +135,7 @@ def DownloadLinks(links, referer):
     return '', ''
 
 def Download(url,lang):
-    try: shutil.rmtree(__temp__)
+    try: rmtree(__temp__)
     except: pass
     try: os.makedirs(__temp__)
     except: pass
@@ -215,8 +222,8 @@ if params['action'] == 'search' or params['action'] == 'manualsearch':
     item['year']               = xbmc.getInfoLabel("VideoPlayer.Year")                           # Year
     item['season']             = str(xbmc.getInfoLabel("VideoPlayer.Season"))                    # Season
     item['episode']            = str(xbmc.getInfoLabel("VideoPlayer.Episode"))                   # Episode
-    item['tvshow']             = normalizeString(xbmc.getInfoLabel("VideoPlayer.TVshowtitle"))   # Show
-    item['title']              = normalizeString(xbmc.getInfoLabel("VideoPlayer.OriginalTitle")) # try to get original title
+    item['tvshow']             = xbmc.getInfoLabel("VideoPlayer.TVshowtitle")   # Show
+    item['title']              = xbmc.getInfoLabel("VideoPlayer.OriginalTitle") # try to get original title
     item['file_original_path'] = urllib.unquote(xbmc.Player().getPlayingFile().decode('utf-8'))  # Full path of a playing file
     item['3let_language']      = []
 
@@ -231,7 +238,7 @@ if params['action'] == 'search' or params['action'] == 'manualsearch':
         item['title']  = xbmc.getInfoLabel("VideoPlayer.Title")                       # no original title, get just Title
         if item['title'] == os.path.basename(xbmc.Player().getPlayingFile()):         # get movie title and year if is filename
             title, year = xbmc.getCleanMovieTitle(item['title'])
-            item['title'] = normalizeString(title.replace('[','').replace(']',''))
+            item['title'] = title.replace('[','').replace(']','')
             item['year'] = year
 
     if item['episode'].lower().find("s") > -1:                                        # Check if season is "Special"
