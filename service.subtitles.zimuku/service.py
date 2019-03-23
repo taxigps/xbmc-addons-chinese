@@ -26,8 +26,8 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 
 sys.path.append (__resource__)
 
-ZIMUKU_API = 'http://www.zimuku.cn/search?q=%s'
-ZIMUKU_BASE = 'http://www.zimuku.cn'
+ZIMUKU_API = 'http://www.zimuku.la/search?q=%s'
+ZIMUKU_BASE = 'http://www.zimuku.la'
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
 def log(module, msg):
