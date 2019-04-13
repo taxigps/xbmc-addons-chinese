@@ -5,15 +5,15 @@ import os
 import sys
 import xbmc
 import urllib
-import shutil
 import xbmcvfs
 import xbmcaddon
 import xbmcgui,xbmcplugin
 from bs4 import BeautifulSoup
 import requests
-import simplejson
+import json
+import time
 
-__addon__ = xbmcaddon.Addon()
+__addon__      = xbmcaddon.Addon()
 __author__     = __addon__.getAddonInfo('author')
 __scriptid__   = __addon__.getAddonInfo('id')
 __scriptname__ = __addon__.getAddonInfo('name')
@@ -31,18 +31,24 @@ SUBHD_API  = 'http://subhd.com/search0/%s'
 SUBHD_BASE = 'http://subhd.com'
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
-def log(module, msg):
-    xbmc.log((u"%s::%s - %s" % (__scriptname__,module,msg,)).encode('utf-8'),level=xbmc.LOGDEBUG )
+def get_KodiVersion():
+    json_query = xbmc.executeJSONRPC('{ "jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["version", "name"]}, "id": 1 }')
+    if sys.version_info[0] >= 3:
+        json_query = str(json_query)
+    else:
+        json_query = unicode(json_query, 'utf-8', errors='ignore')
+    json_query = json.loads(json_query)
+    version_installed = []
+    if 'result' in json_query and 'version' in json_query['result']:
+        version_installed  = json_query['result']['version']
+    return version_installed
 
-def rmtree(path):
-    if isinstance(path, unicode):
-        path = path.encode('utf-8')
-    dirs, files = xbmcvfs.listdir(path)
-    for dir in dirs:
-        rmtree(os.path.join(path, dir))
-    for file in files:
-        xbmcvfs.delete(os.path.join(path, file))
-    xbmcvfs.rmdir(path)
+__kodi__ = get_KodiVersion()
+
+def log(module, msg):
+    if isinstance(msg,str):
+        msg = msg.decode('utf-8')
+    xbmc.log((u"%s::%s - %s" % (__scriptname__,module,msg,)).encode('utf-8'),level=xbmc.LOGDEBUG )
 
 def session_get(url, id='', referer='', dtoken=''):
     log(sys._getframe().f_code.co_name, "url=%s id=%s referer=%s dtoken=%s" % (url, id, referer, dtoken))
@@ -143,10 +149,11 @@ def Search( item ):
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
 
 def Download(url,lang):
-    try: rmtree(__temp__)
-    except: pass
-    try: os.makedirs(__temp__)
-    except: pass
+    if not xbmcvfs.exists(__temp__.replace('\\','/')):
+        xbmcvfs.mkdirs(__temp__)
+    dirs, files = xbmcvfs.listdir(__temp__)
+    for file in files:
+        xbmcvfs.delete(os.path.join(__temp__, file))
 
     referer = url
     subtitle_list = []
@@ -158,15 +165,14 @@ def Download(url,lang):
         dtoken = soup.find("button", class_="btn btn-danger btn-sm").get("dtoken").encode('utf-8')
         url = "http://subhd.com/ajax/down_ajax"
         data = session_get(url, id=id, referer=referer, dtoken=dtoken)
-        json_response = simplejson.loads(data)
+        json_response = json.loads(data)
         if json_response['success']:
-            url = json_response['url'].replace(r'\/','/').decode("unicode-escape").encode('utf-8')
+            url = json_response['url'].encode('utf-8')
             if url[:4] <> 'http':
                 url = 'http://subhd.com%s' % (url)
-            log(sys._getframe().f_code.co_name, "Downloading %s" % (url.decode('utf-8')))
             data = session_get(url)
         else:
-            msg = json_response['msg'].decode("unicode-escape")
+            msg = json_response['msg']
             xbmc.executebuiltin((u'XBMC.Notification("subhd","%s")' % (msg)).encode('utf-8'), True)
             data = ''
     except:
@@ -178,32 +184,50 @@ def Download(url,lang):
         return []
     if len(data) < 1024:
         return []
-    zip = os.path.join(__temp__, "subtitles%s" % os.path.splitext(url)[1])
-    with open(zip, "wb") as subFile:
+    t = time.time()
+    ts = time.strftime("%Y%m%d%H%M%S",time.localtime(t)) + str(int((t - int(t)) * 1000))
+    tempfile = os.path.join(__temp__, "subtitles%s%s" % (ts, os.path.splitext(url)[1])).replace('\\','/')
+    with open(tempfile, "wb") as subFile:
         subFile.write(data)
     subFile.close()
     xbmc.sleep(500)
     if data[:4] == 'Rar!' or data[:2] == 'PK':
-        xbmc.executebuiltin(('XBMC.Extract("%s","%s")' % (zip,__temp__,)).encode('utf-8'), True)
-    path = __temp__
-    dirs, files = xbmcvfs.listdir(path)
-    if ('__MACOSX') in dirs:
-        dirs.remove('__MACOSX')
-    if len(dirs) > 0:
-        path = os.path.join(__temp__, dirs[0].decode('utf-8'))
+        archive = urllib.quote_plus(tempfile)
+        if data[:4] == 'Rar!':
+            path = 'rar://%s' % (archive)
+        else:
+            path = 'zip://%s' % (archive)
         dirs, files = xbmcvfs.listdir(path)
-    list = []
-    for subfile in files:
-        if (os.path.splitext( subfile )[1] in exts):
-            list.append(subfile.decode('utf-8'))
-    if len(list) == 1:
-        subtitle_list.append(os.path.join(path, list[0]))
-    elif len(list) > 1:
-        sel = xbmcgui.Dialog().select('请选择压缩包中的字幕', list)
-        if sel == -1:
-            sel = 0
-        subtitle_list.append(os.path.join(path, list[sel]))
+        if ('__MACOSX') in dirs:
+            dirs.remove('__MACOSX')
+        if len(dirs) > 0:
+            path = path + '/' + dirs[0].decode('utf-8')
+            dirs, files = xbmcvfs.listdir(path)
+        list = []
+        for subfile in files:
+            if (os.path.splitext( subfile )[1] in exts):
+                list.append(subfile.decode('utf-8'))
+        if list:
+            if len(list) == 1:
+                subtitle_list.append(path + '/' + list[0])
+            else:
+                # hack to fix encoding problem of zip file in Kodi 18
+                if __kodi__['major'] >= 18 and data[:2] == 'PK':
+                    try:
+                        dlist = [x.encode('CP437').decode('gbk') for x in list]
+                    except:
+                        dlist = list
+                else:
+                    dlist = list
 
+                sel = xbmcgui.Dialog().select('请选择压缩包中的字幕', dlist)
+                if sel == -1:
+                    sel = 0
+                subtitle_list.append(path + '/' + list[sel])
+    else:
+        subtitle_list.append(tempfile)
+    if len(subtitle_list) > 0:
+        log(sys._getframe().f_code.co_name, "Get subtitle file: %s" % (subtitle_list[0]))
     return subtitle_list
 
 def get_params():
