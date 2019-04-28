@@ -10,15 +10,13 @@ import xbmcgui
 import xbmcplugin
 import unicodedata
 import chardet
-import shutil
-import hashlib
-from httplib import HTTPConnection, OK
-import struct
 from cStringIO import StringIO
-import zlib
 import random
 from urlparse import urlparse
+import re
 import json
+import itertools
+import requests
 
 __addon__ = xbmcaddon.Addon()
 __author__     = __addon__.getAddonInfo('author')
@@ -35,6 +33,32 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 sys.path.append (__resource__)
 from langconv import *
 
+
+def get_KodiVersion():
+    json_query = xbmc.executeJSONRPC(
+        '{ "jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["version", "name"]}, "id": 1 }')
+    if sys.version_info[0] >= 3:
+        json_query = str(json_query)
+    else:
+        json_query = unicode(json_query, 'utf-8', errors='ignore')
+    json_query = json.loads(json_query)
+    version_installed = []
+    if 'result' in json_query and 'version' in json_query['result']:
+        version_installed = json_query['result']['version']
+    return version_installed
+
+
+__kodi__ = get_KodiVersion()
+
+if __kodi__['major'] >= '18':
+    API_BASE = "https://api.assrt.net"
+else:
+    API_BASE = "http://api.assrt.net"
+
+DEFAULT_TOKEN = "vXMvTf8eu4pfmAVmllp8OY6aYqVbeB4F"
+
+SUBTYPE_EXT = (".srt", ".ssa", ".ass", ".smi")
+
 SVP_REV_NUMBER = 1543
 CLIENTKEY = "SP,aerSP,aer %d &e(\xd7\x02 %s %s"
 RETRY = 3
@@ -42,6 +66,9 @@ RETRY = 3
 class AppURLopener(urllib.FancyURLopener):
     version = "XBMC(Kodi)-subtitle/%s" % __version__ #cf block default ua
 urllib._urlopener = AppURLopener()
+
+sess = requests.Session()
+sess.headers.update({"User-Agent": "XBMC(Kodi)-subtitle/%s" % __version__})
 
 def log(module, msg):
     xbmc.log((u"%s::%s - %s" % (__scriptname__,module,msg,)).encode('utf-8'),level=xbmc.LOGDEBUG )
@@ -281,35 +308,39 @@ def CalcFileHash(a):
 
 
 def getSubByTitle(title, langs):
-    DEFAULT_TOKEN = "vXMvTf8eu4pfmAVmllp8OY6aYqVbeB4F"
     subtitles_list = []
     token = __addon__.getSetting("customToken") or DEFAULT_TOKEN
     extra_arg = ""
     if title == os.path.basename(xbmc.Player().getPlayingFile()):
         extra_arg = "&no_muxer=1"
-    url = 'http://api.assrt.net/v1/sub/search?token=%s&q=%s&xbmc=1%s' % (token, title, extra_arg)
-    socket = urllib.urlopen( url )
-    data = socket.read()
-    socket.close()
-    result = json.loads(data)
+    url = '%s/v1/sub/search?&q=%s&xbmc=1%s' % (
+        API_BASE, title, extra_arg)
+    r = sess.post(url, headers={'Authorization': 'Bearer %s' % token})
+    result = r.json()
     if result['status']:
         dialog = xbmcgui.Dialog()
         if result['status'] == 30900 and token == DEFAULT_TOKEN:
-            dialog.notification(u'公共API配额超限', '建议使用自定义密钥', xbmcgui.NOTIFICATION_INFO, 3000)
+            dialog.notification(__language__(32009), '', xbmcgui.NOTIFICATION_INFO, 3000)
         else:
-            dialog.notification(u'API请求失败', '%d: %s' % (result['status'], result['errmsg']), xbmcgui.NOTIFICATION_ERROR, 3000)
+            dialog.notification(__language__(32010) + '(%d): %s' % (result['status'], result['errmsg']),
+               '', xbmcgui.NOTIFICATION_ERROR, 3000)
         return
     for sub in result['sub']['subs']:
-        _ = []
-        for k in ('videoname', 'native_name'):
-            if k in sub and sub[k]:
-                _.append(sub[k])
-        it = {"id":sub['id'],
-                "filename": "/".join(_),
-                "rating":str(int(sub['vote_score'])/20),
-                "language_name":"",
-                "language_flag":""
-               }
+        titles = [sub['native_name']]
+        if not getCommon([sub['native_name'], sub['videoname']]):
+            titles.append(sub['videoname'])
+        release = ''
+        if 'release_site' in sub and sub['release_site'] != u"个人":
+            release = sub['release_site']
+        it = {"id": sub['id'],
+              "filename": "/".join(titles),
+              "rating": str(int(sub['vote_score']) / 20),
+              "language_name": "",
+              "language_flag": "",
+              "release": release,
+              "vote_machine_translate": 'vote_machine_translate' in sub,
+              "revision": 'revision' in sub and sub['revision'],
+              }
         if 'lang' in sub:
             ll = sub['lang']['langlist']
             if 'langchs' in ll or 'langcht' in ll or 'langdou' in ll:
@@ -328,18 +359,34 @@ def getSubByTitle(title, langs):
 
     if subtitles_list:
         for it in subtitles_list:
+            fname = it["filename"]
+            if it["release"]:
+                fname = "[B]%s[/B] %s" % (it["release"], fname)
+            if it["vote_machine_translate"] or it["revision"]:
+                fname = "[COLOR FF999999]%s[/COLOR]" % fname
             listitem = xbmcgui.ListItem(label=it["language_name"],
-                                  label2=it["filename"],
-                                  iconImage=it["rating"],
-                                  thumbnailImage=it["language_flag"]
-                                  )
-            listitem.setProperty( "sync", "false" )
-            listitem.setProperty( "hearing_imp", "false" )
-            url = "plugin://%s/?action=download&id=%s" % (__scriptid__, '999999%s' % it["id"])
-            xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
+                                        label2=fname,
+                                        iconImage=it["rating"],
+                                        thumbnailImage=it["language_flag"]
+                                        )
+            sync = "false"
+            try:
+                # remove resolution
+                pattern = re.sub("\d{3,4}[Pp]", ".+", os.path.splitext(title)[0])
+                if re.findall(pattern, it['filename'], re.I):
+                    sync = 'true'
+            except:
+                pass
+            listitem.setProperty("sync", sync)
+            listitem.setProperty("hearing_imp", "false")
+            url = "plugin://%s/?action=download&fid=%s" % (
+                __scriptid__, it["id"])
+            xbmcplugin.addDirectoryItem(handle=int(
+                sys.argv[1]), url=url, listitem=listitem, isFolder=False)
+
 
 def Search(item):
-    try: shutil.rmtree(__temp__)
+    try: rmtree(__temp__)
     except: pass
     try: os.makedirs(__temp__)
     except: pass
@@ -350,7 +397,7 @@ def Search(item):
     else:
         title = '%s %s' % (item['title'], item['year'])
         # pass original filename, api.assrt.net will handle it more properly
-        getSubByTitle(xbmc.getInfoLabel("VideoPlayer.Title"), item['3let_language']) # use shooter fake 
+        getSubByTitle(xbmc.getInfoLabel("VideoPlayer.Title"), item['3let_language']) # use assrt.net
         if __addon__.getSetting("subSourceAPI") == 'true': # use splayer api
             if 'chi' in item['3let_language']:
                 getSubByHash(item['file_original_path'], "chn", "zh", "Chinese")
@@ -358,7 +405,7 @@ def Search(item):
                 getSubByHash(item['file_original_path'], "eng", "en", "English")
 
 def ChangeFileEndcoding(filepath):
-    if __addon__.getSetting("transUTF8") == "true" and os.path.splitext(filepath)[1] in [".srt", ".ssa", ".ass", ".smi"]:
+    if __addon__.getSetting("transUTF8") == "true" and os.path.splitext(filepath)[1] in SUBTYPE_EXT:
         data = open(filepath, 'rb').read()
         enc = chardet.detect(data)['encoding']
         if enc:
@@ -373,7 +420,7 @@ def ChangeFileEndcoding(filepath):
             local_file_handle.write(data)
             local_file_handle.close()
         except:
-            log(sys._getframe().f_code.co_name, "Failed to save subtitles to '%s'" % (filename))
+            log(sys._getframe().f_code.co_name, "Failed to save subtitles to '%s'" % (filepath))
 
 def Download(filename):
     subtitle_list = []
@@ -384,28 +431,138 @@ def Download(filename):
 def CheckSubList(files):
     list = []
     for subfile in files:
-        if os.path.splitext(subfile)[1] in [".srt", ".ssa", ".ass", ".smi", ".sub"]:
+        if os.path.splitext(subfile)[1] in SUBTYPE_EXT:
             list.append(subfile)
     return list
 
-def DownloadID(id):
-    try: shutil.rmtree(__temp__)
-    except: pass
-    try: os.makedirs(__temp__)
-    except: pass
-
-    subtitle_list = []
-    if id.startswith('999999'):
-        url = 'http://assrt.net/download/%06d/%s' %(int(id[6:]), 'XBMC.SUBTITLE')
+# https://yooooo.us/2014/a-string-pattern-finding-algorithm
+def getCommon(ori_lst, splt='.-_ ]', with_no_digit=False):
+    if not ori_lst:
+        return ''
+    lst = ['.'.join(x.split('.')[:-1]) for x in ori_lst]#strip ext name
+    if len(lst) == 1:
+        return lst[0]
+    # judge which splitter gets most split
+    m_splt = max(splt, key = lambda x:sum(map(lambda l:len(l.split(x)), lst)))
+    def getEqual(l):
+        cnt = len(l)
+        equals = {}
+        for i, j in itertools.combinations(l, 2):
+            if not i or not j:
+                continue
+            if i == j:
+                pass
+            elif i.upper() == j.upper():
+                i = i.upper()
+            else:
+                continue
+            #else i == j
+            if i not in equals:
+                equals[i] = 1
+            else:
+                equals[i] += 1
+        if not equals:
+            #print 'end'
+            return False, ''
+        m = max(equals.iteritems(), key = lambda x:x[1])
+        _comb = cnt * (cnt -1) /2
+        if m[1] > 0.3 * _comb or m[1] == _comb:
+            return True, m[0]
+        else:
+            return False, ''
+    m_lst = map(lambda l:l.split(m_splt), lst)
+    m_pattern = []
+    for p in map(None, *m_lst):#add None to fillup short ones
+        suc, new_pattern = getEqual(p)
+        if suc:
+            m_pattern.append(new_pattern)
+        else:
+            break
+    ret = m_splt.join(m_pattern) + (']' if m_splt == ']' else '')
+    if not ret and not with_no_digit:#let's try strings without digits to get rid of "season" and "episode" difference
+        return getCommon(lst, with_no_digit=True)#we pass prepared lst instead of ori_lst
     else:
-        url = 'http://shooter.cn/files/file3.php?hash=duei7chy7gj59fjew73hdwh213f&fileid=%s' % (id)
-        socket = urllib.urlopen( url )
-        data = socket.read()
-        url = 'http://file0.shooter.cn%s' % (CalcFileHash(data))
+        return ret
+
+def Detail(id):
+    try:
+        os.makedirs(__temp__)
+    except:
+        pass
+
+    token = __addon__.getSetting("customToken") or DEFAULT_TOKEN
+    url = '%s/v1/sub/detail?id=%s&xbmc=1' % (API_BASE, id)
+    r = sess.post(url, headers={'Authorization': 'Bearer %s' % token})
+    result = r.json()
+    if result['status']:
+        dialog = xbmcgui.Dialog()
+        if result['status'] == 30900 and token == DEFAULT_TOKEN:
+            dialog.notification(__language__(32009), '', xbmcgui.NOTIFICATION_INFO, 3000)
+        else:
+            dialog.notification(__language__(32010) + '(%d): %s' % (result['status'], result['errmsg']),
+                '', xbmcgui.NOTIFICATION_ERROR, 3000)
+        return []
+    sub = result['sub']['subs'][0]
+    if 'filelist' not in sub or len(sub['filelist']) == 0:
+        ext = os.path.splitext(sub['filename'])[1].lower()
+        if ext not in SUBTYPE_EXT:
+            r = sess.get(sub['url'])
+            data = r.content
+            return extractArchive(data)
+        # single file, not archive
+        url = sub['url']
+    elif len(sub['filelist']) == 1:
+        url = sub['filelist'][0]['url']
+        ext = os.path.splitext(sub['filelist'][0]['f'])[1].lower()
+    else:
+        allfiles = CheckSubList([f["f"] for f in sub['filelist']])
+        common_prefix = getCommon(allfiles)
+        sel = xbmcgui.Dialog().select(__language__(32006), [
+            f[len(common_prefix):].lstrip('.') for f in allfiles])
+        if sel == -1:
+            return []
+        url = sub['filelist'][sel]['url']
+        ext = os.path.splitext(sub['filelist'][sel]['f'])[1].lower()
+    r = sess.get(url)
+    # XXX: use unicode path may not work on some android devices
+    filename = os.path.join(__temp__, "%x.ass" % (random.getrandbits(48)))
+    with open(filename, "wb") as f:
+        f.write(r.content)
+    ChangeFileEndcoding(filename)
+    return [filename]
+
+
+def rmtree(path):
+    if isinstance(path, unicode):
+        path = path.encode('utf-8')
+    dirs, files = xbmcvfs.listdir(path)
+    for dir in dirs:
+        rmtree(os.path.join(path, dir))
+    for file in files:
+        xbmcvfs.delete(os.path.join(path, file))
+    xbmcvfs.rmdir(path)
+
+def DownloadID(id):
+    try:
+        rmtree(__temp__)
+    except:
+        pass
+    try:
+        os.makedirs(__temp__)
+    except:
+        pass
+
+    url = 'http://shooter.cn/files/file3.php?hash=duei7chy7gj59fjew73hdwh213f&fileid=%s' % (
+        id)
+    data = sess.get(url).content
+    url = 'http://file0.shooter.cn%s' % (splayer.CalcFileHash(data))
     #log(sys._getframe().f_code.co_name ,"url is %s" % (url))
-    socket = urllib.urlopen( url )
-    data = socket.read()
-    socket.close()
+    data = sess.get(url).content
+    return extractArchive(data)
+
+
+def extractArchive(data):
+    subtitle_list = []
     header = data[:4]
     if header == 'Rar!':
         zipext = ".rar"
@@ -506,7 +663,9 @@ if params['action'] == 'search' or params['action'] == 'manualsearch':
     Search(item)
 
 elif params['action'] == 'download':
-    if 'id' in params:
+    if 'fid' in params:
+        subs = Detail(params["fid"])
+    elif 'id' in params:
         subs = DownloadID(params["id"])
     else:
         subs = Download(params["filename"])

@@ -32,5 +32,13 @@ msgid "Use Shooter Player API (may become slower)"
 msgstr ""
 
 msgctxt "#32008"
-msgid "Use custom API token (register at assrt.net)" 
+msgid "Use custom API token (register at assrt.net)"
+msgstr ""
+
+msgctxt "#32009"
+msgid "API quota exceeded, using a custom token is recommended"
+msgstr ""
+
+msgctxt "#32010"
+msgid "API request failed"
 msgstr ""
