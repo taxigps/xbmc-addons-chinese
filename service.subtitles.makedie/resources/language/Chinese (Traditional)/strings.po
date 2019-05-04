@@ -32,5 +32,13 @@ msgid "Use Shooter Player API (may become slower)"
 msgstr "自動搜尋時同時搜尋射手影音庫(可能會使搜尋變慢)"
 
 msgctxt "#32008"
-msgid "Use custom API token (register at assrt.net)" 
+msgid "Use custom API token (register at assrt.net)"
 msgstr "使用自定義API密鑰(可在assrt.net註冊後獲得)"
+
+msgctxt "#32009"
+msgid "API quota exceeded, using a custom token is recommended"
+msgstr "公共API配額超限，建議使用自定義API密鑰"
+
+msgctxt "#32010"
+msgid "API request failed"
+msgstr "API請求失敗"
