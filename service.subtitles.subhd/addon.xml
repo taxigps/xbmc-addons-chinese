@@ -13,7 +13,7 @@
   <extension point="xbmc.addon.metadata">
     <summary lang="en">Sub HD subtitle</summary>
     <summary lang="zh">Sub HD 字幕</summary>
-    <description lang="en">Search and download subtitles from subhd.com</description>
-    <description lang="zh">从 subhd.com 下载字幕</description>
+    <description lang="en">Search and download subtitles from subhd.tv</description>
+    <description lang="zh">从 subhd.tv 下载字幕</description>
   </extension>
 </addon>
