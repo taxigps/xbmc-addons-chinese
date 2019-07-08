@@ -1,0 +1,2 @@
+msgctxt "#cmd"
+msgid "命令"
