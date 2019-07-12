@@ -27,8 +27,8 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 
 sys.path.append (__resource__)
 
-SUBHD_API  = 'http://subhd.com/search0/%s'
-SUBHD_BASE = 'http://subhd.com'
+SUBHD_API  = 'https://subhd.tv/search0/%s'
+SUBHD_BASE = 'https://subhd.tv'
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
 def get_KodiVersion():
@@ -56,8 +56,8 @@ def session_get(url, id='', referer='', dtoken=''):
         HEADERS={'Accept': 'application/json, text/javascript, */*; q=0.01',
             'Accept-Encoding': 'gzip, deflate',
             'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
-            'Host': 'subhd.com',
-            'Origin': 'http://subhd.com',
+            'Host': 'subhd.tv',
+            'Origin': 'https://subhd.tv',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0'}
         s = requests.Session()
         s.headers.update(HEADERS)
@@ -163,13 +163,13 @@ def Download(url,lang):
         soup = BeautifulSoup(data, "html.parser")
         id = soup.find("button", class_="btn btn-danger btn-sm").get("sid").encode('utf-8')
         dtoken = soup.find("button", class_="btn btn-danger btn-sm").get("dtoken").encode('utf-8')
-        url = "http://subhd.com/ajax/down_ajax"
+        url = "https://subhd.tv/ajax/down_ajax"
         data = session_get(url, id=id, referer=referer, dtoken=dtoken)
         json_response = json.loads(data)
         if json_response['success']:
             url = json_response['url'].encode('utf-8')
             if url[:4] <> 'http':
-                url = 'http://subhd.com%s' % (url)
+                url = 'https://subhd.tv%s' % (url)
             data = session_get(url)
         else:
             msg = json_response['msg']
