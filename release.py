@@ -35,7 +35,10 @@ def release(plugin, version):
 
 def getVersion(plugin):
     name = '%s/addon.xml' % plugin
-    cont = open(name).read()
+    if sys.version_info[0] >= 3:
+        cont = open(name,encoding='utf-8').read()
+    else:
+        cont = open(name).read()
     addon = re.findall('<addon.*?version="(.*?)"', cont, re.DOTALL)
     if addon:
         return addon[0]
