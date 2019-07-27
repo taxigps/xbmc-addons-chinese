@@ -27,7 +27,9 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 sys.path.append (__resource__)
 
 try:
-    ZIMUZU_BASE = requests.get('http://www.zimuzu.tv', allow_redirects=False).headers['Location'].rstrip('/')
+    loc = requests.get('http://www.zimuzu.tv', allow_redirects=False).headers['Location'].rstrip('/')
+    # http://www.zmz2019.com/rrys/index.html to http://www.zmz2019.com
+    ZIMUZU_BASE = "/".join(loc.split('/')[:3])
 except:
     ZIMUZU_BASE = 'http://www.zimuzu.tv'
 
