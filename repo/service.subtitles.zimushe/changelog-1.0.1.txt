@@ -1,5 +1,0 @@
-﻿1.0.1
-- subtitle download mechanism changed
-
-1.0.0
-- initial
