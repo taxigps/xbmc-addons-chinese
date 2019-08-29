@@ -7,8 +7,8 @@ import xbmcplugin, xbmcgui
 _handle=int(sys.argv[1]) #当前句柄
 _pluginurl = sys.argv[0] #当前地址
 _url = sys.argv[2]
-_site = 'http://bobozyz.com'
-_site_search = 'http://bobozyz.com/index.php?m=vod-search'
+_site = 'http://605zy.com'#接口域名
+_site_search = 'http://605zy.com/index.php?m=vod-search'
 _site_18 = False
 close_keyword = '伦理片,好姐姐'
 _site_close_keyword = close_keyword.decode('utf-8')
@@ -18,7 +18,7 @@ print('malimaliao：' + str(_handle) + _pluginurl)
 
 UA_head = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.146 Safari/537.36',
-    'referer': 'http://bobozyz.com',
+    'referer': 'http://605zy.com',
 }
 
 # 【获取频道栏目列表】
