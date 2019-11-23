@@ -120,7 +120,8 @@ def Search( item ):
 def DownloadLinks(links, referer):
     for link in links:
         url = link.get('href').encode('utf-8')
-        url = ZIMUKU_BASE + url
+        if not url.startswith('http'):
+            url = ZIMUKU_BASE + url
         try:
             log( sys._getframe().f_code.co_name ,"Download url: %s" % (url))
             req = urllib2.Request(url)
