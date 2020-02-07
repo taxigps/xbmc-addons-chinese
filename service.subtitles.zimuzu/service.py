@@ -6,6 +6,7 @@ import sys
 import xbmc
 import urllib
 import urllib2
+import json
 import xbmcvfs
 import requests
 import xbmcaddon
@@ -27,7 +28,8 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 sys.path.append (__resource__)
 
 try:
-    loc = requests.get('http://www.zimuzu.tv', allow_redirects=False).headers['Location'].rstrip('/')
+    loc = [i for i in requests.get('http://www.rrys.tv', allow_redirects=False).text.split() if 'location.href' in i ][0]
+    loc = loc.split('=')[1].strip('"').strip("'")
     # http://www.zmz2019.com/rrys/index.html to http://www.zmz2019.com
     ZIMUZU_BASE = "/".join(loc.split('/')[:3])
 except:
@@ -123,22 +125,23 @@ def Download(url):
         data = GetHttpData(url)
         soup = BeautifulSoup(data, 'html.parser')
         url = soup.find("div", class_="subtitle-links").a.get('href').encode('utf-8')
-        data = GetHttpData(url)
-        soup = BeautifulSoup(data, 'html.parser')
-        url = soup.find("div", class_="download-box").a.get('href').encode('utf-8')
+        url = url.replace('subtitle.html', 'api/v1/static/subtitle/detail')
+        data = json.loads(GetHttpData(url))
+        if data['info'] != 'OK':
+            return []
+        url = data['data']['info']['file']
         data = GetHttpData(url)
     except:
         return []
     if len(data) < 1024:
         return []
-    zip = os.path.join(__temp__, "subtitles%s" % os.path.splitext(url)[1])
-    with open(zip, "wb") as subFile:
+    tmpfile = os.path.join(__temp__, "subtitles%s" % os.path.splitext(url)[1])
+    with open(tmpfile, "wb") as subFile:
         subFile.write(data)
-    subFile.close()
+
     xbmc.sleep(500)
-    if data[:4] == 'Rar!' or data[:2] == 'PK':
-        xbmc.executebuiltin(('XBMC.Extract("%s","%s")' % (zip,__temp__,)).encode('utf-8'), True)
-    path = __temp__
+    archive = urllib.quote_plus(tmpfile)
+    path = 'rar://%s' % (archive)
     dirs, files = xbmcvfs.listdir(path)
     if ('__MACOSX') in dirs:
         dirs.remove('__MACOSX')
