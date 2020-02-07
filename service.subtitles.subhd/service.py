@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 import re
 import os
@@ -27,8 +27,8 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 
 sys.path.append (__resource__)
 
-SUBHD_API  = 'https://subhd.tv/search0/%s'
-SUBHD_BASE = 'https://subhd.tv'
+SUBHD_BASE = 'http://subhd.la'
+SUBHD_API  = SUBHD_BASE + '/search/%s'
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
 def get_KodiVersion():
@@ -56,8 +56,7 @@ def session_get(url, id='', referer='', dtoken=''):
         HEADERS={'Accept': 'application/json, text/javascript, */*; q=0.01',
             'Accept-Encoding': 'gzip, deflate',
             'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
-            'Host': 'subhd.tv',
-            'Origin': 'https://subhd.tv',
+            'Origin': SUBHD_BASE,
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0'}
         s = requests.Session()
         s.headers.update(HEADERS)
@@ -76,6 +75,8 @@ def session_get(url, id='', referer='', dtoken=''):
         return r.content
 
 def Search( item ):
+    div_class_of_item = 'float-left pt-3 pb-3 px-3'
+    div_class_of_link = 'f12 pt-1'
     subtitles_list = []
 
     log(sys._getframe().f_code.co_name, "Search for [%s] by name" % (os.path.basename( item['file_original_path'] ),))
@@ -94,7 +95,7 @@ def Search( item ):
     except:
         return
 
-    results = soup.find_all("div", class_="box")
+    results = soup.find_all("div", class_=div_class_of_item)
 
     # if can't find subtitle for the specified episode, try the whole season instead
     if (len(results) == 0) and (len(item['tvshow']) > 0):
@@ -105,24 +106,19 @@ def Search( item ):
             soup = BeautifulSoup(data, "html.parser")
         except:
             return
-        results = [x for x in soup.find_all("div", class_="box") if x.find('div', class_='tvlist')]
+        results = [x for x in soup.find_all("div", class_=div_class_of_item) if x.find('div', class_=div_class_of_link)]
 
     for it in results:
-        link = SUBHD_BASE + it.find("div", class_="d_title").a.get('href').encode('utf-8')
-        version = it.find("div", class_="d_title").a.get('title').encode('utf-8')
+        a = it.find('div', class_=div_class_of_link).a
+        link = SUBHD_BASE + a.get('href').encode('utf-8')
+        title = a.get('title') if item['title'] in a.get('title') else a.text
+        version = title.encode('utf-8')
         if version.find('本字幕按 ') == 0:
             version = version.split()[1]
+
         try:
-            group = it.find("div", class_="d_zu").text.encode('utf-8')
-            if group.isspace():
-                group = ''
-        except:
-            group = ''
-        if group and (version.find(group) == -1):
-            version += ' ' + group
-        try:
-            r2 = it.find_all("span", class_="label")
-            langs = [x.text.encode('utf-8') for x in r2][:-1]
+            langs = it.find("div", class_="pt-1 text-secondary").text.split()
+            langs = [x.encode('utf-8') for x in langs][:-1]
         except:
             langs = '未知'
         name = '%s (%s)' % (version, ",".join(langs))
@@ -163,13 +159,13 @@ def Download(url,lang):
         soup = BeautifulSoup(data, "html.parser")
         id = soup.find("button", class_="btn btn-danger btn-sm").get("sid").encode('utf-8')
         dtoken = soup.find("button", class_="btn btn-danger btn-sm").get("dtoken").encode('utf-8')
-        url = "https://subhd.tv/ajax/down_ajax"
+        url = "%s/ajax/down_ajax" % SUBHD_BASE
         data = session_get(url, id=id, referer=referer, dtoken=dtoken)
         json_response = json.loads(data)
         if json_response['success']:
             url = json_response['url'].encode('utf-8')
-            if url[:4] <> 'http':
-                url = 'https://subhd.tv%s' % (url)
+            if url[:4] != 'http':
+                url = '%s%s' % (SUBHD_BASE, url)
             data = session_get(url)
         else:
             msg = json_response['msg']
