@@ -95,7 +95,7 @@ def Search( item ):
     except:
         return
 
-    results = soup.find_all("div", class_=div_class_of_item)
+    results = soup.find_all("div", class_="col-sm-10 p-3 position-relative")
 
     # if can't find subtitle for the specified episode, try the whole season instead
     if (len(results) == 0) and (len(item['tvshow']) > 0):
@@ -106,12 +106,12 @@ def Search( item ):
             soup = BeautifulSoup(data, "html.parser")
         except:
             return
-        results = [x for x in soup.find_all("div", class_=div_class_of_item) if x.find('div', class_=div_class_of_link)]
+        results = [x for x in soup.find_all("div", class_="col-sm-10 p-3 position-relative") if x.find('div', class_="f12 pt-1")]
 
     for it in results:
-        a = it.find('div', class_=div_class_of_link).a
+        a = it.find('div', class_="f12 pt-1").a
         link = SUBHD_BASE + a.get('href').encode('utf-8')
-        title = a.get('title') if item['title'] in a.get('title') else a.text
+        title = a.get('title') if a.get('title') else a.text
         version = title.encode('utf-8')
         if version.find('本字幕按 ') == 0:
             version = version.split()[1]
