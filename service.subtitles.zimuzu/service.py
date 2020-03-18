@@ -141,12 +141,15 @@ def Download(url):
 
     xbmc.sleep(500)
     archive = urllib.quote_plus(tmpfile)
-    path = 'rar://%s' % (archive)
+    if data[:4] == 'Rar!':
+        path = 'rar://%s' % (archive)
+    else:
+        path = 'zip://%s' % (archive)
     dirs, files = xbmcvfs.listdir(path)
     if ('__MACOSX') in dirs:
         dirs.remove('__MACOSX')
     if len(dirs) > 0:
-        path = os.path.join(__temp__, dirs[0].decode('utf-8'))
+        path = path + '/' + dirs[0].decode('utf-8')
         dirs, files = xbmcvfs.listdir(path)
     list = []
     for subfile in files:
