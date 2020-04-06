@@ -146,7 +146,7 @@ def Download(url,lang):
         xbmcvfs.mkdirs(__temp__)
     dirs, files = xbmcvfs.listdir(__temp__)
     for file in files:
-        xbmcvfs.delete(os.path.join(__temp__, file))
+        xbmcvfs.delete(os.path.join(__temp__, file.decode('utf-8')))
 
     subtitle_list = []
     exts = [".srt", ".sub", ".smi", ".ssa", ".ass" ]
