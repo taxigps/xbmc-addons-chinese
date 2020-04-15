@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addons>
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="repository.xbmc-addons-chinese"
         name="Chinese Add-ons"
         version="2.0.0"
@@ -24,25 +23,3 @@
     </extension>
 </addon>
 
-<addon id="service.subtitles.zimuku"
-       name="zimuku"
-       version="2.0.0"
-       provider-name="taxigps">
-  <requires>
-    <import addon="xbmc.python" version="3.0.0"/>
-    <import addon="script.module.beautifulsoup4" version="4.6.2"/>
-    <import addon="vfs.rar" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.subtitle.module"
-             library="service.py" />
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">zimuku subtitle</summary>
-    <summary lang="zh">字幕库</summary>
-    <description lang="en">Search and download subtitles from www.zimuku.la</description>
-    <description lang="zh">从 www.zimuku.la 下载字幕</description>
-    <assets>
-      <icon>icon.png</icon>
-    </assets>
-  </extension>
-</addon>
-</addons>
