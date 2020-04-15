@@ -12,6 +12,7 @@ This project is an repository for open source Addon scripts, plugins, and skins 
 To install the repository, you need to download the latest repository zip file
 * [repository.xbmc-addons-chinese-1.2.1.zip][2] for Kodi 18 and older
 * [repository.xbmc-addons-chinese-2.0.0.zip][3] for Kodi 19
+
 And then:
 * Launch Kodi
 * Navigate to System | Settings | Add-ons
