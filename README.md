@@ -1,26 +1,27 @@
 # Introduction
 
-This project is an repository for open source Addon scripts, plugins, and skins for XBMC Media Center. Specially for Chinese Language speaking people.
+This project is an repository for open source Addon scripts, plugins, and skins for Kodi Media Center. Specially for Chinese Language speaking people.
 
-Note: Chinese repository is also applicable to Kodi (new releases - formerly known as xbmc)
-
-* Forum Discuss in Chinese: <del>原动力论坛: XBMC媒体中心讨论版</del> (Site closed)
-* Forum Discuss in English: [XBMC Community Forum: Project xbmc-addons-chinese Release Thread][2]
+* Forum Discuss in English: [Kodi Community Forum: Project xbmc-addons-chinese Release Thread][1]
 * QQ Group for Developers: 253355963
 
 # How To Use
 
 ## Install Repository
 
-To install the repository, you need to download the latest repository zip file [repository.xbmc-addons-chinese-1.2.1.zip][3]. And then:
-* Launch XBMC
+To install the repository, you need to download the latest repository zip file
+* [repository.xbmc-addons-chinese-1.2.1.zip][2] for Kodi 18 and older
+* [repository.xbmc-addons-chinese-2.0.0.zip][3] for Kodi 19
+
+And then:
+* Launch Kodi
 * Navigate to System | Settings | Add-ons
 * Select Install from zip file
 * Browse to the directory where the new downloaded zip file is being stored.
 * Select OK
 
 For proper Chinese text display on xbmc, do the following steps:
-* Launch XBMC
+* Launch Kodi
 * Navigate to System | Settings | Appearance | skin
 * Change skin-font to "Arial based"
 
@@ -87,7 +88,7 @@ PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStre
 
 * Shooter(Fake) - service.subtitles.makedie - Search and download subtitles from [assrt.net](http://assrt.net)
 * Sub HD - service.subtitles.subhd - Search and download subtitles from [subhd.com](http://subhd.com)
-* zimuku - service.subtitles.zimuku - Search and download subtitles from [zimuku.cn](http://www.zimuku.cn)
+* zimuku - service.subtitles.zimuku - Search and download subtitles from [zimuku.la](http://www.zimuku.la)
 * ZiMuZu - service.subtitles.zimuzu - Search and download subtitles from [zimuzu.tv](http://www.zimuzu.tv)
 
 ## TV Scraper Add-ons
@@ -100,8 +101,8 @@ PPS网络电视(PPStream) can playback without pps4xbmc by DE-SELECT "Use PPStre
 
 If for reasons that you need to manually install a specific plugin, you can download the required zip file from the corresponding ./repo sub-directory. Then follow the ** Install Repository ** steps described above to install the zip plugin. 
 
-[1]: http://bbs.htpc1.com/forum-225-1.html
-[2]: https://forum.kodi.tv/showthread.php?tid=64250
-[3]: https://github.com/taxigps/xbmc-addons-chinese/raw/master/repo/repository.xbmc-addons-chinese/repository.xbmc-addons-chinese-1.2.1.zip
+[1]: https://forum.kodi.tv/showthread.php?tid=64250
+[2]: https://github.com/taxigps/xbmc-addons-chinese/raw/master/repo/repository.xbmc-addons-chinese/repository.xbmc-addons-chinese-1.2.1.zip
+[3]: https://github.com/taxigps/xbmc-addons-chinese/raw/matrix/repo/repository.xbmc-addons-chinese/repository.xbmc-addons-chinese-2.0.0.zip
 
 
