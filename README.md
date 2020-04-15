@@ -10,8 +10,8 @@ This project is an repository for open source Addon scripts, plugins, and skins 
 ## Install Repository
 
 To install the repository, you need to download the latest repository zip file
- [repository.xbmc-addons-chinese-1.2.1.zip][2] for Kodi 18 and older 
- [repository.xbmc-addons-chinese-2.0.0.zip][3] for Kodi 19
+* [repository.xbmc-addons-chinese-1.2.1.zip][2] for Kodi 18 and older
+* [repository.xbmc-addons-chinese-2.0.0.zip][3] for Kodi 19
 And then:
 * Launch Kodi
 * Navigate to System | Settings | Add-ons
@@ -57,5 +57,6 @@ If for reasons that you need to manually install a specific plugin, you can down
 
 [1]: https://forum.kodi.tv/showthread.php?tid=64250
 [2]: https://github.com/taxigps/xbmc-addons-chinese/raw/master/repo/repository.xbmc-addons-chinese/repository.xbmc-addons-chinese-1.2.1.zip
+[3]: https://github.com/taxigps/xbmc-addons-chinese/raw/matrix/repo/repository.xbmc-addons-chinese/repository.xbmc-addons-chinese-2.0.0.zip
 
 
