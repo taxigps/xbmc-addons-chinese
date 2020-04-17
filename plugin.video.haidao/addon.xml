@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.haidao" name="海盗影院" version="1.0.0" provider-name="malimaliao">
+	<requires>
+		<import addon="script.module.requests" version="2.12.4"/>
+		<import addon="script.module.keyboard.chinese" version="2.0.4" optional="true"/>
+	</requires>
+	<extension point="xbmc.python.pluginsource" library="haidao.py">
+		<provides>video</provides>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<platform>all</platform>
+		<summary>Pirate Kodi Plugn</summary>
+		<summary lang="zh">海盗影院 Kodi插件</summary>
+		<description>Pirate python plugn for Kodi</description>
+		<description lang="zh">海盗影院 Kodi视频插件</description>
+		<website>https://github.com/malimaliao</website>
+		<email>malimaliao@gmail.com</email>
+		<disclaimer>Neither this addon nor its author are in anyway affiliated with the Pirate</disclaimer>
+		<assets>
+			<icon>icon.png</icon>
+			<fanart>resources/fanart.jpg</fanart>
+			<screenshot>resources/p1.jpg</screenshot>
+			<screenshot>resources/p2.jpg</screenshot>
+			<screenshot>resources/p3.jpg</screenshot>
+			<screenshot>resources/p4.jpg</screenshot>
+        </assets>
+	</extension>
+</addon>
