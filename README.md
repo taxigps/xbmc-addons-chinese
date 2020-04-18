@@ -47,6 +47,7 @@ For proper Chinese text display on Kodi, do the following steps:
 
 * Shooter - service.subtitles.shooter - Shooter subtitle service
 * zimuku - service.subtitles.zimuku - Search and download subtitles from [zimuku.la](http://www.zimuku.la)
+* zimuzu - service.subtitles.zimuzu - Search and download subtitles from [zimuzu.tv](http://www.zimuzu.tv)
 
 ## TV Scraper Add-ons
 
