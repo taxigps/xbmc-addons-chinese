@@ -114,4 +114,37 @@ V2.0.0 (2020-04-14)
         </news>
     </extension>
 </addon>
+
+<addon id="service.subtitles.zimuzu"
+       name="ZiMuZu"
+       version="2.0.0"
+       provider-name="xodidox">
+    <requires>
+        <import addon="xbmc.python" version="3.0.0"/>
+        <import addon="script.module.requests" version="2.22.0"/>
+        <import addon="script.module.beautifulsoup4" version="4.6.2"/>
+        <import addon="vfs.rar" version="3.3.0"/>
+    </requires>
+    <extension point="xbmc.subtitle.module"
+               library="service.py" />
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">YYeTs ZiMuZu subtitle</summary>
+        <summary lang="zh">人人影视字幕组 字幕</summary>
+        <description lang="en">Search and download subtitles from zimuzu.tv</description>
+        <description lang="zh">从 zimuzu.tv 下载字幕</description>
+        <assets>
+            <icon>icon.png</icon>
+            <clearlogo>logo.png</clearlogo>
+            <fanart>resources/media/fanart.jpg</fanart>
+            <screenshot>resources/media/screenshot_1.jpg</screenshot>
+            <screenshot>resources/media/screenshot_2.jpg</screenshot>
+            <screenshot>resources/media/screenshot_3.jpg</screenshot>
+            <screenshot>resources/media/screenshot_4.jpg</screenshot>
+        </assets>
+        <news>
+V2.0.0 (2020-04-18)
+- Ported to python 3.0 for Kodi 19
+        </news>
+    </extension>
+</addon>
 </addons>
