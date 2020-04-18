@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import re
 import os
 import sys
 import xbmc
@@ -12,8 +11,9 @@ import requests
 import xbmcaddon
 import xbmcgui,xbmcplugin
 from bs4 import BeautifulSoup
+import time
 
-__addon__ = xbmcaddon.Addon()
+__addon__      = xbmcaddon.Addon()
 __author__     = __addon__.getAddonInfo('author')
 __scriptid__   = __addon__.getAddonInfo('id')
 __scriptname__ = __addon__.getAddonInfo('name')
@@ -41,9 +41,6 @@ UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 def log(module, msg):
     xbmc.log((u"%s::%s - %s" % (__scriptname__,module,msg,)).encode('utf-8'),level=xbmc.LOGDEBUG )
 
-def normalizeString(str):
-    return str
-
 def GetHttpData(url, data=''):
     log(sys._getframe().f_code.co_name, "url [%s]" % (url))
     if data:
@@ -56,7 +53,7 @@ def GetHttpData(url, data=''):
         httpdata = response.read()
         response.close()
     except:
-        log(sys._getframe().f_code.co_name, "(%d) [%s]" % (
+        log(sys._getframe().f_code.co_name, "Error (%d) [%s]" % (
                sys.exc_info()[2].tb_lineno,
                sys.exc_info()[1]
                ))
@@ -92,9 +89,7 @@ def Search( item ):
             listitem = xbmcgui.ListItem(label=it["language_name"],
                                   label2=it["filename"],
                                   iconImage=it["rating"],
-                                  thumbnailImage=it["language_flag"]
-                                  )
-
+                                  thumbnailImage=it["language_flag"])
             listitem.setProperty( "sync", "false" )
             listitem.setProperty( "hearing_imp", "false" )
 
@@ -103,21 +98,12 @@ def Search( item ):
                                                             )
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
 
-def rmtree(path):
-    if isinstance(path, unicode):
-        path = path.encode('utf-8')
-    dirs, files = xbmcvfs.listdir(path)
-    for dir in dirs:
-        rmtree(os.path.join(path, dir))
-    for file in files:
-        xbmcvfs.delete(os.path.join(path, file))
-    xbmcvfs.rmdir(path)
-
 def Download(url):
-    try: rmtree(__temp__)
-    except: pass
-    try: os.makedirs(__temp__)
-    except: pass
+    if not xbmcvfs.exists(__temp__.replace('\\','/')):
+        xbmcvfs.mkdirs(__temp__)
+    dirs, files = xbmcvfs.listdir(__temp__)
+    for file in files:
+        xbmcvfs.delete(os.path.join(__temp__, file.decode("utf-8")))
 
     subtitle_list = []
     exts = [".srt", ".sub", ".txt", ".smi", ".ssa", ".ass" ]
@@ -135,7 +121,9 @@ def Download(url):
         return []
     if len(data) < 1024:
         return []
-    tmpfile = os.path.join(__temp__, "subtitles%s" % os.path.splitext(url)[1])
+    t = time.time()
+    ts = time.strftime("%Y%m%d%H%M%S",time.localtime(t)) + str(int((t - int(t)) * 1000))
+    tmpfile = os.path.join(__temp__, "subtitles%s%s" % (ts, os.path.splitext(url)[1])).replace('\\','/')
     with open(tmpfile, "wb") as subFile:
         subFile.write(data)
 
@@ -156,12 +144,12 @@ def Download(url):
         if (os.path.splitext( subfile )[1] in exts):
             list.append(subfile.decode('utf-8'))
     if len(list) == 1:
-        subtitle_list.append(os.path.join(path, list[0]))
+        subtitle_list.append(path + '/' + list[0])
     elif len(list) > 1:
         sel = xbmcgui.Dialog().select('请选择压缩包中的字幕', list)
         if sel == -1:
             sel = 0
-        subtitle_list.append(os.path.join(path, list[sel]))
+        subtitle_list.append(path + '/' + list[sel])
 
     return subtitle_list
 
@@ -192,8 +180,8 @@ if params['action'] == 'search' or params['action'] == 'manualsearch':
     item['year']               = xbmc.getInfoLabel("VideoPlayer.Year")                           # Year
     item['season']             = str(xbmc.getInfoLabel("VideoPlayer.Season"))                    # Season
     item['episode']            = str(xbmc.getInfoLabel("VideoPlayer.Episode"))                   # Episode
-    item['tvshow']             = normalizeString(xbmc.getInfoLabel("VideoPlayer.TVshowtitle"))   # Show
-    item['title']              = normalizeString(xbmc.getInfoLabel("VideoPlayer.OriginalTitle")) # try to get original title
+    item['tvshow']             = xbmc.getInfoLabel("VideoPlayer.TVshowtitle")                    # Show
+    item['title']              = xbmc.getInfoLabel("VideoPlayer.OriginalTitle")                  # try to get original title
     item['file_original_path'] = urllib.unquote(xbmc.Player().getPlayingFile().decode('utf-8'))  # Full path of a playing file
     item['3let_language']      = []
 
@@ -208,7 +196,7 @@ if params['action'] == 'search' or params['action'] == 'manualsearch':
         item['title']  = xbmc.getInfoLabel("VideoPlayer.Title")                       # no original title, get just Title
         if item['title'] == os.path.basename(xbmc.Player().getPlayingFile()):         # get movie title and year if is filename
             title, year = xbmc.getCleanMovieTitle(item['title'])
-            item['title'] = normalizeString(title.replace('[','').replace(']',''))
+            item['title'] = title.replace('[','').replace(']','')
             item['year'] = year
 
     if item['episode'].lower().find("s") > -1:                                        # Check if season is "Special"

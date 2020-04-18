@@ -931,21 +931,60 @@ V1.0.0 (2015-05-11)
 
 <addon id="service.subtitles.zimuzu"
        name="ZiMuZu"
-       version="1.0.6"
+       version="1.0.7"
        provider-name="xodidox">
-  <requires>
-    <import addon="xbmc.python" version="2.1.0"/>
-    <import addon="script.module.requests" version="1.1.0"/>
-    <import addon="script.module.beautifulsoup4" version="4.3.2"/>
-    <import addon="vfs.rar" version="2.0.7"/>
-  </requires>
-  <extension point="xbmc.subtitle.module"
-             library="service.py" />
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">YYeTs ZiMuZu subtitle</summary>
-    <summary lang="zh">人人影视字幕组 字幕</summary>
-    <description lang="en">Search and download subtitles from zimuzu.tv</description>
-    <description lang="zh">从 zimuzu.tv 下载字幕</description>
-  </extension>
+    <requires>
+        <import addon="xbmc.python" version="2.1.0"/>
+        <import addon="script.module.requests" version="1.1.0"/>
+        <import addon="script.module.beautifulsoup4" version="4.3.2"/>
+        <import addon="vfs.rar" version="2.3.0"/>
+    </requires>
+    <extension point="xbmc.subtitle.module"
+               library="service.py" />
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">YYeTs ZiMuZu subtitle</summary>
+        <summary lang="zh">人人影视字幕组 字幕</summary>
+        <description lang="en">Search and download subtitles from zimuzu.tv</description>
+        <description lang="zh">从 zimuzu.tv 下载字幕</description>
+        <assets>
+            <icon>icon.png</icon>
+            <clearlogo>logo.png</clearlogo>
+            <fanart>resources/media/fanart.jpg</fanart>
+            <screenshot>resources/media/screenshot_1.jpg</screenshot>
+            <screenshot>resources/media/screenshot_2.jpg</screenshot>
+            <screenshot>resources/media/screenshot_3.jpg</screenshot>
+            <screenshot>resources/media/screenshot_4.jpg</screenshot>
+        </assets>
+        <news>
+V1.0.7 (2020-04-18) by taxigps
+- Add screenshot
+- get rid of function normalizeString
+- fix bug that can't get rarfile with wrong path type
+
+V1.0.6 (2020-03-18) by taxigps
+- Fix for zip file
+
+V1.0.5 (2020-02-08) by 4ft35t
+- 修复域名获取方式
+- 修复字幕文件最终 url 获取
+- 修复压缩包解压问题
+
+V1.0.4 (2019-07-27) by Scott Liu
+- http://rrys.tv/ is used for relocation
+
+V1.0.3 (2018-03-06) by taxigps
+- Fix for URL redirection
+- get rid of warning about BeautifulSoup
+
+V1.0.2 (2017-01-22) by xodidox
+- Fix for URL redirection
+
+V1.0.1 (2017-01-08) by xodidox
+- Minor tweak
+
+V1.0.0 (2017-01-03) by xodidox
+- initial
+        </news>
+    </extension>
 </addon>
 </addons>
