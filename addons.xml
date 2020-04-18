@@ -82,23 +82,36 @@ V1.0.0 (2013-12-04)
 
 <addon id="service.subtitles.zimuku"
        name="zimuku"
-       version="2.0.0"
+       version="2.0.1"
        provider-name="taxigps">
-  <requires>
-    <import addon="xbmc.python" version="3.0.0"/>
-    <import addon="script.module.beautifulsoup4" version="4.6.2"/>
-    <import addon="vfs.rar" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.subtitle.module"
-             library="service.py" />
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">zimuku subtitle</summary>
-    <summary lang="zh">字幕库</summary>
-    <description lang="en">Search and download subtitles from www.zimuku.la</description>
-    <description lang="zh">从 www.zimuku.la 下载字幕</description>
-    <assets>
-      <icon>icon.png</icon>
-    </assets>
-  </extension>
+    <requires>
+        <import addon="xbmc.python" version="3.0.0"/>
+        <import addon="script.module.beautifulsoup4" version="4.6.2"/>
+        <import addon="vfs.rar" version="3.0.0"/>
+    </requires>
+    <extension point="xbmc.subtitle.module"
+               library="service.py" />
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">zimuku subtitle</summary>
+        <summary lang="zh">字幕库</summary>
+        <description lang="en">Search and download subtitles from www.zimuku.la</description>
+        <description lang="zh">从 www.zimuku.la 下载字幕</description>
+        <platform>all</platform>
+        <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+        <assets>
+            <icon>icon.png</icon>
+            <clearlogo>logo.png</clearlogo>
+            <screenshot>resources/media/screenshot_1.jpg</screenshot>
+            <screenshot>resources/media/screenshot_2.jpg</screenshot>
+            <screenshot>resources/media/screenshot_3.jpg</screenshot>
+        </assets>
+        <news>
+V2.0.1 (2020-04-18)
+- Add screenshot
+
+V2.0.0 (2020-04-14)
+- Ported to python 3.0 for Kodi 19
+        </news>
+    </extension>
 </addon>
 </addons>

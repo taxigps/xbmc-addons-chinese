@@ -53,8 +53,7 @@ def Search( item ):
         socket.close()
         soup = BeautifulSoup(data, 'html.parser')
     except:
-        log(sys._getframe().f_code.co_name, "%s (%d) [%s]" % (
-            sys.exc_info()[2].tb_frame.f_code.co_name,
+        log(sys._getframe().f_code.co_name, "Error (%d) [%s]" % (
             sys.exc_info()[2].tb_lineno,
             sys.exc_info()[1]
             ))
@@ -72,8 +71,7 @@ def Search( item ):
             socket.close()
             soup = BeautifulSoup(data, 'html.parser').find("div", class_="subs box clearfix")
         except:
-            log(sys._getframe().f_code.co_name, "%s (%d) [%s]" % (
-                sys.exc_info()[2].tb_frame.f_code.co_name,
+            log(sys._getframe().f_code.co_name, "Error (%d) [%s]" % (
                 sys.exc_info()[2].tb_lineno,
                 sys.exc_info()[1]
                 ))
@@ -160,8 +158,7 @@ def Download(url,lang):
         soup = BeautifulSoup(data, 'html.parser')
         links = soup.find("div", {"class":"clearfix"}).find_all('a')
     except:
-        log(sys._getframe().f_code.co_name, "%s (%d) [%s]" % (
-            sys.exc_info()[2].tb_frame.f_code.co_name,
+        log(sys._getframe().f_code.co_name, "Error (%d) [%s]" % (
             sys.exc_info()[2].tb_lineno,
             sys.exc_info()[1]
             ))
