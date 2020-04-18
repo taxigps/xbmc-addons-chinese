@@ -1,12 +1,10 @@
 ﻿# -*- coding: utf-8 -*-
 
-import re
 import os
 import sys
 import xbmc
 import urllib
 import urllib2
-import shutil
 import xbmcvfs
 import xbmcaddon
 import xbmcgui,xbmcplugin
@@ -169,7 +167,7 @@ def Download(url,lang):
         soup = BeautifulSoup(data, 'html.parser')
         links = soup.find("div", {"class":"clearfix"}).find_all('a')
     except:
-        log( sys.exc_info()[2].tb_frame.f_code.co_name, "(%d) [%s]" % (
+        log( sys.exc_info()[2].tb_frame.f_code.co_name, "Error (%d) [%s]" % (
             sys.exc_info()[2].tb_lineno,
             sys.exc_info()[1]
             ))
