@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="service.subtitles.shooter"
+       name="Shooter"
+       version="2.0.0"
+       provider-name="taxigps">
+    <requires>
+        <import addon="xbmc.python" version="3.0.0"/>
+        <import addon="script.module.chardet" version="3.0.4"/>
+        <import addon="script.module.beautifulsoup4" version="4.6.2"/>
+    </requires>
+    <extension point="xbmc.subtitle.module"
+               library="service.py" />
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">Shooter</summary>
+        <summary lang="zh">射手字幕</summary>
+        <summary lang="zh_TW">射手字幕</summary>
+        <description lang="en">Shooter subtitle service</description>
+        <description lang="zh">射手字幕插件</description>
+        <description lang="zh_TW">射手字幕挿件</description>
+        <platform>all</platform>
+        <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+        <forum>http://forum.xbmc.org/showthread.php?tid=199644</forum>
+        <source>https://github.com/taxigps/service.subtitles.shooter</source>
+        <assets>
+            <icon>icon.png</icon>
+            <clearlogo>logo.png</clearlogo>
+            <screenshot>resources/media/screenshot_1.jpg</screenshot>
+            <screenshot>resources/media/screenshot_2.jpg</screenshot>
+            <screenshot>resources/media/screenshot_3.jpg</screenshot>
+        </assets>
+        <news>
+V2.0.0 (2020-04-18)
+- Ported to python 3.0 for Kodi 19
+
+V1.0.5 (2014-12-24)
+- fixed: can't get subtitles by title because website closed
+
+V1.0.4 (2014-07-13)
+- reduce unneeded coding convertion to download faster
+
+V1.0.3 (2014-06-27)
+- added search subtitles by title
+
+V1.0.2 (2014-04-09)
+- added setting to save subtitles as UTF-8
+- added setting for Simplified and Traditional conversion
+- changed to use zlib to decompress incomplete zipped subtitle
+
+V1.0.1 (2013-12-05)
+- fixed to show language flag
+
+V1.0.0 (2013-12-04)
+- move the service out of XBMC Subtitles
+        </news>
+    </extension>
+</addon>
