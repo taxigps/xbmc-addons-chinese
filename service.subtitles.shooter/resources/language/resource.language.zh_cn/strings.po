@@ -1,7 +1,11 @@
 msgid ""
 msgstr ""
-
-#Chinese Simplified
+"Report-Msgid-Bugs-To: https://github.com/taxigps/service.subtitles.shooter/issues\n"
+"Last-Translator: taxigps\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: zh_CN\n"
 
 msgctxt "#32001"
 msgid "Text subtitles save as UTF-8"
