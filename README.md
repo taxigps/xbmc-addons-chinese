@@ -47,6 +47,7 @@ For proper Chinese text display on xbmc, do the following steps:
 * 斗鱼TV(douyutv) - plugin.video.douyutv2 - Online videos from www.douyutv.com
 * 风行视频(Funshion) - plugin.video.funshion - Online videos from www.funshion.com
 * 海盗影院 - plugin.video.haidao - 海盗影院 Kodi视频插件`(new)`
+* 韩剧视频 - plugin.video.hanju - 韩剧视频 Kodi插件`(new)`
 * 酷6云中剧场(Ku6) - plugin.video.ku6 - Online video from www.juchang.com
 * 乐视网(LeTV) - plugin.video.letv - Online video from www.letv.com.cn
 * 美剧猫(meijumao) - plugin.video.meijumao - online video from www.meijumao.net
