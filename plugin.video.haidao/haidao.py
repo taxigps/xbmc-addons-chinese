@@ -9,8 +9,8 @@ _pluginurl = sys.argv[0] #当前地址
 _url = sys.argv[2]
 _site = 'http://www.okzyw.com'#接口域名
 _site_search = 'http://www.okzyw.com/index.php?m=vod-search'
-_site_18 = False
-close_keyword = '伦理片,好姐姐'
+_site_18 = True #启用过滤
+close_keyword = '伦理片,好姐姐' #黑名单关键词
 _site_close_keyword = close_keyword.decode('utf-8')
 _movieinfo = True #启用视频信息
 
