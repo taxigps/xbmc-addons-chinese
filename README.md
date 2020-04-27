@@ -36,6 +36,7 @@ For proper Chinese text display on Kodi, do the following steps:
 
 ## Video Add-ons
 
+* 韩剧视频 - plugin.video.hanju - 韩剧视频 Kodi插件`(new)`
 
 ## Music Add-ons
 
