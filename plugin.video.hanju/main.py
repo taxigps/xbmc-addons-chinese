@@ -13,7 +13,9 @@ _plugin_address =sys.argv[0]
 _wh_url =sys.argv[2]
 # 接口域名
 _site ='http://www.hanju.cc'
-_site_18 = False
+# 不良内容过滤开关
+_site_18 = True
+# 不良内容关键词
 _close_keyword = '伦理片,操'
 _encoding = 'gb2312'
 print('爬虫调试_cj:' + str(_handle))
