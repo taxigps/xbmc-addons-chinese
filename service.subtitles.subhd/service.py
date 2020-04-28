@@ -27,9 +27,18 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 
 sys.path.append (__resource__)
 
-SUBHD_BASE = 'http://subhd.la'
+SUBHD_BASE = 'http://subhd.tv'
 SUBHD_API  = SUBHD_BASE + '/search/%s'
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
+
+s = requests.Session()
+HEADERS={'Accept': 'application/json, text/javascript, */*; q=0.01',
+    'Accept-Encoding': 'gzip, deflate',
+    'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+    'Origin': SUBHD_BASE,
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0'}
+s.headers.update(HEADERS)
 
 def get_KodiVersion():
     json_query = xbmc.executeJSONRPC('{ "jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["version", "name"]}, "id": 1 }')
@@ -50,29 +59,13 @@ def log(module, msg):
         msg = msg.decode('utf-8')
     xbmc.log((u"%s::%s - %s" % (__scriptname__,module,msg,)).encode('utf-8'),level=xbmc.LOGDEBUG )
 
-def session_get(url, id='', referer='', dtoken=''):
-    log(sys._getframe().f_code.co_name, "url=%s id=%s referer=%s dtoken=%s" % (url, id, referer, dtoken))
-    if id:
-        HEADERS={'Accept': 'application/json, text/javascript, */*; q=0.01',
-            'Accept-Encoding': 'gzip, deflate',
-            'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
-            'Origin': SUBHD_BASE,
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0'}
-        s = requests.Session()
-        s.headers.update(HEADERS)
-        r = s.get(referer)
+def session_get(url, data='', referer=''):
+    log(sys._getframe().f_code.co_name, "url=%s data=%s referer=%s" % (url, data, referer))
+    if referer:
         s.headers.update({'Referer': referer})
-        r = s.post(url, data={'sub_id': id, 'dtoken': dtoken})
-        return r.content
-    else:
-        HEADERS={'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, sdch',
-            'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0'}
-        s = requests.Session()
-        s.headers.update(HEADERS)
-        r = s.get(url)
-        return r.content
+    if data:
+        return s.post(url, data)
+    return s.get(url)
 
 def Search( item ):
     div_class_of_item = 'float-left pt-3 pb-3 px-3'
@@ -89,7 +82,7 @@ def Search( item ):
     else:
         search_string = item['title']
     url = SUBHD_API % (urllib.quote(search_string))
-    data = session_get(url)
+    data = session_get(url).text
     try:
         soup = BeautifulSoup(data, "html.parser")
     except:
@@ -101,7 +94,7 @@ def Search( item ):
     if (len(results) == 0) and (len(item['tvshow']) > 0):
         search_string = "%s S%.2d" % (item['tvshow'], int(item['season']))
         url = SUBHD_API % (urllib.quote(search_string))
-        data = session_get(url)
+        data = session_get(url).text
         try:
             soup = BeautifulSoup(data, "html.parser")
         except:
@@ -151,26 +144,10 @@ def Download(url,lang):
     for file in files:
         xbmcvfs.delete(os.path.join(__temp__, file))
 
-    referer = url
     subtitle_list = []
-    exts = [".srt", ".sub", ".txt", ".smi", ".ssa", ".ass" ]
+    exts =(".srt", ".sub", ".txt", ".smi", ".ssa", ".ass")
     try:
-        data = session_get(url)
-        soup = BeautifulSoup(data, "html.parser")
-        id = soup.find("button", class_="btn btn-danger btn-sm").get("sid").encode('utf-8')
-        dtoken = soup.find("button", class_="btn btn-danger btn-sm").get("dtoken").encode('utf-8')
-        url = "%s/ajax/down_ajax" % SUBHD_BASE
-        data = session_get(url, id=id, referer=referer, dtoken=dtoken)
-        json_response = json.loads(data)
-        if json_response['success']:
-            url = json_response['url'].encode('utf-8')
-            if url[:4] != 'http':
-                url = '%s%s' % (SUBHD_BASE, url)
-            data = session_get(url)
-        else:
-            msg = json_response['msg']
-            xbmc.executebuiltin((u'XBMC.Notification("subhd","%s")' % (msg)).encode('utf-8'), True)
-            data = ''
+        html = session_get(url).text
     except:
         log(sys._getframe().f_code.co_name, "%s (%d) [%s]" % (
                sys.exc_info()[2].tb_frame.f_code.co_name,
@@ -178,50 +155,32 @@ def Download(url,lang):
                sys.exc_info()[1]
                ))
         return []
+
+    soup = BeautifulSoup(html, "html.parser")
+    # 预览接口无验证码，可以提取单个字幕文件
+    data = soup.find_all('a', text='预览')
+    data = [i.get('data-fname').encode('utf-8') for i in data]
+    subs = [i for i in data if i.endswith(exts)]
+
+    dialog = xbmcgui.Dialog()
+    # 文件名超长时会滚动显示，截断只显示最后50个字符，提高选择效率
+    ret = dialog.select("选择字幕", [i[-50:] for i in subs])
+
+    subid = int(url.rsplit('/')[-1])
+    fname = urllib.quote(subs[ret])
+
+    data = 'dasid=%d&dafname=%s' % (subid, fname)
+    data = session_get('%s/ajax/file_ajax' % SUBHD_BASE, data=data, referer=url).json()
+    data = data['filedata'].encode('utf-8').replace('<br />', '')
+
     if len(data) < 1024:
         return []
     t = time.time()
     ts = time.strftime("%Y%m%d%H%M%S",time.localtime(t)) + str(int((t - int(t)) * 1000))
-    tempfile = os.path.join(__temp__, "subtitles%s%s" % (ts, os.path.splitext(url)[1])).replace('\\','/')
+    tempfile = os.path.join(__temp__, "subtitles%s%s" % (ts, fname[-4:])).replace('\\','/')
     with open(tempfile, "wb") as subFile:
         subFile.write(data)
-    subFile.close()
-    xbmc.sleep(500)
-    if data[:4] == 'Rar!' or data[:2] == 'PK':
-        archive = urllib.quote_plus(tempfile)
-        if data[:4] == 'Rar!':
-            path = 'rar://%s' % (archive)
-        else:
-            path = 'zip://%s' % (archive)
-        dirs, files = xbmcvfs.listdir(path)
-        if ('__MACOSX') in dirs:
-            dirs.remove('__MACOSX')
-        if len(dirs) > 0:
-            path = path + '/' + dirs[0].decode('utf-8')
-            dirs, files = xbmcvfs.listdir(path)
-        list = []
-        for subfile in files:
-            if (os.path.splitext( subfile )[1] in exts):
-                list.append(subfile.decode('utf-8'))
-        if list:
-            if len(list) == 1:
-                subtitle_list.append(path + '/' + list[0])
-            else:
-                # hack to fix encoding problem of zip file in Kodi 18
-                if __kodi__['major'] >= 18 and data[:2] == 'PK':
-                    try:
-                        dlist = [x.encode('CP437').decode('gbk') for x in list]
-                    except:
-                        dlist = list
-                else:
-                    dlist = list
-
-                sel = xbmcgui.Dialog().select('请选择压缩包中的字幕', dlist)
-                if sel == -1:
-                    sel = 0
-                subtitle_list.append(path + '/' + list[sel])
-    else:
-        subtitle_list.append(tempfile)
+    subtitle_list.append(tempfile)
     if len(subtitle_list) > 0:
         log(sys._getframe().f_code.co_name, "Get subtitle file: %s" % (subtitle_list[0]))
     return subtitle_list
