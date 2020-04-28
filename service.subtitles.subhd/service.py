@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import re
 import os
 import sys
 import xbmc
@@ -10,7 +9,6 @@ import xbmcaddon
 import xbmcgui,xbmcplugin
 from bs4 import BeautifulSoup
 import requests
-import json
 import time
 
 __addon__      = xbmcaddon.Addon()
@@ -29,7 +27,6 @@ sys.path.append (__resource__)
 
 SUBHD_BASE = 'http://subhd.tv'
 SUBHD_API  = SUBHD_BASE + '/search/%s'
-UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
 s = requests.Session()
 HEADERS={'Accept': 'application/json, text/javascript, */*; q=0.01',
@@ -39,20 +36,6 @@ HEADERS={'Accept': 'application/json, text/javascript, */*; q=0.01',
     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0'}
 s.headers.update(HEADERS)
-
-def get_KodiVersion():
-    json_query = xbmc.executeJSONRPC('{ "jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["version", "name"]}, "id": 1 }')
-    if sys.version_info[0] >= 3:
-        json_query = str(json_query)
-    else:
-        json_query = unicode(json_query, 'utf-8', errors='ignore')
-    json_query = json.loads(json_query)
-    version_installed = []
-    if 'result' in json_query and 'version' in json_query['result']:
-        version_installed  = json_query['result']['version']
-    return version_installed
-
-__kodi__ = get_KodiVersion()
 
 def log(module, msg):
     if isinstance(msg,str):
