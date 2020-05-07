@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.acfun" name="Acfun" version="0.2.1" provider-name="zhengfan">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+    <import addon="script.module.xbmcswift2" version="2.4.0"/>
+  <import addon="script.module.beautifulsoup4" version="4.5.3"/>
+  <import addon="script.module.requests" version="2.19.1"/>
+  <import addon="script.module.html5lib" version="0.999.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="addon.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <platform>all</platform>
+    <language></language>
+    <description>AcFun是一家弹幕视频网站，致力于为每一个人带来欢乐。</description>
+  </extension>
+</addon>
