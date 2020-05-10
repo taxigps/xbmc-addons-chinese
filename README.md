@@ -37,6 +37,7 @@ For proper Chinese text display on xbmc, do the following steps:
 ## Video Add-ons
 
 * 5ivdo(5ivdo) - plugin.video.5ivdo - Online video from www.5ivdo.com
+* Acfun - plugin.video.acfun - AcFun弹幕视频网站`(new)`
 * 亚洲电视 - plugin.video.asia-tv - Live TV channels, include Mainland China, Hong Kong and Taiwan
 * 百度云(BaiDuYun) - plugin.video.bdyun - Personal Cloud Storage from yun.baidu.com
 * 哔哩哔哩(bilibili) - plugin.video.bilibili - Online video from www.bilibili.com
