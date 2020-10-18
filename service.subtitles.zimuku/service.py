@@ -304,7 +304,8 @@ def Download(url,lang):
                     sel = 0
                 subtitle_list.append(path + '/' + list[sel])
     else:
-        subtitle_list.append(tempfile)
+        log(sys._getframe().f_code.co_name, "Unsupported file: %s" % (tempfile), level=xbmc.LOGWARNING)
+        print "ERROR: Unsupported file compressed format! Please try another subtitle."
     if len(subtitle_list) > 0:
         log(sys._getframe().f_code.co_name, "Get subtitle file: %s" % (subtitle_list[0]), level=xbmc.LOGINFO)
     return subtitle_list
