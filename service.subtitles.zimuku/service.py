@@ -99,10 +99,23 @@ def Search( item ):
             except:
                 langs = '未知'
             name = '%s (%s)' % (version, ",".join(langs))
+
+            # Get rating. rating from str(int [0 , 5]).
+            try:
+                rating_div = sub.find("td", class_="tac hidden-xs")
+                rating_div_str = str(rating_div)
+                rating_star_str = "allstar"
+                rating = rating_div_str[rating_div_str.find(rating_star_str) + len(rating_star_str)]
+                if rating not in ["0", "1", "2", "3", "4", "5"]:
+                    log( sys._getframe().f_code.co_name ,"Failed to locate rating in %s from %s" % (rating_div_str, link), level=xbmc.LOGWARNING)
+                    rating = "0"
+            except:
+                rating = "0"
+
             if ('English' in langs) and not(('简体中文' in langs) or ('繁體中文' in langs)):
-                subtitles_list.append({"language_name":"English", "filename":name, "link":link, "language_flag":'en', "rating":"0", "lang":langs})
+                subtitles_list.append({"language_name":"English", "filename":name, "link":link, "language_flag":'en', "rating":str(rating), "lang":langs})
             else:
-                subtitles_list.append({"language_name":"Chinese", "filename":name, "link":link, "language_flag":'zh', "rating":"0", "lang":langs})
+                subtitles_list.append({"language_name":"Chinese", "filename":name, "link":link, "language_flag":'zh', "rating":str(rating), "lang":langs})
 
     if subtitles_list:
         for it in subtitles_list:
