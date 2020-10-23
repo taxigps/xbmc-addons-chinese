@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
+# -*- coding: UTF-8 -*-
 
 import os
 import sys
 import json
 import time
 import urllib
+import urlparse
 import shutil
 import requests
 from bs4 import BeautifulSoup
@@ -24,8 +25,8 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 
 sys.path.append (__resource__)
 
-sys = reload(sys)
-sys.setdefaultencoding('utf-8')
+#sys = reload(sys)
+#sys.setdefaultencoding('UTF-8')
 
 ZIMUKU_API = 'http://www.zimuku.la/search?q=%s'
 ZIMUKU_BASE = 'http://www.zimuku.la'
@@ -79,7 +80,7 @@ def Search( item ):
     results = soup.find_all("div", class_="item prel clearfix")
     for it in results:
         #moviename = it.find("div", class_="title").a.text.encode('utf-8')
-        movieurl = '%s%s' % (ZIMUKU_BASE, it.find("div", class_="title").a.get('href').encode('utf-8'))
+        movieurl = urlparse.urljoin(ZIMUKU_BASE, it.find("div", class_="title").a.get('href').encode('utf-8'))
         try:
             # Movie page.
             _headers, data = get_page(movieurl)
@@ -89,12 +90,12 @@ def Search( item ):
             return
         subs = soup.tbody.find_all("tr")
         for sub in subs:
-            link = '%s%s' % (ZIMUKU_BASE, sub.a.get('href').encode('utf-8'))
+            link = urlparse.urljoin(ZIMUKU_BASE, sub.a.get('href').encode('utf-8'))
             version = sub.a.text.encode('utf-8')
             try:
                 td = sub.find("td", class_="tac lang")
                 r2 = td.find_all("img")
-                langs = [x.get('title').encode('utf-8') for x in r2]
+                langs = [x.get('title').encode('utf-8').rstrip('字幕'.encode('utf-8')) for x in r2]
             except:
                 langs = '未知'
             #name = '%s (%s)' % (version, ",".join(langs))
@@ -118,7 +119,7 @@ def Search( item ):
             elif 'English' in langs:
                 subtitles_list.append({"language_name":"English", "filename":name, "link":link, "language_flag":'en', "rating":str(rating), "lang":langs})
             else:
-                # Not sure if "language_name":"Unknown" will work.
+                log( sys._getframe().f_code.co_name ,"Unrecognized lang: %s" % (langs), level=xbmc.LOGDEBUG)
                 subtitles_list.append({"language_name":"Unknown", "filename":name, "link":link, "language_flag":'en', "rating":str(rating), "lang":langs})
 
     if subtitles_list:
@@ -159,7 +160,7 @@ def store_file(filename, data):
         subFile.write(data)
     # May require close file explicitly to ensure the file.
     subFile.close()
-    return tempfile
+    return tempfile.replace('\\','/')
 
 def DownloadLinks(links, referer):
     """
@@ -168,6 +169,10 @@ def DownloadLinks(links, referer):
     Parameters:
         links   The list of subtitle download links.
         referer The url of dld list page, used as referer.
+
+    Return:
+        '', []          If nothing to return.
+        filename, data  If success.
     """
     filename = None
     data = None
@@ -178,7 +183,7 @@ def DownloadLinks(links, referer):
     for link in links:
         url = link.get('href').encode('utf-8')
         if not url.startswith('http://'):
-            url = ZIMUKU_RESOURCE_BASE + url
+            url = urlparse.urljoin(ZIMUKU_RESOURCE_BASE, url)
         link_string += url + ' '
 
         try:
@@ -201,13 +206,13 @@ def DownloadLinks(links, referer):
                 log( sys._getframe().f_code.co_name ,"Failed to download subtitle from %s" % (url))
 
     if filename is not None:
-        if data is not None and len(data) > MIN_SIZE or small_size_confirmed:
+        if data is not None and (len(data) > MIN_SIZE or small_size_confirmed):
             return filename, data
         else:
             log( sys._getframe().f_code.co_name ,'File received but too small: %s %d bytes' % (filename, len(data)), level=xbmc.LOGWARNING)
             return '', ''
     else:
-        log( sys._getframe().f_code.co_name ,'Failed to download subtitle from all links: %s' % (link_string), level=xbmc.LOGWARNING)
+        log( sys._getframe().f_code.co_name ,'Failed to download subtitle from all links: %s' % (referer), level=xbmc.LOGWARNING)
         return '', ''
 
 def get_page(url, **kwargs):
@@ -242,9 +247,11 @@ def get_page(url, **kwargs):
 
 def Download(url,lang):
     global ZIMUKU_RESOURCE_BASE
-    if xbmcvfs.exists(__temp__.replace('\\','/')):
-        shutil.rmtree(xbmc.translatePath(__temp__.replace('\\','/')))
-    xbmcvfs.mkdirs(__temp__)
+    if not xbmcvfs.exists(__temp__.replace('\\','/')):
+        xbmcvfs.mkdirs(__temp__)
+    _dirs, files = xbmcvfs.listdir(__temp__)
+    for file in files:
+        xbmcvfs.delete(os.path.join(__temp__, file.decode('utf-8')))
 
     subtitle_list = []
     exts = ( ".srt", ".sub", ".smi", ".ssa", ".ass" )
@@ -261,11 +268,9 @@ def Download(url,lang):
         url = soup.find("li", class_="dlsub").a.get('href').encode('utf-8')
 
         if not ( url.startswith('http://') or url.startswith('https://')):
-            url = ZIMUKU_RESOURCE_BASE + url
+            url = urlparse.urljoin(ZIMUKU_RESOURCE_BASE, url)
         else:
-            protocol, s1 = urllib.splittype(url)
-            host, _=  urllib.splithost(s1)
-            ZIMUKU_RESOURCE_BASE = "%s://%s" % (protocol, host)
+            ZIMUKU_RESOURCE_BASE = "{host_info.scheme}://{host_info.netloc}".format(host_info=urlparse.urlparse(url))
         log( sys._getframe().f_code.co_name ,"Download links: %s" % (url))
 
         # Subtitle download-list page.
@@ -288,8 +293,8 @@ def Download(url,lang):
         return []
 
     if filename.endswith(exts):
-        store_file(filename, data)
-        subtitle_list.append(os.path.join(__temp__, filename).replace('\\','/'))
+        tempfile = store_file(filename, data)
+        subtitle_list.append(tempfile)
 
     elif filename.endswith(supported_archive_exts):
         tempfile = store_file(filename, data)
@@ -320,21 +325,7 @@ def get_params():
     """
     Decode params from sys.argv[2].
     """
-    paramstring=sys.argv[2]
-    if len(paramstring)>=2:
-        pairsofparams = paramstring.strip('?').split('&')
-
-        param = {}
-        for param_pair_raw in pairsofparams:
-            try:
-                param_key, param_value = param_pair_raw.split('=', 1)
-                param[param_key] = param_value
-            except ValueError:
-                # No '=' in param_pair_raw
-                log(sys._getframe().f_code.co_name, "Unknown param: %s" % (param_pair_raw), level=xbmc.LOGWARNING)
-                pass
-
-    return param
+    return dict(urlparse.parse_qsl(urlparse.urlparse(sys.argv[2]).query))
 
 params = get_params()
 if params['action'] == 'search' or params['action'] == 'manualsearch':
