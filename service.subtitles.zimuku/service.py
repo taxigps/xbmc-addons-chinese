@@ -5,6 +5,7 @@ import sys
 import json
 import time
 import urllib
+import shutil
 import requests
 from bs4 import BeautifulSoup
 from kodi_six import xbmc, xbmcgui, xbmcaddon, xbmcplugin, xbmcvfs
@@ -137,6 +138,29 @@ def Search( item ):
                                                                         )
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
 
+def store_file(filename, data):
+    """
+    Store file function. Store bin(data) into os.path.join(__temp__, "subtitles<time>.<ext>")
+
+    This may store subtitle files or compressed archive. So write in binary mode.
+
+    Params:
+        filename    The name of the file. May include non-unicode chars, so may cause problems if used as filename to store directly.
+        data        The data of the file. May be compressed.
+
+    Return:
+        The absolute path to the file.
+    """
+     # Store file in an ascii name since some chars may cause some problems.
+    t = time.time()
+    ts = time.strftime("%Y%m%d%H%M%S",time.localtime(t)) + str(int((t - int(t)) * 1000))
+    tempfile = os.path.join(__temp__, "subtitles%s%s" % (ts, os.path.splitext(filename)[1])).replace('\\','/')
+    with open(tempfile, "wb") as subFile:
+        subFile.write(data)
+    # May require close file explicitly to ensure the file.
+    subFile.close()
+    return tempfile
+
 def DownloadLinks(links, referer):
     """
     Download subtitles one by one until success.
@@ -214,21 +238,19 @@ def get_page(url, **kwargs):
     except Exception, e:
         log(sys._getframe().f_code.co_name, "Error: %s.    Failed to access %s" % (e, url), level=xbmc.LOGWARNING)
 
-    return headers, http_body
+    return headers, http_body   
 
 def Download(url,lang):
     global ZIMUKU_RESOURCE_BASE
-    if not xbmcvfs.exists(__temp__.replace('\\','/')):
-        xbmcvfs.mkdirs(__temp__)
-    dirs, files = xbmcvfs.listdir(__temp__)
-    for file in files:
-        xbmcvfs.delete(os.path.join(__temp__, file.decode('utf-8')))
+    if xbmcvfs.exists(__temp__.replace('\\','/')):
+        shutil.rmtree(xbmc.translatePath(__temp__.replace('\\','/')))
+    xbmcvfs.mkdirs(__temp__)
 
     subtitle_list = []
     exts = ( ".srt", ".sub", ".smi", ".ssa", ".ass" )
     # Some exts may cause fatal failure/ crash with some coding except from UTF-8.
     supported_archive_exts = ( ".zip", ".7z", ".tar", ".bz2", ".rar", ".gz", ".xz", ".iso", ".tgz", ".tbz2", ".cbr" )
-    self_archive_exts = ( ".zip", ".rar" )
+    #self_archive_exts = ( ".zip", ".rar" )
 
     log( sys._getframe().f_code.co_name ,"Download page: %s" % (url))
 
@@ -265,60 +287,28 @@ def Download(url,lang):
         # No file received.
         return []
 
-    # Store file in an ascii name since some chars may cause some problems.
-    t = time.time()
-    ts = time.strftime("%Y%m%d%H%M%S",time.localtime(t)) + str(int((t - int(t)) * 1000))
-    tempfile = os.path.join(__temp__, "subtitles%s%s" % (ts, os.path.splitext(filename)[1])).replace('\\','/')
-    with open(tempfile, "wb") as subFile:
-        subFile.write(data)
-    # May require close file explicitly to assure the file.
-    subFile.close()
-    xbmc.sleep(500)
-
-    if tempfile.endswith(supported_archive_exts):
-        archive_file = urllib.quote_plus(xbmc.translatePath(tempfile))
-        if tempfile.endswith(self_archive_exts):
-            ext = tempfile[tempfile.rfind('.'):]
-            archive_path = ext.strip('.') + '://%(archive_file)s' % {'archive_file': archive_file}
-        else:
-            archive_path = 'archive://%(archive_file)s' % {'archive_file': archive_file}
-        log(sys._getframe().f_code.co_name, "Get archive: %s" % (archive_path), level=xbmc.LOGDEBUG)
-
-        dirs, files = xbmcvfs.listdir(archive_path)
-        if ('__MACOSX') in dirs:
-            dirs.remove('__MACOSX')
-        if len(dirs) > 0:
-            archive_path = os.path.join(archive_path, dirs[0], '')
-            dirs, files = xbmcvfs.listdir(archive_path)
-
-        list = []
-        for subfile in files:
-            if subfile.endswith(exts):
-                list.append(subfile.decode('utf-8'))
-
-        if list:
-            # hack to fix encoding problem of zip file in Kodi 18
-            if __kodi__['major'] >= 18 and data.startswith('PK'):
-                try:
-                    dlist = [x.encode('CP437').decode('gbk') for x in list]
-                except:
-                    dlist = list
-            else:
-                dlist = list
-
-            if len(dlist) == 1:
-                subtitle_list.append( os.path.join( archive_path, list[0] ))
-            else:
-                sel = xbmcgui.Dialog().select('请选择压缩包中的字幕', dlist)
-                if sel == -1:
-                    sel = 0
-                subtitle_list.append( os.path.join( archive_path, list[sel] ))
-
-    elif tempfile.endswith(exts):
+    if filename.endswith(exts):
+        store_file(filename, data)
         subtitle_list.append(os.path.join(__temp__, filename).replace('\\','/'))
 
+    elif filename.endswith(supported_archive_exts):
+        tempfile = store_file(filename, data)
+        # libarchive requires the access to the file, so sleep a while to ensure the file.
+        xbmc.sleep(500)
+        # Import here to avoid waste.
+        import zimuku_archive
+        archive_path, list = zimuku_archive.unpack(tempfile)
+
+        if len(list) == 1:
+            subtitle_list.append( os.path.join( archive_path, list[0] ))
+        elif len(list) > 1:
+            sel = xbmcgui.Dialog().select('请选择压缩包中的字幕', list)
+            if sel == -1:
+                sel = 0
+            subtitle_list.append( os.path.join( archive_path, list[sel] ))
+
     else:
-        log(sys._getframe().f_code.co_name, "Unsupported file: %s" % (tempfile), level=xbmc.LOGWARNING)
+        log(sys._getframe().f_code.co_name, "Unsupported file: %s" % (filename), level=xbmc.LOGWARNING)
         raise TypeError, "Unsupported file compressed format! Please try another subtitle."
 
     if len(subtitle_list) > 0:
