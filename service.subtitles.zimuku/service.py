@@ -25,8 +25,8 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 
 sys.path.append (__resource__)
 
-#sys = reload(sys)
-#sys.setdefaultencoding('UTF-8')
+sys = reload(sys)
+sys.setdefaultencoding('UTF-8')
 
 ZIMUKU_API = 'http://www.zimuku.la/search?q=%s'
 ZIMUKU_BASE = 'http://www.zimuku.la'
