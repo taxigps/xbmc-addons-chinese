@@ -1,16 +1,15 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: UTF-8 -*-
 
 import os
 import sys
-import xbmc
-import urllib
-import urllib2
-import xbmcvfs
-import xbmcaddon
-import xbmcgui,xbmcplugin
-from bs4 import BeautifulSoup
 import json
 import time
+import urllib
+import urlparse
+import shutil
+import requests
+from bs4 import BeautifulSoup
+from kodi_six import xbmc, xbmcgui, xbmcaddon, xbmcplugin, xbmcvfs
 
 __addon__      = xbmcaddon.Addon()
 __author__     = __addon__.getAddonInfo('author')
@@ -26,16 +25,27 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 
 sys.path.append (__resource__)
 
+#sys = reload(sys)
+#sys.setdefaultencoding('UTF-8')
+
 ZIMUKU_API = 'http://www.zimuku.la/search?q=%s'
 ZIMUKU_BASE = 'http://www.zimuku.la'
+ZIMUKU_RESOURCE_BASE = 'http://zmk.pw'
+# IE UA
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
+# Chrome UA
+UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
+
+session = requests.Session()
+
+MIN_SIZE = 1024
 
 def get_KodiVersion():
     json_query = xbmc.executeJSONRPC('{ "jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["version", "name"]}, "id": 1 }')
     if sys.version_info[0] >= 3:
         json_query = str(json_query)
     else:
-        json_query = unicode(json_query, 'utf-8', errors='ignore')
+        json_query = json_query.encode('utf-8')
     json_query = json.loads(json_query)
     version_installed = []
     if 'result' in json_query and 'version' in json_query['result']:
@@ -44,59 +54,73 @@ def get_KodiVersion():
 
 __kodi__ = get_KodiVersion()
 
-def log(module, msg):
+def log(module, msg, level=xbmc.LOGDEBUG):
     if isinstance(msg, unicode): msg = msg.encode("utf-8")
-    xbmc.log("{0}::{1} - {2}".format(__scriptname__,module,msg) ,level=xbmc.LOGDEBUG )
+    xbmc.log("{0}::{1} - {2}".format(__scriptname__,module,msg) ,level=level )
 
 def Search( item ):
     subtitles_list = []
 
-    log( sys._getframe().f_code.co_name ,"Search for [%s] by name" % (os.path.basename(item['file_original_path'])))
     if item['mansearch']:
         search_str = item['mansearchstr']
     elif len(item['tvshow']) > 0:
         search_str = item['tvshow']
     else:
         search_str = item['title']
-    url = ZIMUKU_API % (urllib.quote(search_str))
+    log( sys._getframe().f_code.co_name ,"Search for [%s] by str %s" % (os.path.basename(item['file_original_path']), search_str))
+    url = ZIMUKU_API % (urllib.quote(str(search_str)))
     log( sys._getframe().f_code.co_name ,"Search API url: %s" % (url))
     try:
-        req = urllib2.Request(url)
-        req.add_header('User-Agent', UserAgent)
-        socket = urllib2.urlopen(req)
-        data = socket.read()
-        socket.close()
+        # Search page.
+        _headers, data = get_page(url)
         soup = BeautifulSoup(data, 'html.parser')
-    except:
+    except Exception, e:
+        log( sys._getframe().f_code.co_name ,'%s: %s    Error searching.' % (Exception, e), level=xbmc.LOGERROR)
         return
     results = soup.find_all("div", class_="item prel clearfix")
     for it in results:
-        moviename = it.find("div", class_="title").a.text.encode('utf-8')
-        movieurl = '%s%s' % (ZIMUKU_BASE, it.find("div", class_="title").a.get('href').encode('utf-8'))
+        #moviename = it.find("div", class_="title").a.text.encode('utf-8')
+        movieurl = urlparse.urljoin(ZIMUKU_BASE, it.find("div", class_="title").a.get('href').encode('utf-8'))
         try:
-            req = urllib2.Request(movieurl)
-            req.add_header('User-Agent', UserAgent)
-            socket = urllib2.urlopen(req)
-            data = socket.read()
-            socket.close()
+            # Movie page.
+            _headers, data = get_page(movieurl)
             soup = BeautifulSoup(data, 'html.parser').find("div", class_="subs box clearfix")
         except:
+            log( sys._getframe().f_code.co_name ,'Error searching.', level=xbmc.LOGERROR)
             return
         subs = soup.tbody.find_all("tr")
         for sub in subs:
-            link = '%s%s' % (ZIMUKU_BASE, sub.a.get('href').encode('utf-8'))
+            link = urlparse.urljoin(ZIMUKU_BASE, sub.a.get('href').encode('utf-8'))
             version = sub.a.text.encode('utf-8')
             try:
                 td = sub.find("td", class_="tac lang")
                 r2 = td.find_all("img")
-                langs = [x.get('title').encode('utf-8') for x in r2]
+                langs = [x.get('title').encode('utf-8').rstrip('字幕'.encode('utf-8')) for x in r2]
             except:
                 langs = '未知'
-            name = '%s (%s)' % (version, ",".join(langs))
-            if ('English' in langs) and not(('简体中文' in langs) or ('繁體中文' in langs)):
-                subtitles_list.append({"language_name":"English", "filename":name, "link":link, "language_flag":'en', "rating":"0", "lang":langs})
+            #name = '%s (%s)' % (version, ",".join(langs))
+            name = version
+
+            # Get rating. rating from str(int [0 , 5]).
+            try:
+                rating_div = sub.find("td", class_="tac hidden-xs")
+                rating_div_str = str(rating_div)
+                rating_star_str = "allstar"
+                rating = rating_div_str[rating_div_str.find(rating_star_str) + len(rating_star_str)]
+                if rating not in ["0", "1", "2", "3", "4", "5"]:
+                    log( sys._getframe().f_code.co_name ,"Failed to locate rating in %s from %s" % (rating_div_str, link), level=xbmc.LOGWARNING)
+                    rating = "0"
+            except:
+                rating = "0"
+
+            if '简体中文' in langs or '繁體中文' in langs:
+                # In GUI, only "lang", "filename" and "rating" displays to users, .
+                subtitles_list.append({"language_name":"Chinese", "filename":name, "link":link, "language_flag":'zh', "rating":str(rating), "lang":langs})
+            elif 'English' in langs:
+                subtitles_list.append({"language_name":"English", "filename":name, "link":link, "language_flag":'en', "rating":str(rating), "lang":langs})
             else:
-                subtitles_list.append({"language_name":"Chinese", "filename":name, "link":link, "language_flag":'zh', "rating":"0", "lang":langs})
+                log( sys._getframe().f_code.co_name ,"Unrecognized lang: %s" % (langs), level=xbmc.LOGDEBUG)
+                subtitles_list.append({"language_name":"Unknown", "filename":name, "link":link, "language_flag":'en', "rating":str(rating), "lang":langs})
 
     if subtitles_list:
         for it in subtitles_list:
@@ -115,129 +139,193 @@ def Search( item ):
                                                                         )
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=listitem,isFolder=False)
 
+def store_file(filename, data):
+    """
+    Store file function. Store bin(data) into os.path.join(__temp__, "subtitles<time>.<ext>")
+
+    This may store subtitle files or compressed archive. So write in binary mode.
+
+    Params:
+        filename    The name of the file. May include non-unicode chars, so may cause problems if used as filename to store directly.
+        data        The data of the file. May be compressed.
+
+    Return:
+        The absolute path to the file.
+    """
+     # Store file in an ascii name since some chars may cause some problems.
+    t = time.time()
+    ts = time.strftime("%Y%m%d%H%M%S",time.localtime(t)) + str(int((t - int(t)) * 1000))
+    tempfile = os.path.join(__temp__, "subtitles%s%s" % (ts, os.path.splitext(filename)[1])).replace('\\','/')
+    with open(tempfile, "wb") as subFile:
+        subFile.write(data)
+    # May require close file explicitly to ensure the file.
+    subFile.close()
+    return tempfile.replace('\\','/')
+
 def DownloadLinks(links, referer):
+    """
+    Download subtitles one by one until success.
+    
+    Parameters:
+        links   The list of subtitle download links.
+        referer The url of dld list page, used as referer.
+
+    Return:
+        '', []          If nothing to return.
+        filename, data  If success.
+    """
+    filename = None
+    data = None
+    small_size_confirmed = False
+    data_size = -1
+    link_string = ''
+
     for link in links:
         url = link.get('href').encode('utf-8')
-        if url[:4] != 'http':
-            url = ZIMUKU_BASE + url
+        if not url.startswith('http://'):
+            url = urlparse.urljoin(ZIMUKU_RESOURCE_BASE, url)
+        link_string += url + ' '
+
         try:
-            log( sys._getframe().f_code.co_name ,"Download url: %s" % (url))
-            req = urllib2.Request(url)
-            req.add_header('User-Agent', UserAgent)
-            req.add_header('Referer', referer)
-            socket = urllib2.urlopen(req)
-            filename = socket.headers['Content-Disposition'].split('filename=')[1]
-            if filename[0] == '"' or filename[0] == "'":
-                filename = filename[1:-1]
-            data = socket.read()
-            socket.close()
-            if len(data) > 1024:
-                return filename, data
+            log( sys._getframe().f_code.co_name ,"Download subtitle url: %s" % (url))
+            # Download subtitle one by one until success.
+            headers, data = get_page(url, Referer=referer)
+
+            filename = headers['Content-Disposition'].split('filename=')[1].strip('"').strip("'")
+            small_size_confirmed = data_size == len(data)
+            if len(data) > MIN_SIZE or small_size_confirmed:
+                break
             else:
-                return '', ''
-        except Exception, e:
-            log(sys._getframe().f_code.co_name, "Failed to access %s" % (url))
-    return '', ''
+                data_size = len(data)
+
+        except Exception:
+            if filename is not None:
+                log( sys._getframe().f_code.co_name ,"Failed to download subtitle data of %s." % (filename))
+                filename = None
+            else:
+                log( sys._getframe().f_code.co_name ,"Failed to download subtitle from %s" % (url))
+
+    if filename is not None:
+        if data is not None and (len(data) > MIN_SIZE or small_size_confirmed):
+            return filename, data
+        else:
+            log( sys._getframe().f_code.co_name ,'File received but too small: %s %d bytes' % (filename, len(data)), level=xbmc.LOGWARNING)
+            return '', ''
+    else:
+        log( sys._getframe().f_code.co_name ,'Failed to download subtitle from all links: %s' % (referer), level=xbmc.LOGWARNING)
+        return '', ''
+
+def get_page(url, **kwargs):
+    """
+    Get page with requests.
+
+    Parameters:
+        url     Target URL.
+        kwargs  Attached headers. HTTP_HEADER_KEY = HTTP_HEADER_VALUE. Use '_' instead of '-' in HTTP_HEADER_KEY since '-' is illegal in python variable name.
+
+    Return:
+        headers     The http response headers.
+        http_body   The http response body.
+    """
+    headers = None
+    http_body = None
+    try:
+        request_headers = {'User-Agent': UserAgent}
+        if kwargs:
+            for key, value in kwargs.items():
+                request_headers[key.replace('_', '-')] = value
+
+        http_response = session.get(url, headers=request_headers)
+        log( sys._getframe().f_code.co_name ,'Got url %s' % (url), level=xbmc.LOGDEBUG)
+        headers = http_response.headers
+        http_body = http_response.content
+
+    except Exception, e:
+        log(sys._getframe().f_code.co_name, "Error: %s.    Failed to access %s" % (e, url), level=xbmc.LOGWARNING)
+
+    return headers, http_body   
 
 def Download(url,lang):
+    global ZIMUKU_RESOURCE_BASE
     if not xbmcvfs.exists(__temp__.replace('\\','/')):
         xbmcvfs.mkdirs(__temp__)
-    dirs, files = xbmcvfs.listdir(__temp__)
+    _dirs, files = xbmcvfs.listdir(__temp__)
     for file in files:
         xbmcvfs.delete(os.path.join(__temp__, file.decode('utf-8')))
 
     subtitle_list = []
-    exts = [".srt", ".sub", ".smi", ".ssa", ".ass" ]
+    exts = ( ".srt", ".sub", ".smi", ".ssa", ".ass" )
+    # Some exts may cause fatal failure/ crash with some coding except from UTF-8.
+    supported_archive_exts = ( ".zip", ".7z", ".tar", ".bz2", ".rar", ".gz", ".xz", ".iso", ".tgz", ".tbz2", ".cbr" )
+    #self_archive_exts = ( ".zip", ".rar" )
+
     log( sys._getframe().f_code.co_name ,"Download page: %s" % (url))
+
     try:
-        req = urllib2.Request(url)
-        req.add_header('User-Agent', UserAgent)
-        socket = urllib2.urlopen(req)
-        data = socket.read()
+        # Subtitle detail page.
+        _headers, data = get_page(url)
         soup = BeautifulSoup(data, 'html.parser')
         url = soup.find("li", class_="dlsub").a.get('href').encode('utf-8')
-        if url[:4] != 'http':
-            url = ZIMUKU_BASE + url
+
+        if not ( url.startswith('http://') or url.startswith('https://')):
+            url = urlparse.urljoin(ZIMUKU_RESOURCE_BASE, url)
+        else:
+            ZIMUKU_RESOURCE_BASE = "{host_info.scheme}://{host_info.netloc}".format(host_info=urlparse.urlparse(url))
         log( sys._getframe().f_code.co_name ,"Download links: %s" % (url))
-        req = urllib2.Request(url)
-        req.add_header('User-Agent', UserAgent)
-        socket = urllib2.urlopen(req)
-        data = socket.read()
-        socket.close()
+
+        # Subtitle download-list page.
+        _headers, data = get_page(url)
+
         soup = BeautifulSoup(data, 'html.parser')
         links = soup.find("div", {"class":"clearfix"}).find_all('a')
     except:
         log( sys.exc_info()[2].tb_frame.f_code.co_name, "Error (%d) [%s]" % (
             sys.exc_info()[2].tb_lineno,
             sys.exc_info()[1]
-            ))
+            ),
+            level=xbmc.LOGERROR
+            )
         return []
-    filename, data = DownloadLinks(links, url)
-    if len(data) < 1024:
-        return []
-    t = time.time()
-    ts = time.strftime("%Y%m%d%H%M%S",time.localtime(t)) + str(int((t - int(t)) * 1000))
-    tempfile = os.path.join(__temp__, "subtitles%s%s" % (ts, os.path.splitext(filename)[1])).replace('\\','/')
-    with open(tempfile, "wb") as subFile:
-        subFile.write(data)
-    subFile.close()
-    xbmc.sleep(500)
-    if data[:4] == 'Rar!' or data[:2] == 'PK':
-        archive = urllib.quote_plus(tempfile)
-        if data[:4] == 'Rar!':
-            path = 'rar://%s' % (archive)
-        else:
-            path = 'zip://%s' % (archive)
-        dirs, files = xbmcvfs.listdir(path)
-        if ('__MACOSX') in dirs:
-            dirs.remove('__MACOSX')
-        if len(dirs) > 0:
-            path = path + '/' + dirs[0].decode('utf-8')
-            dirs, files = xbmcvfs.listdir(path)
-        list = []
-        for subfile in files:
-            if (os.path.splitext( subfile )[1] in exts):
-                list.append(subfile.decode('utf-8'))
-        if list:
-            if len(list) == 1:
-                subtitle_list.append(path + '/' + list[0])
-            else:
-                # hack to fix encoding problem of zip file in Kodi 18
-                if __kodi__['major'] >= 18 and data[:2] == 'PK':
-                    try:
-                        dlist = [x.encode('CP437').decode('gbk') for x in list]
-                    except:
-                        dlist = list
-                else:
-                    dlist = list
 
-                sel = xbmcgui.Dialog().select('请选择压缩包中的字幕', dlist)
-                if sel == -1:
-                    sel = 0
-                subtitle_list.append(path + '/' + list[sel])
-    else:
+    filename, data = DownloadLinks(links, url)
+    if filename == '':
+        # No file received.
+        return []
+
+    if filename.endswith(exts):
+        tempfile = store_file(filename, data)
         subtitle_list.append(tempfile)
+
+    elif filename.endswith(supported_archive_exts):
+        tempfile = store_file(filename, data)
+        # libarchive requires the access to the file, so sleep a while to ensure the file.
+        xbmc.sleep(500)
+        # Import here to avoid waste.
+        import zimuku_archive
+        archive_path, list = zimuku_archive.unpack(tempfile)
+
+        if len(list) == 1:
+            subtitle_list.append( os.path.join( archive_path, list[0] ))
+        elif len(list) > 1:
+            sel = xbmcgui.Dialog().select('请选择压缩包中的字幕', list)
+            if sel == -1:
+                sel = 0
+            subtitle_list.append( os.path.join( archive_path, list[sel] ))
+
+    else:
+        log(sys._getframe().f_code.co_name, "Unsupported file: %s" % (filename), level=xbmc.LOGWARNING)
+        raise TypeError, "Unsupported file compressed format! Please try another subtitle."
+
     if len(subtitle_list) > 0:
-        log(sys._getframe().f_code.co_name, "Get subtitle file: %s" % (subtitle_list[0]))
+        log(sys._getframe().f_code.co_name, "Get subtitle file: %s" % (subtitle_list[0]), level=xbmc.LOGINFO)
+
     return subtitle_list
 
 def get_params():
-    param=[]
-    paramstring=sys.argv[2]
-    if len(paramstring)>=2:
-        params=paramstring
-        cleanedparams=params.replace('?','')
-        if (params[len(params)-1]=='/'):
-            params=params[0:len(params)-2]
-        pairsofparams=cleanedparams.split('&')
-        param={}
-        for i in range(len(pairsofparams)):
-            splitparams={}
-            splitparams=pairsofparams[i].split('=')
-            if (len(splitparams))==2:
-                param[splitparams[0]]=splitparams[1]
-
-    return param
+    """
+    Decode params from sys.argv[2].
+    """
+    return dict(urlparse.parse_qsl(urlparse.urlparse(sys.argv[2]).query))
 
 params = get_params()
 if params['action'] == 'search' or params['action'] == 'manualsearch':
