@@ -113,10 +113,10 @@ def Search( item ):
             except:
                 rating = "0"
 
-            if '简体中文' in langs or '繁體中文' in langs:
+            if '简体中文' in langs or '繁體中文' in langs or '简体中文字幕' in langs or '繁體中文字幕' in langs:
                 # In GUI, only "lang", "filename" and "rating" displays to users, .
                 subtitles_list.append({"language_name":"Chinese", "filename":name, "link":link, "language_flag":'zh', "rating":str(rating), "lang":langs})
-            elif '双语' in langs:
+            elif '双语' in langs or '双语字幕' in langs:
                 subtitles_list.append({"language_name":"Chinese", "filename":name, "link":link, "language_flag":'zh', "rating":str(rating), "lang":langs})
             elif 'English' in langs:
                 subtitles_list.append({"language_name":"English", "filename":name, "link":link, "language_flag":'en', "rating":str(rating), "lang":langs})
