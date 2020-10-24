@@ -53,7 +53,7 @@ def unpack(file_path):
                     However, some encoding (Chinese chars for example) in file names may cause failure, even crash,
                     so raise TypeError to avoid the worst condition.
     """
-    exts = ( ".srt", ".sub", ".smi", ".ssa", ".ass" )
+    exts = ( ".srt", ".sub", ".smi", ".ssa", ".ass", ".sup" )
     supported_archive_exts = ( ".zip", ".7z", ".tar", ".bz2", ".rar", ".gz", ".xz", ".iso", ".tgz", ".tbz2", ".cbr" )
     self_archive_exts = ( ".zip", ".rar" )
 
@@ -62,6 +62,7 @@ def unpack(file_path):
         raise TypeError, "Not supported file!"
 
     file_path = file_path.rstrip('/')
+    print file_path
     if file_path.endswith(self_archive_exts):
         archive_file = urllib.quote_plus(xbmc.translatePath(file_path))
         ext = file_path[file_path.rfind('.') + 1:]
@@ -72,7 +73,7 @@ def unpack(file_path):
         if ('__MACOSX') in dirs:
             dirs.remove('__MACOSX')
         if len(dirs) > 0:
-            archive_path = os.path.join(archive_path, dirs[0], '')
+            archive_path = os.path.join(archive_path, dirs[0], '').replace('\\','/')
             dirs, files = xbmcvfs.listdir(archive_path)
 
         list = []
@@ -80,6 +81,7 @@ def unpack(file_path):
             if subfile.endswith(exts):
                 list.append(subfile.decode('utf-8'))
 
+        subtitle_list = list
         if list:
             # hack to fix encoding problem of zip file in Kodi 18
             if __kodi__['major'] >= 18 and file_path.endswith('.zip'):
@@ -87,8 +89,6 @@ def unpack(file_path):
                     subtitle_list = [x.encode('CP437').decode('gbk') for x in list]
                 except:
                     subtitle_list = list
-            else:
-                subtitle_list = list
     
     elif file_path.endswith('.7z'):
         archive_path, subtitle_list = unpack_7z(file_path)

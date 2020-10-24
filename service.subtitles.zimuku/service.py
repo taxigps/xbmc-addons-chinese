@@ -95,11 +95,11 @@ def Search( item ):
             try:
                 td = sub.find("td", class_="tac lang")
                 r2 = td.find_all("img")
-                langs = [x.get('title').encode('utf-8').rstrip('字幕'.encode('utf-8')) for x in r2]
+                langs = [x.get('title').encode('utf-8') for x in r2]
             except:
                 langs = '未知'
-            #name = '%s (%s)' % (version, ",".join(langs))
-            name = version
+            name = '%s (%s)' % (version, ",".join(langs))
+            #name = version
 
             # Get rating. rating from str(int [0 , 5]).
             try:
@@ -115,6 +115,8 @@ def Search( item ):
 
             if '简体中文' in langs or '繁體中文' in langs:
                 # In GUI, only "lang", "filename" and "rating" displays to users, .
+                subtitles_list.append({"language_name":"Chinese", "filename":name, "link":link, "language_flag":'zh', "rating":str(rating), "lang":langs})
+            elif '双语' in langs:
                 subtitles_list.append({"language_name":"Chinese", "filename":name, "link":link, "language_flag":'zh', "rating":str(rating), "lang":langs})
             elif 'English' in langs:
                 subtitles_list.append({"language_name":"English", "filename":name, "link":link, "language_flag":'en', "rating":str(rating), "lang":langs})
@@ -305,12 +307,12 @@ def Download(url,lang):
         archive_path, list = zimuku_archive.unpack(tempfile)
 
         if len(list) == 1:
-            subtitle_list.append( os.path.join( archive_path, list[0] ))
+            subtitle_list.append( os.path.join( archive_path, list[0] ).replace('\\','/'))
         elif len(list) > 1:
             sel = xbmcgui.Dialog().select('请选择压缩包中的字幕', list)
             if sel == -1:
                 sel = 0
-            subtitle_list.append( os.path.join( archive_path, list[sel] ))
+            subtitle_list.append( os.path.join( archive_path, list[sel] ).replace('\\','/'))
 
     else:
         log(sys._getframe().f_code.co_name, "Unsupported file: %s" % (filename), level=xbmc.LOGWARNING)
