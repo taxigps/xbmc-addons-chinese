@@ -892,7 +892,7 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
 
 <addon id="service.subtitles.zimuku"
        name="zimuku"
-       version="1.1.4"
+       version="1.1.5"
        provider-name="taxigps">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
@@ -917,13 +917,19 @@ For Non-PRC OS environment (Windows7|WindowsXP):[CR]"Control Panel"|"Region and 
             <screenshot>resources/media/screenshot_3.jpg</screenshot>
         </assets>
         <news>
+V1.1.5 (2020-11-01)
+- fix some bug
+- set sys encoding UTF-8 explicitly
+- support .sup subtitle
+
 V1.1.4 (2020-10-18)
 - Debug: Change download url to fix download failure
 - Fix: Correct rating score
 - Ungrade: Use xmbc modules in kodi_six to take place.
 - Fix: Support more compressed format
 - Use requests to take the place of urllib2. Seems more reliable in getting page.
-- Known issue: some encoding may cause fatal failure / crash in some compressed formats.
+- Known issue(solved): some encoding may cause fatal failure / crash in some compressed formats.
+- Forbid 7z archive since chinese chars in filename in 7z archive may cause failure.
 
 V1.1.3 (2020-04-18)
 - Add screenshot

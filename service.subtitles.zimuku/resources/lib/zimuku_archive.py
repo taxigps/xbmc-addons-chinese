@@ -18,20 +18,6 @@ from kodi_six import xbmc, xbmcvfs, xbmcaddon
 __addon__      = xbmcaddon.Addon()
 __scriptname__ = __addon__.getAddonInfo('name')
 
-def get_KodiVersion():
-    json_query = xbmc.executeJSONRPC('{ "jsonrpc": "2.0", "method": "Application.GetProperties", "params": {"properties": ["version", "name"]}, "id": 1 }')
-    if sys.version_info[0] >= 3:
-        json_query = str(json_query)
-    else:
-        json_query = json_query.encode('utf-8')
-    json_query = json.loads(json_query)
-    version_installed = []
-    if 'result' in json_query and 'version' in json_query['result']:
-        version_installed  = json_query['result']['version']
-    return version_installed
-
-__kodi__ = get_KodiVersion()
-
 def log(module, msg, level=xbmc.LOGDEBUG):
     if isinstance(msg, unicode): msg = msg.encode("utf-8")
     xbmc.log("{0}::{1} - {2}".format(__scriptname__,module,msg) ,level=level )
@@ -62,7 +48,6 @@ def unpack(file_path):
         raise TypeError, "Not supported file!"
 
     file_path = file_path.rstrip('/')
-    print file_path
     if file_path.endswith(self_archive_exts):
         archive_file = urllib.quote_plus(xbmc.translatePath(file_path))
         ext = file_path[file_path.rfind('.') + 1:]
@@ -82,13 +67,6 @@ def unpack(file_path):
                 list.append(subfile.decode('utf-8'))
 
         subtitle_list = list
-        if list:
-            # hack to fix encoding problem of zip file in Kodi 18
-            if __kodi__['major'] >= 18 and file_path.endswith('.zip'):
-                try:
-                    subtitle_list = [x.encode('CP437').decode('gbk') for x in list]
-                except:
-                    subtitle_list = list
     
     elif file_path.endswith('.7z'):
         archive_path, subtitle_list = unpack_7z(file_path)

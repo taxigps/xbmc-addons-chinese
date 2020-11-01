@@ -25,8 +25,8 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') ).decode
 
 sys.path.append (__resource__)
 
-#sys = reload(sys)
-#sys.setdefaultencoding('UTF-8')
+sys = reload(sys)
+sys.setdefaultencoding('UTF-8')
 
 ZIMUKU_API = 'http://www.zimuku.la/search?q=%s'
 ZIMUKU_BASE = 'http://www.zimuku.la'
@@ -95,7 +95,7 @@ def Search( item ):
             try:
                 td = sub.find("td", class_="tac lang")
                 r2 = td.find_all("img")
-                langs = [x.get('title').encode('utf-8') for x in r2]
+                langs = [x.get('title').rstrip(u'字幕').encode('utf-8') for x in r2]
             except:
                 langs = '未知'
             name = '%s (%s)' % (version, ",".join(langs))
@@ -113,10 +113,8 @@ def Search( item ):
             except:
                 rating = "0"
 
-            if '简体中文' in langs or '繁體中文' in langs or '简体中文字幕' in langs or '繁體中文字幕' in langs:
+            if '简体中文' in langs or '繁體中文' in langs or '双语' in langs:
                 # In GUI, only "lang", "filename" and "rating" displays to users, .
-                subtitles_list.append({"language_name":"Chinese", "filename":name, "link":link, "language_flag":'zh', "rating":str(rating), "lang":langs})
-            elif '双语' in langs or '双语字幕' in langs:
                 subtitles_list.append({"language_name":"Chinese", "filename":name, "link":link, "language_flag":'zh', "rating":str(rating), "lang":langs})
             elif 'English' in langs:
                 subtitles_list.append({"language_name":"English", "filename":name, "link":link, "language_flag":'en', "rating":str(rating), "lang":langs})
@@ -256,7 +254,7 @@ def Download(url,lang):
         xbmcvfs.delete(os.path.join(__temp__, file.decode('utf-8')))
 
     subtitle_list = []
-    exts = ( ".srt", ".sub", ".smi", ".ssa", ".ass" )
+    exts = ( ".srt", ".sub", ".smi", ".ssa", ".ass", ".sup" )
     # Some exts may cause fatal failure/ crash with some coding except from UTF-8.
     supported_archive_exts = ( ".zip", ".7z", ".tar", ".bz2", ".rar", ".gz", ".xz", ".iso", ".tgz", ".tbz2", ".cbr" )
     #self_archive_exts = ( ".zip", ".rar" )
@@ -309,7 +307,16 @@ def Download(url,lang):
         if len(list) == 1:
             subtitle_list.append( os.path.join( archive_path, list[0] ).replace('\\','/'))
         elif len(list) > 1:
-            sel = xbmcgui.Dialog().select('请选择压缩包中的字幕', list)
+            # hack to fix encoding problem of zip file in Kodi 18
+            if __kodi__['major'] >= 18 and data[:2] == 'PK':
+                try:
+                    dlist = [x.encode('CP437').decode('gbk') for x in list]
+                except:
+                    dlist = list
+            else:
+                dlist = list
+
+            sel = xbmcgui.Dialog().select('请选择压缩包中的字幕', dlist)
             if sel == -1:
                 sel = 0
             subtitle_list.append( os.path.join( archive_path, list[sel] ).replace('\\','/'))
