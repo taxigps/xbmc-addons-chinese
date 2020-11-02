@@ -114,12 +114,14 @@ V1.0.0 (2013-12-04)
 
 <addon id="service.subtitles.zimuku"
        name="zimuku"
-       version="2.0.1"
+       version="2.0.2"
        provider-name="taxigps">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.beautifulsoup4" version="4.6.2"/>
+        <import addon="script.module.kodi-six"/>
         <import addon="vfs.rar" version="3.0.0"/>
+        <import addon="script.module.requests" version="2.22.0"/>
     </requires>
     <extension point="xbmc.subtitle.module"
                library="service.py" />
@@ -138,6 +140,15 @@ V1.0.0 (2013-12-04)
             <screenshot>resources/media/screenshot_3.jpg</screenshot>
         </assets>
         <news>
+V2.0.2 (2020-11-02)
+- support .sup subtitle
+- Change download url to fix download failure
+- Fix: Correct rating score
+- Ungrade: Use xmbc modules in kodi_six to take place.
+- Fix: Support more compressed format
+- Use requests to take the place of urllib2. Seems more reliable in getting page.
+- Forbid 7z archive since chinese chars in filename in 7z archive may cause failure.
+
 V2.0.1 (2020-04-18)
 - Add screenshot
 
