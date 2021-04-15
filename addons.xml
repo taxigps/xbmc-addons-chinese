@@ -114,7 +114,7 @@ V1.0.0 (2013-12-04)
 
 <addon id="service.subtitles.zimuku"
        name="zimuku"
-       version="2.0.2"
+       version="2.0.3"
        provider-name="taxigps">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -140,6 +140,9 @@ V1.0.0 (2013-12-04)
             <screenshot>resources/media/screenshot_3.jpg</screenshot>
         </assets>
         <news>
+V2.0.3 (2021-04-05)
+- update main domain
+
 V2.0.2 (2020-11-02)
 - support .sup subtitle
 - Change download url to fix download failure
