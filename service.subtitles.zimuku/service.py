@@ -28,8 +28,8 @@ sys.path.append (__resource__)
 sys = reload(sys)
 sys.setdefaultencoding('UTF-8')
 
-ZIMUKU_API = 'http://www.zimuku.la/search?q=%s'
-ZIMUKU_BASE = 'http://www.zimuku.la'
+ZIMUKU_API = 'http://zmk.pw/search?q=%s'
+ZIMUKU_BASE = 'http://zmk.pw'
 ZIMUKU_RESOURCE_BASE = 'http://zmk.pw'
 # IE UA
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
