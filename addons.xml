@@ -997,7 +997,7 @@ V1.0.0 (2015-05-11)
 
 <addon id="service.subtitles.zimuzu"
        name="ZiMuZu"
-       version="1.0.7"
+       version="1.0.8"
        provider-name="xodidox">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
@@ -1012,6 +1012,7 @@ V1.0.0 (2015-05-11)
         <summary lang="zh">人人影视字幕组 字幕</summary>
         <description lang="en">Search and download subtitles from zimuzu.tv</description>
         <description lang="zh">从 zimuzu.tv 下载字幕</description>
+        <broken>The website is closed and the service is terminated.</broken>
         <assets>
             <icon>icon.png</icon>
             <clearlogo>logo.png</clearlogo>
@@ -1022,6 +1023,9 @@ V1.0.0 (2015-05-11)
             <screenshot>resources/media/screenshot_4.jpg</screenshot>
         </assets>
         <news>
+V1.0.8 (2021-05-29)
+- Tag as broken.
+
 V1.0.7 (2020-04-18) by taxigps
 - Add screenshot
 - get rid of function normalizeString
