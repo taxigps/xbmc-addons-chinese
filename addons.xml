@@ -114,7 +114,7 @@ V1.0.0 (2013-12-04)
 
 <addon id="service.subtitles.zimuku"
        name="zimuku"
-       version="2.0.3"
+       version="2.0.4"
        provider-name="taxigps">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -128,8 +128,8 @@ V1.0.0 (2013-12-04)
     <extension point="xbmc.addon.metadata">
         <summary lang="en">zimuku subtitle</summary>
         <summary lang="zh">字幕库</summary>
-        <description lang="en">Search and download subtitles from www.zimuku.la</description>
-        <description lang="zh">从 www.zimuku.la 下载字幕</description>
+        <description lang="en">Search and download subtitles from ZIMUKU site</description>
+        <description lang="zh">从“字幕库”网站下载字幕</description>
         <platform>all</platform>
         <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
         <assets>
@@ -140,6 +140,9 @@ V1.0.0 (2013-12-04)
             <screenshot>resources/media/screenshot_3.jpg</screenshot>
         </assets>
         <news>
+V2.0.4 (2021-05-29)
+- fix error: variable referenced before assignment
+
 V2.0.3 (2021-04-05)
 - update main domain
 

@@ -239,8 +239,6 @@ def Download(url,lang):
 
         if not ( url.startswith('http://') or url.startswith('https://')):
             url = urllib.parse.urljoin(ZIMUKU_RESOURCE_BASE, url)
-        else:
-            ZIMUKU_RESOURCE_BASE = "{host_info.scheme}://{host_info.netloc}".format(host_info=urllib.parse.urlparse(url))
         log( sys._getframe().f_code.co_name ,"Download links: %s" % (url))
 
         # Subtitle download-list page.
