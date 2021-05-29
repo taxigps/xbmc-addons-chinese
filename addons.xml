@@ -166,7 +166,7 @@ V2.0.0 (2020-04-14)
 
 <addon id="service.subtitles.zimuzu"
        name="ZiMuZu"
-       version="2.0.0"
+       version="2.0.1"
        provider-name="xodidox">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -181,6 +181,8 @@ V2.0.0 (2020-04-14)
         <summary lang="zh">人人影视字幕组 字幕</summary>
         <description lang="en">Search and download subtitles from zimuzu.tv</description>
         <description lang="zh">从 zimuzu.tv 下载字幕</description>
+        <lifecyclestate type="broken" lang="en">The website is closed and the service is terminated.</lifecyclestate>
+        <lifecyclestate type="broken" lang="zh">网站关闭，服务终止。</lifecyclestate>
         <assets>
             <icon>icon.png</icon>
             <clearlogo>logo.png</clearlogo>
@@ -191,6 +193,9 @@ V2.0.0 (2020-04-14)
             <screenshot>resources/media/screenshot_4.jpg</screenshot>
         </assets>
         <news>
+V2.0.1 (2021-05-29)
+- Tag as broken.
+
 V2.0.0 (2020-04-18)
 - Ported to python 3.0 for Kodi 19
         </news>
