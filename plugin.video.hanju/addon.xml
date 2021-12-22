@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.hanju" name="韩剧视频" version="2.0.0" provider-name="malimaliao">
+<addon id="plugin.video.hanju" name="韩剧视频" version="2.1.0" provider-name="malimaliao">
 	<requires>
 		<import addon="script.module.requests" version="2.12.4"/>
-		<import addon="script.module.keyboard.chinese" version="2.0.4" optional="true"/>
 	</requires>
 	<extension point="xbmc.python.pluginsource" library="main.py">
 		<provides>video</provides>
@@ -15,11 +14,11 @@
 			This plugin for Kodi v19 "Matrix" and above,form third-party website video resource, and its resource has nothing to do with the author of this plugin.
 		</description>
 		<description lang="zh">
-			适用于Kodi v19 "Matrix" 及以上版本。本视频插件是作者学习python在kodi计算平台的应用练习，该视频插件基于爬虫技术拓扑了来自于第三方网站公开的访问内容，插件所拓扑的播放资源均与作者无关，请下载学习后删除本插件！
+			适用于Kodi v19 "Matrix" 及以上版本。本视频插件是作者基于python在kodi计算平台的应用练习，仅供阁下参考和学习。Kodi插件应用的爬虫技术拓扑了来自于第三方网站公开的访问内容，播放资源均与作者无关，请下载学习后删除本插件！
 		</description>
 		<website>https://github.com/malimaliao</website>
 		<email>malimaliao@gmail.com</email>
-		<disclaimer>Good luck ! by : Malimaliao</disclaimer>
+		<disclaimer>Good luck !</disclaimer>
 		<assets>
 			<icon>icon.png</icon>
 			<fanart>resources/bg.jpg</fanart>
