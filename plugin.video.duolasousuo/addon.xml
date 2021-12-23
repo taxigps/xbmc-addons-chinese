@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.duolasousuo" name="哆啦搜索" version="1.0.3" provider-name="malimaliao">
+	<requires>
+		<import addon="script.module.requests" version="2.12.4"/>
+	</requires>
+	<extension point="xbmc.python.pluginsource" library="main.py">
+		<provides>video</provides>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<platform>all</platform>
+		<summary>duola video search plugin</summary>
+		<summary lang="zh">哆啦搜索</summary>
+		<description>
+		This plugin for Kodi v19 and above,form third-party website video resource, and its resource has nothing to do with the author of this plugin.
+		</description>
+		<description lang="zh">
+		一个简单的搜索工具，适用于Kodi 19 及更高版本。本视频插件是基于python在kodi计算平台的应用练习，仅供阁下参考和学习。本应用的爬虫技术拓扑了第三方网站公开的网络索引内容，播放资源均与作者无关，请下载学习后删除本插件。
+		</description>
+		<website>https://github.com/malimaliao</website>
+		<email>malimaliao@gmail.com</email>
+		<disclaimer>Hello Duola!</disclaimer>
+		<assets>
+			<icon>logo.png</icon>
+			<fanart>resources/hello.jpg</fanart>
+			<screenshot>resources/1.png</screenshot>
+			<screenshot>resources/2.png</screenshot>
+			<screenshot>resources/3.png</screenshot>
+        </assets>
+	</extension>
+</addon>
