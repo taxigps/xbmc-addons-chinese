@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addons>
-<addon id="plugin.video.hanju" name="韩剧视频" version="2.0.0" provider-name="malimaliao">
+<addon id="plugin.video.hanju" name="韩剧视频" version="2.1.0" provider-name="malimaliao">
 	<requires>
 		<import addon="script.module.requests" version="2.12.4"/>
-		<import addon="script.module.keyboard.chinese" version="2.0.4" optional="true"/>
 	</requires>
 	<extension point="xbmc.python.pluginsource" library="main.py">
 		<provides>video</provides>
@@ -16,11 +15,11 @@
 			This plugin for Kodi v19 "Matrix" and above,form third-party website video resource, and its resource has nothing to do with the author of this plugin.
 		</description>
 		<description lang="zh">
-			适用于Kodi v19 "Matrix" 及以上版本。本视频插件是作者学习python在kodi计算平台的应用练习，该视频插件基于爬虫技术拓扑了来自于第三方网站公开的访问内容，插件所拓扑的播放资源均与作者无关，请下载学习后删除本插件！
+			适用于Kodi v19 "Matrix" 及以上版本。本视频插件是作者基于python在kodi计算平台的应用练习，仅供阁下参考和学习。Kodi插件应用的爬虫技术拓扑了来自于第三方网站公开的访问内容，播放资源均与作者无关，请下载学习后删除本插件！
 		</description>
 		<website>https://github.com/malimaliao</website>
 		<email>malimaliao@gmail.com</email>
-		<disclaimer>Good luck ! by : Malimaliao</disclaimer>
+		<disclaimer>Good luck !</disclaimer>
 		<assets>
 			<icon>icon.png</icon>
 			<fanart>resources/bg.jpg</fanart>
@@ -114,20 +113,22 @@ V1.0.0 (2013-12-04)
 
 <addon id="service.subtitles.zimuku"
        name="zimuku"
-       version="2.0.1"
+       version="2.0.4"
        provider-name="taxigps">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.beautifulsoup4" version="4.6.2"/>
+        <import addon="script.module.kodi-six"/>
         <import addon="vfs.rar" version="3.0.0"/>
+        <import addon="script.module.requests" version="2.22.0"/>
     </requires>
     <extension point="xbmc.subtitle.module"
                library="service.py" />
     <extension point="xbmc.addon.metadata">
         <summary lang="en">zimuku subtitle</summary>
         <summary lang="zh">字幕库</summary>
-        <description lang="en">Search and download subtitles from www.zimuku.la</description>
-        <description lang="zh">从 www.zimuku.la 下载字幕</description>
+        <description lang="en">Search and download subtitles from ZIMUKU site</description>
+        <description lang="zh">从“字幕库”网站下载字幕</description>
         <platform>all</platform>
         <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
         <assets>
@@ -138,6 +139,21 @@ V1.0.0 (2013-12-04)
             <screenshot>resources/media/screenshot_3.jpg</screenshot>
         </assets>
         <news>
+V2.0.4 (2021-05-29)
+- fix error: variable referenced before assignment
+
+V2.0.3 (2021-04-05)
+- update main domain
+
+V2.0.2 (2020-11-02)
+- support .sup subtitle
+- Change download url to fix download failure
+- Fix: Correct rating score
+- Ungrade: Use xmbc modules in kodi_six to take place.
+- Fix: Support more compressed format
+- Use requests to take the place of urllib2. Seems more reliable in getting page.
+- Forbid 7z archive since chinese chars in filename in 7z archive may cause failure.
+
 V2.0.1 (2020-04-18)
 - Add screenshot
 
@@ -149,7 +165,7 @@ V2.0.0 (2020-04-14)
 
 <addon id="service.subtitles.zimuzu"
        name="ZiMuZu"
-       version="2.0.0"
+       version="2.0.1"
        provider-name="xodidox">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -164,6 +180,8 @@ V2.0.0 (2020-04-14)
         <summary lang="zh">人人影视字幕组 字幕</summary>
         <description lang="en">Search and download subtitles from zimuzu.tv</description>
         <description lang="zh">从 zimuzu.tv 下载字幕</description>
+        <lifecyclestate type="broken" lang="en">The website is closed and the service is terminated.</lifecyclestate>
+        <lifecyclestate type="broken" lang="zh">网站关闭，服务终止。</lifecyclestate>
         <assets>
             <icon>icon.png</icon>
             <clearlogo>logo.png</clearlogo>
@@ -174,6 +192,9 @@ V2.0.0 (2020-04-14)
             <screenshot>resources/media/screenshot_4.jpg</screenshot>
         </assets>
         <news>
+V2.0.1 (2021-05-29)
+- Tag as broken.
+
 V2.0.0 (2020-04-18)
 - Ported to python 3.0 for Kodi 19
         </news>
