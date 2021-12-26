@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<settings>
+	<category label="30100">
+		<setting id="Duola_play_style" type="select" label="30101" lvalues="30001|30002|30003"/>
+		<setting label="30102" type="lsep"/>
+        <setting id="Duola_Cloud_Search_Engine" type="bool" label="30103" default="false"/>
+		<setting id="Duola_Local_Search_Engine" type="text" label="30104" default="https://api.wujinapi.com/api.php/provide/vod/" />
+	</category>
+</settings>

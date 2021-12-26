@@ -1,0 +1,52 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: /script.video.duolasousuo\n"
+"POT-Creation-Date: 2021-12-25 14:00+0300\n"
+"PO-Revision-Date: 2021-12-25 14:00+0200\n"
+"Last-Translator: Malimaliao\n"
+"Language-Team: Malimaliao\n"
+"Language: zh_cn\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# https://kodi.wiki/view/Language_support
+# 字符串 30000 到 30999 保留用于插件和插件设置
+# 字符串 31000 到 31999 保留给皮肤
+# 为脚本保留的字符串 32000 到 32999
+# 字符串 33000 到 33999 保留用于附加组件中使用的常用字符串
+
+# 3010x
+msgctxt "#30100"
+msgid "Basic config"
+msgstr "基本设置"
+
+msgctxt "#30101"
+msgid "Player style"
+msgstr "播放显示风格"
+
+msgctxt "#30102"
+msgid "Server config"
+msgstr "服务器设置"
+
+msgctxt "#30103"
+msgid "Cloud Search Engine"
+msgstr "使用云端搜索引擎"
+
+msgctxt "#30104"
+msgid "Local Search Engine"
+msgstr "内置搜索引擎接口"
+
+#3000x
+msgctxt "#30001"
+msgid "List Mode"
+msgstr "列表模式"
+
+msgctxt "#30002"
+msgid "Movie Mode"
+msgstr "影院模式"
+
+msgctxt "#30003"
+msgid "TV Mode"
+msgstr "剧集模式（推荐）"
