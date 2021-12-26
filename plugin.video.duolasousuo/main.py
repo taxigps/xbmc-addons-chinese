@@ -1,32 +1,33 @@
 # -*- coding:utf-8 -*-
-import sys, re, json
+import sys, json, base64
 import requests
 import urllib.parse
 from collections import OrderedDict
 # https://codedocs.xyz/xbmc/xbmc/
-import xbmcplugin, xbmcgui, xbmc
+import xbmc, xbmcplugin, xbmcgui
+import xbmcvfs , xbmcaddon
+import os, datetime
 
-# plugin config
+# plugin base config
 _plugin_name = '哆啦搜索'
 _plugin_player_mimes = ['.m3u8','.mp4','.flv','.ts']
-_plugin_handle = int(sys.argv[1])  # 当前句柄
+_plugin_handle = int(sys.argv[1])  # 当前插件句柄
 _plugin_address = sys.argv[0]  # 当前插件地址
 _plugin_parm = sys.argv[2]  # 问号以后的内容
 _plugin_dialog = xbmcgui.Dialog()
-_plugin_player_style = 3
-print('duola_debug:[' + str(_plugin_handle)+']'+ _plugin_address+' || '+ _plugin_parm)
+_plugin_player_style = int(xbmcplugin.getSetting(_plugin_handle, 'Duola_play_style'))
+# 系统会追加 ?addons=[_plugin_address]
+_plugin_cloud_url = 'https://kodi.maliao.workers.dev/api/plugin.video.duolasousuo/v1.json'
 
 # bot config
-Site = 'https://m3u8.xiangkanapi.com'
-Site_api_list = Site + '/provide/vod/?ac=list'
-Site_api_search = Site + '/provide/vod/?wd='
-Site_api_detail = Site + '/provide/vod/?ac=detail&ids='
-
 UA_head = { 
     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.87 Safari/537.36',
  }
 
-# 特定函数
+# global debug
+print('duola_debug: [' + str(_plugin_handle)+']'+ _plugin_address+' || '+ _plugin_parm)
+
+# custom function
 def check_json(input_str):
     try:
         json.loads(input_str)
@@ -40,11 +41,13 @@ def check_url_mime(url):
     else:
         return False
 
-# 视频查找：返回符合的视频列表
-def Web_load_search(keyword):
-    to_url = Site_api_search + keyword
-    res = requests.get(url=to_url,headers=UA_head)
-    # print('dula_debug:'+to_url, res.text)
+# request: https://123.com/api/provide/vod/?wd={keyword}
+# return: 
+def Web_load_search(_api_url, keyword):
+    get_url = _api_url + '?wd=' + keyword
+    res = requests.get(url=get_url,headers=UA_head)
+    #print('duola_debug:'+get_url, res.text)
+    #_plugin_dialog.ok(_plugin_name + 'debug', get_url)
     if check_json(res.text):
         res_json = json.loads(res.text)
         if res_json['code'] == 1:
@@ -58,7 +61,8 @@ def Web_load_search(keyword):
                     list_item = xbmcgui.ListItem(vod_name+' ('+ vod_typename+' / '+vod_remarks+')')
                     # list_item.setArt({'icon': '123.JPG'})
                     # list_item.setInfo('video', {'year': vod['year'], 'title':vod['name'], 'episodeguide': play['name'], 'tracknumber': i})
-                    xbmcplugin.addDirectoryItem(_plugin_handle, _plugin_address+'?kodi_detail='+vod_id, list_item, True)
+                    a_url = urllib.parse.quote(_api_url)
+                    xbmcplugin.addDirectoryItem(_plugin_handle, _plugin_address + '?from_engine=' + a_url + '&read_detail='+vod_id, list_item, True)
                 # 退出kodi菜单布局
                 xbmcplugin.endOfDirectory(handle=_plugin_handle, succeeded=True, updateListing=False, cacheToDisc=True)
             else:
@@ -71,11 +75,13 @@ def Web_load_search(keyword):
         print('duola_debug:目标服务器返回的数据无法解析')
         _plugin_dialog.notification(heading=_plugin_name, message='抱歉，目标服务器返回的数据无法响应，服务暂不可用', time=3000)
 
-# 视频内容：返回单个视频详情，并交互输出select play list
-def Web_load_detail_one_style1(detail):
-    to_url = Site_api_detail + detail
-    res = requests.get(url=to_url,headers=UA_head)
-    # print('dula_debug:'+to_url, res.text)
+# request: https://123.com/api/provide/vod/?ac=detail&ids={detail_id}
+# return: play list
+def Web_load_detail_one(_api_url, detail_id):
+    get_url = _api_url + '?ac=detail&ids=' + detail_id
+    res = requests.get(url=get_url,headers=UA_head)
+    #print('duola_debug:'+get_url, res.text)
+    #_plugin_dialog.ok(_plugin_name + 'debug', get_url)
     if check_json(res.text):
         res_json = json.loads(res.text)
         if res_json['code'] == 1:
@@ -119,22 +125,24 @@ def Web_load_detail_one_style1(detail):
                             # 按#分隔，将vod_title与vod_url区分
                             # 第01集$http://abc.com/1.flv
                             V = V_play.split('$')
-                            if check_url_mime(V[1]):
-                                V_name_list.append(V[0]) # 播放标签
-                                V_m3u8_list.append(V[1]) # 播放地址
+                            if len(V) == 2 and check_url_mime( V[1].strip() ):
+                                _v_play_label = V[0].strip() # 去除首尾空格
+                                _v_play_url = V[1].strip() # 去除首尾空格
+                                V_name_list.append(_v_play_label) # 播放标签
+                                V_m3u8_list.append(_v_play_url) # 播放地址
                                 # listitem
-                                list_item = xbmcgui.ListItem(v_name + ':' + V[0], v_typename)
+                                list_item = xbmcgui.ListItem(v_name + ':' + _v_play_label, v_typename)
                                 list_item.setArt({'thumb': v_picture, 'poster': v_picture})
                                 list_item.setInfo('video', v_infos)
-                                playlist.add(url= V[1], listitem=list_item, index=V_i)
-                                V_i = V_i +1
+                                playlist.add(url= _v_play_url, listitem=list_item, index=V_i)
+                                V_i = V_i + 1
                             else:
                                 pass # 不符合条件的播放地址跳过
                 else:
                    select_title = '此视频暂时没有播放源'
                 # 播放方式
                 # player_style -------------------------------------------------
-                if _plugin_player_style == 1:
+                if _plugin_player_style == 0:
                     a = -1
                     for x in V_name_list:
                         a = a + 1
@@ -144,7 +152,7 @@ def Web_load_detail_one_style1(detail):
                         xbmcplugin.addDirectoryItem(_plugin_handle, V_m3u8_list[a] , list_item, False)
                     xbmcplugin.endOfDirectory(handle=_plugin_handle, succeeded=True, updateListing=False, cacheToDisc=True)
                 # player_style -------------------------------------------------
-                if _plugin_player_style == 2:
+                if _plugin_player_style == 1:
                     dialog = xbmcgui.Dialog()
                     select_i = dialog.select(select_title, V_name_list)
                     print('duola_debug: select_i '+str(select_i))
@@ -154,15 +162,15 @@ def Web_load_detail_one_style1(detail):
                         list_item.setInfo('video', v_infos)
                         #_plugin_dialog.info(list_item) # 显示视频信息，含播放按钮
                         xbmc.Player().play(item=V_m3u8_list[select_i], listitem=list_item) # 立即播放视频
-                        _plugin_dialog.notification(heading=_plugin_name,message = v_name + ':' + V_name_list[select_i] + ' 即将自动播放，请稍候', time=5000, sound=False)
+                        _plugin_dialog.notification(heading=_plugin_name,message = '视频即将播放，请稍候', time=6000, sound=False)
                 # player_style -------------------------------------------------
-                if _plugin_player_style == 3:
+                if _plugin_player_style == 2:
                     dialog = xbmcgui.Dialog()
                     select_i = dialog.select(select_title, V_name_list)
                     print('duola_debug: select_i '+str(select_i))
                     if select_i >= 0:
                         xbmc.Player().play(item=playlist, listitem=list_item, windowed=False, startpos=select_i) # 立即播放列表
-                        _plugin_dialog.notification(heading = _plugin_name,message = v_name + ':' + V_name_list[select_i] + ' 即将自动播放，请稍候',time=5000,sound=False)
+                        _plugin_dialog.notification(heading = _plugin_name,message = '视频即将播放，请稍候',time=6000,sound=False)
             else:
                 print('duola_debug:没有数据')
                 _plugin_dialog.notification(heading=_plugin_name, message='抱歉，找不到播放列表', time=3000)
@@ -173,8 +181,114 @@ def Web_load_detail_one_style1(detail):
         print('duola_debug:目标服务器返回的数据无法解析')
         _plugin_dialog.notification(heading=_plugin_name, message='抱歉，目标服务器返回的数据无法响应，服务暂不可用', time=3000)
 
-# 搜索交互
-def kodi_start_search():
+# API->engine get new
+def API_get_Cloud_Engine_new(CloudEngine_cache_path):
+    tj_agent = xbmc.getUserAgent()
+    tj_agent += ' Kodi-Plugin:' +  _plugin_address
+    tj_ua = { 'User-Agent': tj_agent }
+    # print('duola_debug: api=>' + _plugin_cloud_url, res.text)
+    res = requests.get(url = _plugin_cloud_url + '?addons=', headers = tj_ua)
+    cloud_engine_text = res.text
+    # 写入缓存，降低服务器请求数
+    expires_in = 3600 # 初始有效时间为1小时
+    if check_json(cloud_engine_text):
+        api_json = json.loads(cloud_engine_text)
+        if 'expires_in' in api_json:
+            expires_in = float(api_json['expires_in']) # 使用服务器限定的有效期
+        next_time = datetime.datetime.now() + datetime.timedelta(seconds=expires_in) # 设定时间有效期在n秒后失效
+        next_timestamp = str(int(next_time.timestamp()))
+        with xbmcvfs.File(CloudEngine_cache_path, 'w') as f:
+            time_value = 'next_timestamp=' + next_timestamp # 有效时间
+            f.write(time_value) # time
+            f.write('\n--------\n') # 此处分隔符
+            f.write(cloud_engine_text) # json
+    return cloud_engine_text
+
+# API->engine get
+def API_get_Cloud_Engine():
+    temp_path= xbmcvfs.translatePath('special://home/temp')
+    my_addon = xbmcaddon.Addon()
+    my_addon_id = my_addon.getAddonInfo('id')
+    my_cache_path = os.path.join(temp_path, my_addon_id, '')
+    xbmcvfs.mkdirs(my_cache_path)
+    if xbmcvfs.exists(my_cache_path):
+        print('duola_debug: 缓存目录读取成功->' + my_cache_path )
+        my_cloud_engine_cache = os.path.join(my_cache_path, 'Duola_Local_Search_Engine.txt')
+        if xbmcvfs.exists(my_cloud_engine_cache):
+            cloud_engine_text = ""
+            with xbmcvfs.File(my_cloud_engine_cache) as f:
+                cache = f.read()
+                a = cache.split('--------')
+                a101 = a[1] # json text
+                b = a[0].split('timestamp=')
+                cc = b[1].replace('\n', '') # next_timestamp=1640507115
+                print(b, cc)
+                next_timestamp = int(cc)
+                this_timestamp = int(datetime.datetime.now().timestamp())
+                print('this_timestamp:'+str(this_timestamp)+',next_timestamp:' + str(next_timestamp), cloud_engine_text)
+                if this_timestamp < next_timestamp:
+                    print('duola_debug: 从本地读取引擎数据->' + my_cloud_engine_cache)
+                    cloud_engine_text = a101 # 使用缓存
+                else:
+                    print('duola_debug: 从云端刷新引擎数据->' + _plugin_cloud_url)
+                    cloud_engine_text = API_get_Cloud_Engine_new() # 重新获取
+        else:
+            print('duola_debug: 从云端拉取引擎数据->' + _plugin_cloud_url)
+            cloud_engine_text = API_get_Cloud_Engine_new(my_cloud_engine_cache)
+        # ----- 解析json ------
+        if check_json(cloud_engine_text):
+            api = json.loads(cloud_engine_text)
+            #print('duola_debug:zy code' + str(api['code'] ))
+            #print('duola_debug:zy data_list' + str(len(api['data']['list'])) )
+            if api['code'] == 1 and len(api['data']['list']) > 0:
+                print('duola_debug:zy YES')
+                for zy in api['data']['list']:
+                    # print('duola_debug:zy' + zy['name'] + '@' + zy['api_url'])
+                    if zy['status'] == 1:
+                        _api_url = urllib.parse.quote(base64.b64decode(zy['api_url'])) # base64 解码后，再URL编码
+                        _api_title = ' [COLOR yellow] (' + zy['name'] + ') [/COLOR]'
+                        listitem=xbmcgui.ListItem('哆啦搜索' + _api_title)
+                        xbmcplugin.addDirectoryItem(_plugin_handle, _plugin_address+'?start_engine='+_api_url, listitem, True)
+                    else:
+                        _api_title = ' [COLOR blue] (' + zy['name'] + ') ' + ' 暂不可用[/COLOR]'
+                        listitem=xbmcgui.ListItem('哆啦搜索' + _api_title)
+                        xbmcplugin.addDirectoryItem(_plugin_handle, _plugin_address, listitem, True)
+            else:
+                _plugin_dialog.notification(heading=_plugin_name, message='云端搜索引擎暂时出现故障，请稍后重试' + api['message'], time=3000)
+        else:
+            _plugin_dialog.notification(heading=_plugin_name, message='暂时无法连接云端搜索引擎服务器，请稍后重试', time=3000)
+        # ----- 解析json ------
+    else:
+        print('duola_debug: 缓存目录读取失败->' + my_cache_path )
+        _plugin_dialog.ok(_plugin_name, '抱歉，由于缓存无法读写，因此云端引擎不可用。文件地址：' + my_cache_path)
+
+# /
+if _plugin_parm == '':
+    # print('duola_debug:'+ xbmcplugin.getSetting(_plugin_handle, 'Duola_Cloud_Search_Engine') )
+    enable_cloud = xbmcplugin.getSetting(_plugin_handle, 'Duola_Cloud_Search_Engine')
+    _b = ""
+    # add cloud menu
+    if enable_cloud == 'true':
+        _b = ' (本地)'
+        API_get_Cloud_Engine()
+    # add local menu
+    _local_api_url = xbmcplugin.getSetting(_plugin_handle, 'Duola_Local_Search_Engine')
+    _api_url = urllib.parse.quote(_local_api_url)
+    listitem=xbmcgui.ListItem('哆啦搜索' + _b)
+    xbmcplugin.addDirectoryItem(_plugin_handle, _plugin_address+'?start_engine='+_api_url, listitem, True)
+    # 退出kodi菜单布局（如果没有及时退出布局会被Kodi进行布局，而不响应文件夹点击）
+    listitem=xbmcgui.ListItem('使用帮助')
+    xbmcplugin.addDirectoryItem(_plugin_handle, _plugin_address+'?help', listitem, True)
+    xbmcplugin.endOfDirectory(handle=_plugin_handle, succeeded=True, updateListing=False, cacheToDisc=True)
+
+# /?help
+if '?help' in _plugin_parm:
+    _plugin_dialog.ok(_plugin_name + '使用帮助', '您只要输入您想搜索的资源关键词就可以啦')
+
+# /?start_engine=https%3A%2F%2F123.com%2Fapi%2Fprovide%2Fvod%2F
+if '?start_engine=' in _plugin_parm:
+    _parm_url =  urllib.parse.unquote(_plugin_parm)
+    engine_url = _parm_url.split("start_engine=")[1]
     keyboard = xbmc.Keyboard()
     keyboard.setHeading('请输入关键词')
     keyboard.doModal()
@@ -187,34 +301,15 @@ def kodi_start_search():
         keyword = ''
     print('duola_debug:' + keyword)
     if len(keyword) > 0:
-        Web_load_search(keyword)
+        Web_load_search(engine_url, keyword)
 
-# 当前路由> 访问首页
-if _plugin_parm == '':
-    # https://codedocs.xyz/xbmc/xbmc/group__python___dialog.html#ga27157f98dddb21b44cc6456137977aa2
-    #_plugin_dialog.notification(_plugin_name,'欢迎使用'+_plugin_name, xbmcgui.NOTIFICATION_INFO, 3000, False)
-    listitem=xbmcgui.ListItem('[COLOR yellow]哆啦搜索[/COLOR]')
-    xbmcplugin.addDirectoryItem(_plugin_handle, _plugin_address+'?kodi_search=yes', listitem, True)
-    listitem=xbmcgui.ListItem('使用帮助')
-    xbmcplugin.addDirectoryItem(_plugin_handle, _plugin_address+'?kodi_help', listitem, True)
-    # 退出kodi菜单布局（如果没有及时退出布局会被Kodi进行布局，而不响应文件夹点击）
-    xbmcplugin.endOfDirectory(handle=_plugin_handle, succeeded=True, updateListing=False, cacheToDisc=True)
-    # kodi_start_search()
-
-# 当前路由> 访问搜索
-if '?kodi_search=yes' in _plugin_parm:
-    print('duola_debug:' + _plugin_parm)
-    kodi_start_search()
-
-# 当前路由> 访问帮助
-if '?kodi_help' in _plugin_parm:
-    _plugin_dialog.ok(_plugin_name + '使用帮助', '您只要输入您想搜索的资源关键词就可以啦')
-
-# 当前路由> 访问视频详情
-if '?kodi_detail=' in _plugin_parm:
-    detail = _plugin_parm.split("kodi_detail=")[1]
-    if detail != "":
-        this_list = Web_load_detail_one_style1(detail)
+# /?from_engine=https%3A%2F%2F123.com%2Fapi%2Fprovide%2Fvod%2F&read_detail=123
+if '?from_engine=' in _plugin_parm and '&read_detail' in _plugin_parm:
+    _parm_url = urllib.parse.unquote(_plugin_parm)
+    engine_url = _parm_url.split("from_engine=")[1]
+    detail_id = _parm_url.split("&read_detail=")[1]
+    if detail_id != "":
+        this_list = Web_load_detail_one(engine_url, detail_id)
     else:
-        print('duola_debug:传入的kodi_detail地址为空')
-        _plugin_dialog.notification(heading=_plugin_name, message='此视频信息无效，无法访问此视频', time=3000)
+        print('duola_debug:传入的 read_detail 地址为空')
+        _plugin_dialog.notification(heading=_plugin_name, message='此视频信息无效', time=3000)

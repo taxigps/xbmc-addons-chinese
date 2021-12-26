@@ -1,0 +1,46 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: /script.video.duolasousuo\n"
+"POT-Creation-Date: 2021-12-25 14:00+0300\n"
+"PO-Revision-Date: 2021-12-25 14:00+0200\n"
+"Last-Translator: Malimaliao\n"
+"Language-Team: Malimaliao\n"
+"Language: en_gb\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# 3010x
+msgctxt "#30100"
+msgid "Basic config"
+msgstr ""
+
+msgctxt "#30101"
+msgid "Player style"
+msgstr ""
+
+msgctxt "#30102"
+msgid "Server config"
+msgstr ""
+
+msgctxt "#30103"
+msgid "Cloud Search Engine"
+msgstr ""
+
+msgctxt "#30104"
+msgid "Local Search Engine"
+msgstr ""
+
+#3000x
+msgctxt "#30001"
+msgid "List Mode"
+msgstr ""
+
+msgctxt "#30002"
+msgid "Movie Mode"
+msgstr ""
+
+msgctxt "#30003"
+msgid "TV Mode"
+msgstr ""
