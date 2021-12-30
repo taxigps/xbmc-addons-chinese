@@ -182,7 +182,7 @@ def Web_load_detail_one(_api_url, detail_id):
         _plugin_dialog.notification(heading=_plugin_name, message='抱歉，目标服务器返回的数据无法响应，服务暂不可用', time=3000)
 
 # API->engine get new
-def API_get_Cloud_Engine_new(CloudEngine_cache_path):
+def API_get_Cloud_Engine_new(Cache_save_path):
     tj_agent = xbmc.getUserAgent()
     tj_agent += ' Kodi-Plugin:' +  _plugin_address
     tj_ua = { 'User-Agent': tj_agent }
@@ -197,7 +197,7 @@ def API_get_Cloud_Engine_new(CloudEngine_cache_path):
             expires_in = float(api_json['expires_in']) # 使用服务器限定的有效期
         next_time = datetime.datetime.now() + datetime.timedelta(seconds=expires_in) # 设定时间有效期在n秒后失效
         next_timestamp = str(int(next_time.timestamp()))
-        with xbmcvfs.File(CloudEngine_cache_path, 'w') as f:
+        with xbmcvfs.File(Cache_save_path, 'w') as f:
             time_value = 'next_timestamp=' + next_timestamp # 有效时间
             f.write(time_value) # time
             f.write('\n--------\n') # 此处分隔符
@@ -231,7 +231,7 @@ def API_get_Cloud_Engine():
                     cloud_engine_text = a101 # 使用缓存
                 else:
                     print('duola_debug: 从云端刷新引擎数据->' + _plugin_cloud_url)
-                    cloud_engine_text = API_get_Cloud_Engine_new() # 重新获取
+                    cloud_engine_text = API_get_Cloud_Engine_new(my_cloud_engine_cache) # 重新获取
         else:
             print('duola_debug: 从云端拉取引擎数据->' + _plugin_cloud_url)
             cloud_engine_text = API_get_Cloud_Engine_new(my_cloud_engine_cache)
