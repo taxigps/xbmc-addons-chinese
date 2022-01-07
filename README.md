@@ -10,7 +10,7 @@
 ## 安装插件库 Install Repository
 
 安装本插件库，按照使用的Kodi版本下载相应zip安装包 To install the repository, you need to download the latest repository zip file
-* [repository.xbmc-addons-chinese-1.2.1.zip][2] for Kodi 18 and older
+* [repository.xbmc-addons-chinese-1.2.1.zip][2] for Kodi 18 and older(不推荐，已停止维护升级 Not recommended. Stop maintenance and upgrading)
 * [repository.xbmc-addons-chinese-2.0.0.zip][3] for Kodi 19
 
 然后 And then:
@@ -32,6 +32,12 @@ Kodi的中文显示设置步骤如下 For proper Chinese text display on Kodi, d
 * 选择你要安装的插件 Select the appropriate Add-ons from the display categories
 * 点击安装插件 Click to install the Add-on
 
+## 手动安装插件 Plugins Manual Installation
+
+* 本项目所有中文插件的安装包保存在repo子目录下。Official releases of all the Chinese plugins can be found in the ./repo sub-directories.
+
+如果你想手动下载而不是通过插件库安装单个插件，可以从repo子目录中找到相应zip安装包，下载并从zip文件安装插件。If for reasons that you need to manually install a specific plugin, you can download the required zip file from the corresponding ./repo sub-directory. Then follow the ** Install Repository ** steps described above to install the zip plugin. 
+
 # 插件功能 Features
 
 ## 视频插件 Video Add-ons
@@ -50,12 +56,6 @@ Kodi的中文显示设置步骤如下 For proper Chinese text display on Kodi, d
 * Shooter - service.subtitles.shooter - Shooter subtitle service
 * zimuku - service.subtitles.zimuku - Search and download subtitles from [zimuku.la](http://www.zimuku.la)
 * <strike>zimuzu - service.subtitles.zimuzu - Search and download subtitles from [zimuzu.tv](http://www.zimuzu.tv)</strike>
-
-## 手动安装插件 Plugins Manual Installation
-
-* 本项目所有中文插件的安装包保存在repo子目录下。Official releases of all the Chinese plugins can be found in the ./repo sub-directories.
-
-如果你想手动下载而不是通过插件库安装单个插件，可以从repo子目录中找到相应zip安装包，下载并从zip文件安装插件。If for reasons that you need to manually install a specific plugin, you can download the required zip file from the corresponding ./repo sub-directory. Then follow the ** Install Repository ** steps described above to install the zip plugin. 
 
 [1]: https://forum.kodi.tv/showthread.php?tid=64250
 [2]: https://github.com/taxigps/xbmc-addons-chinese/raw/master/repo/repository.xbmc-addons-chinese/repository.xbmc-addons-chinese-1.2.1.zip
