@@ -29,8 +29,6 @@ ZIMUKU_BASE = 'http://zmk.pw'
 ZIMUKU_RESOURCE_BASE = 'http://zmk.pw'
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
-session = requests.Session()
-
 MIN_SIZE = 1024
 
 def log(module, msg, level=xbmc.LOGDEBUG):
@@ -56,7 +54,17 @@ def get_page(url, **kwargs):
             for key, value in kwargs.items():
                 request_headers[key.replace('_', '-')] = value
 
+        session = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(max_retries=3)
+        session.mount('http://', adapter)
+        url1 = url + '&security_verify_data=313932302c31303830'
+        url2 = url + '?security_verify_data=313932302c31303830'
+        session.get(url, headers=request_headers)
+        session.get(url1, headers=request_headers)
         http_response = session.get(url, headers=request_headers)
+        if http_response.status_code != 200:
+            session.get(url2, headers=request_headers)
+            http_response = session.get(url2, headers=request_headers)
         log( sys._getframe().f_code.co_name ,'Got url %s' % (url), level=xbmc.LOGDEBUG)
         headers = http_response.headers
         http_body = http_response.content
