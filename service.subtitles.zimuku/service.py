@@ -24,15 +24,35 @@ __temp__       = xbmc.translatePath( os.path.join( __profile__, 'temp') )
 
 sys.path.append (__resource__)
 
-ZIMUKU_API = 'http://zmk.pw/search?q=%s'
+ZIMUKU_API = 'http://zmk.pw/search?q=%s&vertoken=%s'
 ZIMUKU_BASE = 'http://zmk.pw'
 ZIMUKU_RESOURCE_BASE = 'http://zmk.pw'
 UserAgent  = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)'
 
 MIN_SIZE = 1024
 
+session = requests.Session()
+vertoken = ''
+
 def log(module, msg, level=xbmc.LOGDEBUG):
     xbmc.log("{0}::{1} - {2}".format(__scriptname__,module,msg) ,level=level )
+
+def get_vertoken():
+    # get vertoken from home page and cache it for the session
+    global vertoken
+    if vertoken:
+        return vertoken
+    else:
+        log( sys._getframe().f_code.co_name, "Fetching new vertoken form home page", level=xbmc.LOGDEBUG)
+        try:
+            headers, data = get_page(ZIMUKU_BASE+'/')
+            hsoup = BeautifulSoup(data, 'html.parser')
+            vt = hsoup.find('input', attrs={'name': 'vertoken'}).attrs.get('value', '')
+            vertoken = vt
+            return vt
+        except Exception as e:
+            log(sys._getframe().f_code.co_name, "ERROR GETTING vertoken, E=(%s: %s)" % (Exception, e), level=xbmc.LOGWARNING)
+            return ''
 
 def get_page(url, **kwargs):
     """
@@ -46,6 +66,7 @@ def get_page(url, **kwargs):
         headers     The http response headers.
         http_body   The http response body.
     """
+    global session
     headers = None
     http_body = None
     try:
@@ -54,18 +75,19 @@ def get_page(url, **kwargs):
             for key, value in kwargs.items():
                 request_headers[key.replace('_', '-')] = value
 
-        session = requests.Session()
         adapter = requests.adapters.HTTPAdapter(max_retries=3)
         session.mount('http://', adapter)
+        log( sys._getframe().f_code.co_name, 'Got url %s' % (url), level=xbmc.LOGDEBUG)
+
+        url += '&' if '?' in url else '?'
+        url += 'security_verify_data=313932302c31303830'
         url1 = url + '&security_verify_data=313932302c31303830'
-        url2 = url + '?security_verify_data=313932302c31303830'
         session.get(url, headers=request_headers)
         session.get(url1, headers=request_headers)
         http_response = session.get(url, headers=request_headers)
         if http_response.status_code != 200:
-            session.get(url2, headers=request_headers)
-            http_response = session.get(url2, headers=request_headers)
-        log( sys._getframe().f_code.co_name ,'Got url %s' % (url), level=xbmc.LOGDEBUG)
+            session.get(url, headers=request_headers)
+            http_response = session.get(url, headers=request_headers)
         headers = http_response.headers
         http_body = http_response.content
 
@@ -76,6 +98,7 @@ def get_page(url, **kwargs):
 
 def Search( item ):
     subtitles_list = []
+    get_vertoken()
 
     if item['mansearch']:
         search_str = item['mansearchstr']
@@ -84,7 +107,7 @@ def Search( item ):
     else:
         search_str = item['title']
     log( sys._getframe().f_code.co_name ,"Search for [%s] by str %s" % (os.path.basename(item['file_original_path']), search_str))
-    url = ZIMUKU_API % (urllib.parse.quote(search_str))
+    url = ZIMUKU_API % (urllib.parse.quote(search_str), vertoken)
     log( sys._getframe().f_code.co_name ,"Search API url: %s" % (url))
     try:
         # Search page.
