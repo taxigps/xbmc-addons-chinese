@@ -5,7 +5,7 @@
         provider-name="Taxigps">
     <extension point="xbmc.addon.repository"
             name="Chinese Add-ons">
-        <dir>
+        <dir minversion="19.0.0">
             <info compressed="true">https://github.com/taxigps/xbmc-addons-chinese/raw/matrix/addons.xml</info>
             <checksum>https://github.com/taxigps/xbmc-addons-chinese/raw/matrix/addons.xml.md5</checksum>
             <datadir zip="true">https://github.com/taxigps/xbmc-addons-chinese/raw/matrix/repo</datadir>
