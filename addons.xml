@@ -82,6 +82,44 @@
     </extension>
 </addon>
 
+<addon id="service.subtitles.assrt"
+       name="assrt.net"
+       version="2.0.0"
+       provider-name="taxigps, fffonion">
+    <requires>
+        <import addon="xbmc.python" version="3.0.0"/>
+        <import addon="script.module.chardet" version="3.0.4"/>
+        <import addon="script.module.requests" version="2.22.0"/>
+    </requires>
+    <extension point="xbmc.subtitle.module"
+               library="service.py" />
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">assrt.net subtitle</summary>
+        <summary lang="zh">伪射手字幕</summary>
+        <summary lang="zh_TW">伪射手字幕</summary>
+        <description lang="en">Search and download subtitles from assrt.net</description>
+        <description lang="zh">从伪射手网（assrt.net）下载字幕</description>
+        <description lang="zh_TW">從偽射手網（assrt.net）下載字幕</description>
+        <platform>all</platform>
+        <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+        <forum>http://forum.kodi.tv/showthread.php?tid=199644</forum>
+        <website></website>
+        <email></email>
+        <source>https://github.com/taxigps/xbmc-addons-chinese/tree/martrix/service.subtitles.assrt</source>
+        <assets>
+            <icon>icon.png</icon>
+            <clearlogo>logo.png</clearlogo>
+            <screenshot>resources/media/screenshot_1.jpg</screenshot>
+            <screenshot>resources/media/screenshot_2.jpg</screenshot>
+            <screenshot>resources/media/screenshot_3.jpg</screenshot>
+        </assets>
+        <news>
+V2.0.0 (2022-09-1)
+- Ported to python 3.0 for Kodi 19
+        </news>
+    </extension>
+</addon>
+
 <addon id="service.subtitles.shooter"
        name="Shooter"
        version="2.0.0"
