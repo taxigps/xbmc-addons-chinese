@@ -53,8 +53,9 @@ Kodi的中文显示设置步骤如下 For proper Chinese text display on Kodi, d
 
 ## 字幕插件 Subtitle Add-ons
 
+* assrt.net - service.subtitles.assrt - Search and download subtitles from [assrt.net](https://assrt.net/)
 * Shooter - service.subtitles.shooter - Shooter subtitle service
-* zimuku - service.subtitles.zimuku - Search and download subtitles from [zimuku.la](http://www.zimuku.la)
+* <strike>zimuku - service.subtitles.zimuku - Search and download subtitles from [zimuku.la](http://www.zimuku.la)</strike>
 * <strike>zimuzu - service.subtitles.zimuzu - Search and download subtitles from [zimuzu.tv](http://www.zimuzu.tv)</strike>
 
 [1]: https://forum.kodi.tv/showthread.php?tid=64250
