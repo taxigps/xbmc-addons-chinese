@@ -23,6 +23,15 @@ SUBTYPE_EXT = (".srt", ".smi", ".ssa", ".ass", ".sup")
 def logging(msg):
     return log(__name__, msg)
 
+def server_msg(errorID):
+    dialog = xbmcgui.Dialog()
+    if errorID == 30900 and self.api_key == DEFAULT_TOKEN:
+        dialog.notification(__name__, __language__(32009),
+                        xbmcgui.NOTIFICATION_INFO, 3000)
+    else:
+        dialog.notification(__name__, __language__(32010) + '(%d): %s' % (result['status'], result['errmsg']),
+                        xbmcgui.NOTIFICATION_ERROR, 3000)
+
 class AssrtProvider:
 
     def __init__(self, api_key):
@@ -44,7 +53,7 @@ class AssrtProvider:
 
         result = r.json()
         if result["status"]: # server return errorID
-            serverMsg(result["status"])
+            server_msg(result["status"])
             return None
 
         logging(f"Query returned {len(result['sub']['subs'])} subtitles")
@@ -87,12 +96,3 @@ class AssrtProvider:
         r = self.session.get(url)
         subtitle = {"ext": ext, "content": r.content}
         return subtitle
-
-    def server_msg(errorID):
-        dialog = xbmcgui.Dialog()
-        if errorID == 30900 and self.api_key == DEFAULT_TOKEN:
-            dialog.notification(__name__, __language__(32009),
-                            xbmcgui.NOTIFICATION_INFO, 3000)
-        else:
-            dialog.notification(__name__, __language__(32010) + '(%d): %s' % (result['status'], result['errmsg']),
-                            xbmcgui.NOTIFICATION_ERROR, 3000)
