@@ -11,7 +11,7 @@
 
 安装本插件库，按照使用的Kodi版本下载相应zip安装包 To install the repository, you need to download the latest repository zip file
 * [repository.xbmc-addons-chinese-1.2.1.zip][2] for Kodi 18 and older(不推荐，已停止维护升级 Not recommended. Stop maintenance and upgrading)
-* [repository.xbmc-addons-chinese-2.0.0.zip][3] for Kodi 19
+* [repository.xbmc-addons-chinese-2.0.1.zip][3] for Kodi 19 and newer
 
 然后 And then:
 * 进入Kodi系统 Launch Kodi
@@ -60,6 +60,6 @@ Kodi的中文显示设置步骤如下 For proper Chinese text display on Kodi, d
 
 [1]: https://forum.kodi.tv/showthread.php?tid=64250
 [2]: https://github.com/taxigps/xbmc-addons-chinese/raw/master/repo/repository.xbmc-addons-chinese/repository.xbmc-addons-chinese-1.2.1.zip
-[3]: https://github.com/taxigps/xbmc-addons-chinese/raw/matrix/repo/repository.xbmc-addons-chinese/repository.xbmc-addons-chinese-2.0.0.zip
+[3]: https://github.com/taxigps/xbmc-addons-chinese/raw/matrix/repo/repository.xbmc-addons-chinese/repository.xbmc-addons-chinese-2.0.1.zip
 
 
