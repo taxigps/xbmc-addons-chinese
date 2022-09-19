@@ -159,7 +159,7 @@ class SubtitleDownloader:
                 subtype = subtitle["subtype"]
             else:
                 subtype = "未标"
-            fname = "[%s]%s" % (subtitle["subtype"], fname)
+            fname = "[%s]%s" % (subtype, fname)
 
             list_item = xbmcgui.ListItem(label=language_name,
                                          label2=fname)
