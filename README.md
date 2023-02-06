@@ -43,7 +43,7 @@ Kodi的中文显示设置步骤如下 For proper Chinese text display on Kodi, d
 ## 视频插件 Video Add-ons
 
 * 哆啦搜索 - plugin.video.duolasousuo - 哆啦搜索视频插件`(new)`
-* 韩剧视频 - plugin.video.hanju - 韩剧视频Kodi插件`(new)`
+* <strike>韩剧视频 - plugin.video.hanju - 韩剧视频Kodi插件</strike>
 
 ## 音乐插件 Music Add-ons
 
