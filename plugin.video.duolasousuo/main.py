@@ -17,7 +17,8 @@ _plugin_parm = sys.argv[2]  # 问号以后的内容
 _plugin_dialog = xbmcgui.Dialog()
 _plugin_player_style = int(xbmcplugin.getSetting(_plugin_handle, 'Duola_play_style'))
 # 系统会追加 ?addons=[_plugin_address]
-_plugin_cloud_url = 'https://raw.githubusercontent.com/malimaliao/kodi-addons/matrix/api/plugin.video.duolasousuo/v1.json'
+# 镜像接口：https://raw.githubusercontent.com/malimaliao/kodi/matrix/api/plugin.video.duolasousuo/v1.json
+_plugin_cloud_url = 'https://gitee.com/beijifeng/kodi/raw/matrix/api/plugin.video.duolasousuo/v1.json'
 
 # bot config
 UA_head = { 
