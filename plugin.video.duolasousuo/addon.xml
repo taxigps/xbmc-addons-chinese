@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.duolasousuo" name="哆啦搜索" version="1.3.0" provider-name="malimaliao">
+<addon id="plugin.video.duolasousuo" name="哆啦搜索" version="1.4.0" provider-name="malimaliao">
 	<requires>
 		<import addon="script.module.requests" version="2.12.4"/>
 	</requires>
