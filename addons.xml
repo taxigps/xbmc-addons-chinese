@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addons>
-<addon id="plugin.video.duolasousuo" name="哆啦搜索" version="1.4.0" provider-name="malimaliao">
+<addon id="plugin.video.duolasousuo" name="哆啦搜索" version="1.5.0" provider-name="malimaliao">
 	<requires>
 		<import addon="script.module.requests" version="2.12.4"/>
 	</requires>
@@ -12,16 +12,18 @@
 		<summary>duola video search plugin</summary>
 		<summary lang="zh">哆啦搜索</summary>
 		<description>This plugin for Kodi v19 and above,form third-party website video resource, and its resource has nothing to do with the author of this plugin.</description>
-		<description lang="zh">一个简单的搜索工具，适用于Kodi 19 及更高版本。本视频插件是基于python在kodi计算平台的应用练习，仅供阁下参考和学习。本应用的爬虫技术拓扑了第三方网站公开的网络索引内容，播放资源均与作者无关，请下载学习后删除本插件。</description>
+		<description lang="zh">哆啦搜索是免费的视频搜索插件，通过Kodi开放的计算平台，并基于Python爬虫自动拓扑第三方网站的数据并汇集成一个简单的影音库。</description>
 		<website>https://github.com/malimaliao</website>
 		<email>malimaliao@gmail.com</email>
-		<disclaimer>Hello Duola!</disclaimer>
+		<disclaimer>All resources are irrelevant to the author! For your reference and study only. Please download and delete. Email: malimaliao@gmail.com</disclaimer>
+		<disclaimer lang="zh">本插件是一个Kodi练习测试应用，基于python拓扑了第三方的引用内容，所有资源均与作者无关！仅供阁下参考和学习。请下载学习后删除。投诉或者反馈联系方式：malimaliao@gmail.com</disclaimer>
 		<assets>
 			<icon>logo.png</icon>
 			<fanart>resources/hello.jpg</fanart>
 			<screenshot>resources/1.png</screenshot>
 			<screenshot>resources/2.png</screenshot>
 			<screenshot>resources/3.png</screenshot>
+			<screenshot>resources/4.png</screenshot>
         </assets>
 	</extension>
 </addon>
