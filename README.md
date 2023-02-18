@@ -32,6 +32,15 @@ Kodi的中文显示设置步骤如下 For proper Chinese text display on Kodi, d
 * 选择你要安装的插件 Select the appropriate Add-ons from the display categories
 * 点击安装插件 Click to install the Add-on
 
+## 更新插件 Update Add-ons
+
+* 进入Kodi系统 Launch Kodi
+* 选择 系统-设置-系统 Navigate to System | Settings | System
+* 选择 插件 设置[未知来源]: 开启 Select Add-ons | [Unknown source]: enable 
+* 选择 插件 设置[更新官方插件于]: 任何库  Select Add-ons | [- Update official add-ons form]: Any repositories
+* 选择 插件 设置[自动安装更新]:自动安装更新 | Select Add-ons | [updates]: Install update automatically
+
+
 ## 手动安装插件 Plugins Manual Installation
 
 * 本项目所有中文插件的安装包保存在repo子目录下。Official releases of all the Chinese plugins can be found in the ./repo sub-directories.
