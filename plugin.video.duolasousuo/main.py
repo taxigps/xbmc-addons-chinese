@@ -360,8 +360,8 @@ def API_get_Cloud_Engine():
         print('duola_debug: 缓存目录读取失败->' + my_cache_path )
         _plugin_dialog.ok(_plugin_name, '抱歉，由于缓存无法读写，因此云端引擎不可用。文件地址：' + my_cache_path)
 
-# API->readme
-def API_get_Cloud_Readme():
+# API->Notice
+def API_get_Cloud_Notice():
     tj_agent = xbmc.getUserAgent()
     tj_agent += ' Kodi-Plugin:' +  _plugin_address
     tj_ua = { 'User-Agent': tj_agent }
@@ -371,10 +371,11 @@ def API_get_Cloud_Readme():
         cloud_engine_text = res.text
         if check_json(cloud_engine_text):
             api_json = json.loads(cloud_engine_text)
-            readme = api_json['readme']
-            _plugin_dialog.notification(heading=_plugin_name, message=readme, time=4000)
+            notice = base64.b64decode(api_json['notice'])
+            client = str(api_json['client'])
+            _plugin_dialog.notification(heading=_plugin_name+' 最新版本: '+client, message=notice, time=4000)
     except requests.exceptions.RequestException as e:
-        print('duola_debug: readme => bad', e)
+        print('duola_debug: notice => bad', e)
 
 # /
 if _plugin_parm == '':
@@ -384,14 +385,14 @@ if _plugin_parm == '':
     # add cloud menu
     if enable_cloud == 'true':
         _b = ' (本机内置接口)'
-        API_get_Cloud_Readme()
+        API_get_Cloud_Notice()
         API_get_Cloud_Engine()
     # add local menu
     _local_api_url = xbmcplugin.getSetting(_plugin_handle, 'Duola_Local_Search_Engine')
     _api_url = urllib.parse.quote(_local_api_url)
     listitem=xbmcgui.ListItem('哆啦搜索' + _b)
     xbmcplugin.addDirectoryItem(_plugin_handle, _plugin_address+'?Bot_engine='+_api_url, listitem, True)
-    # add readme menu
+    # add help menu
     listitem=xbmcgui.ListItem('[COLOR=blue]使用帮助[/COLOR]')
     xbmcplugin.addDirectoryItem(_plugin_handle, _plugin_address+'?Bot_help', listitem, True)
     # exit menu build
