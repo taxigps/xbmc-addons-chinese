@@ -101,7 +101,7 @@ V2.0.0 (2022-09-1)
 
 <addon id="service.subtitles.shooter"
        name="Shooter"
-       version="2.0.0"
+       version="2.0.1"
        provider-name="taxigps">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -130,6 +130,9 @@ V2.0.0 (2022-09-1)
             <screenshot>resources/media/screenshot_3.jpg</screenshot>
         </assets>
         <news>
+V2.0.1 (2023-05-14)
+- fixed: function was removed in Kodi 20
+
 V2.0.0 (2020-04-18)
 - Ported to python 3.0 for Kodi 19
 
